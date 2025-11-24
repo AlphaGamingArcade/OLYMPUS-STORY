@@ -12,6 +12,7 @@ import { ResultScreen } from './screens/ResultScreen';
 import { ConfigAPI } from './api/configApi';
 import { gameConfig } from './utils/gameConfig';
 import { FreeSpinPopup } from './popups/FreeSpinPopup';
+import { FreeSpinWinPopup } from './popups/FreeSpinWinPopup';
 
 /** The PixiJS app Application instance, shared across the project */
 export const app = new Application();
@@ -142,7 +143,13 @@ async function init() {
     } else if (getUrlParam('result') !== null) {
         await navigation.showScreen(ResultScreen);
     } else if (getUrlParam('modal') !== null) {
-        await navigation.presentPopup(FreeSpinPopup);
+        navigation.presentPopup(FreeSpinWinPopup, {
+            winAmount: 100000,
+            spinsCount: 3,
+            callBack: async () => {
+                console.log('HELLO');
+            },
+        });
     } else {
         await navigation.showScreen(LoadScreen);
     }

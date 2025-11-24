@@ -29,7 +29,7 @@ export class Match3Actions {
     }
 
     public async actionFreeSpin() {
-        this.match3.freeSpinProcess.start(15);
+        this.match3.freeSpinProcess.start(5);
     }
 
     /**

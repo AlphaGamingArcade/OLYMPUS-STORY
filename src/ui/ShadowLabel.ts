@@ -68,13 +68,13 @@ export class ShadowLabel extends Container {
     }
 
     /** Update the text content */
-    public setText(text: string) {
+    public set text(text: string) {
         this.shadowText.text = text;
         this.mainText.text = text;
     }
 
     /** Get the current text content */
-    public getText(): string {
+    public get text(): string {
         return this.mainText.text;
     }
 

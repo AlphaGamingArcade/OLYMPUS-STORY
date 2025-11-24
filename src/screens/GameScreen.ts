@@ -15,6 +15,7 @@ import { ControlPanel } from '../ui/ControlPanel';
 import { BetAction, userSettings } from '../utils/userSettings';
 import { BabyZeus } from '../ui/BabyZeus';
 import { FreeSpinPopup } from '../popups/FreeSpinPopup';
+import { FreeSpinWinPopup } from '../popups/FreeSpinWinPopup';
 
 /** The screen tha holds the Match3 game */
 export class GameScreen extends Container {
@@ -299,11 +300,16 @@ export class GameScreen extends Container {
     /** Fires when the match3 grid finishes auto-processing */
     private async onFreeSpinComplete() {
         return new Promise((resolve) => {
-            navigation.presentPopup(FreeSpinPopup, async () => {
-                await navigation.dismissPopup();
-                await waitFor(1);
-                if (!this.match3.process.isProcessing() && !this.match3.freeSpinProcess.isProcessing()) this.finish();
-                resolve;
+            navigation.presentPopup(FreeSpinWinPopup, {
+                winAmount: 1000,
+                spinsCount: 3,
+                callBack: async () => {
+                    await navigation.dismissPopup();
+                    await waitFor(1);
+                    if (!this.match3.process.isProcessing() && !this.match3.freeSpinProcess.isProcessing())
+                        this.finish();
+                    resolve;
+                },
             });
         });
     }
