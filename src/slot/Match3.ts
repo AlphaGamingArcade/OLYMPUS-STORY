@@ -1,7 +1,7 @@
 import { Container } from 'pixi.js';
 import { Match3Actions } from './Match3Actions';
 import { Match3Board } from './Match3Board';
-import { Match3Config, Multiplier, slotGetConfig } from './Match3Config';
+import { Jackpot, Match3Config, slotGetConfig } from './Match3Config';
 import { Match3Process } from './Match3Process';
 import { Match3Stats } from './Match3Stats';
 import { Match3FreeSpinProcess } from './Match3FreeSpinProcess';
@@ -17,15 +17,15 @@ export enum SpinState {
 }
 
 /** Interface for onMatch event data */
-export interface SlotOnMultiplierMatchData {
+export interface SlotOnJackpotMatchData {
     /** List of all matches detected in the grid */
-    pieces: SlotSymbol[];
+    symbols: SlotSymbol[];
 }
 
 /** Interface for onMatch event data */
 export interface SlotOnMultiplierJackpotTriggerData {
     /** List of all matches detected in the grid */
-    multiplier: Multiplier;
+    jackpot: Jackpot;
     /** Occurance */
     occurance: number;
 }
@@ -60,7 +60,7 @@ export class Match3 extends Container {
     /** Firew when free spin triggered */
     public onFreeSpinTrigger?: () => void;
     /** Fires when special triggered */
-    public onMultiplierMatch?: (data: SlotOnMultiplierMatchData) => Promise<void>;
+    public onJackpotMatch?: (data: SlotOnJackpotMatchData) => Promise<void>;
     /** Fires when multiplier jackpot triggered */
     public onMultiplierJackpotTrigger?: (data: SlotOnMultiplierJackpotTriggerData) => Promise<void>;
 

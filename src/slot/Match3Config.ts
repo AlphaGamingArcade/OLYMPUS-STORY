@@ -35,7 +35,7 @@ export function slotGetBlocks(): Block[] {
 }
 
 /** Default special block tier configuration */
-const defaultMultiplier = {
+const defaultJackpot = {
     id: 'grand',
     name: 'GRAND',
     type: 9,
@@ -44,7 +44,7 @@ const defaultMultiplier = {
     order: 2,
 };
 
-export type Multiplier = typeof defaultMultiplier;
+export type Jackpot = typeof defaultJackpot;
 
 /** Default pattern configuration */
 

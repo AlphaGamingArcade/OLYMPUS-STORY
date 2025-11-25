@@ -1,5 +1,5 @@
 import { Match3 } from '../Match3';
-import { match3ForEach, Match3Position, Match3Type } from '../Match3Utility';
+import { match3ForEach, Match3Position, Match3Type } from '../SlotUtility';
 
 /**
  * Process a match list to find out matches at least 5 pieces long, then spawns the Colour Blast piece in the middle.

@@ -10,7 +10,7 @@ import {
     match3GridToString,
     slotGetMatches,
     slotGetScatterMatches,
-} from './Match3Utility';
+} from './SlotUtility';
 
 /**
  * Sort out the gameplay progression on the board after a player action, clearing matches

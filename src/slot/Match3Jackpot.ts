@@ -1,7 +1,7 @@
 import { Match3 } from './Match3';
-import { slotGetMultiplierMatches } from './Match3Utility';
+import { Match3Position, slotGetJackpotMatches } from './SlotUtility';
 import { gameConfig } from '../utils/gameConfig';
-import { waitFor } from '../utils/asyncUtils';
+import { SlotSymbol } from './SlotSymbol';
 
 /**
  * Controls the special pieces in the game. Each special piece should have its own
@@ -9,10 +9,11 @@ import { waitFor } from '../utils/asyncUtils';
  * and release its power (trigger) when touched or popped out.
  */
 export class Match3Jackpot {
+    public processing: boolean = false;
     /** The Match3 instance */
     public match3: Match3;
-    /** Special record */
-    public multipliers: Record<string, number> = {};
+    /** Jackpot record */
+    public jackpots: Record<string, { type: number; active: number }> = {};
 
     constructor(match3: Match3) {
         this.match3 = match3;
@@ -20,59 +21,66 @@ export class Match3Jackpot {
 
     /** Remove all specials handlers */
     public reset() {
-        this.multipliers = {};
+        this.jackpots = {};
+        this.processing = false;
     }
-    /**
-     * Process all specials with existing matches
-     */
-    /**
-     * Process all specials with existing matches
-     */
-    public async process() {
-        this.multipliers = {};
-        const matches = slotGetMultiplierMatches(this.match3.board.grid);
 
-        const animePlayPieces = [];
-        const pieces = [];
+    public async process() {
+        this.jackpots = {};
+
+        const configJackpots = gameConfig.getJackpots();
+        const matches = slotGetJackpotMatches(this.match3.board.grid);
+        const piecesByType: Record<number, SlotSymbol[]> = {};
+
+        // Collect all pieces by type
         for (const match of matches) {
-            animePlayPieces.push(this.match3.board.playSpecialPieces(match));
             for (const position of match) {
                 const piece = this.match3.board.getPieceByPosition(position);
                 if (piece) {
-                    pieces.push(piece);
-                    this.multipliers[piece.type] = (this.multipliers[piece.type] || 0) + 1;
+                    (piecesByType[piece.type] ??= []).push(piece);
+
+                    this.jackpots[piece.type] = {
+                        type: piece.type,
+                        active: (this.jackpots[piece.type]?.active || 0) + 1,
+                    };
                 }
             }
         }
 
-        await Promise.all(animePlayPieces);
+        const groupPieces: SlotSymbol[][] = [];
+        const nonWinPieces: SlotSymbol[] = [];
 
-        await this.match3.onMultiplierMatch?.({
-            pieces: pieces,
-        });
-
-        // Trigger jackpot wins sequentially
-        await this.processMultiplierJackpots();
-    }
-
-    /**
-     * Process and display multiplier jackpot wins one at a time
-     */
-    private async processMultiplierJackpots(): Promise<void> {
-        await waitFor(0.5);
-        const multipliers = gameConfig.getMultipliers();
-
-        for (const mult of multipliers) {
-            if (this.multipliers[mult.type] >= mult.requiredSymbols) {
-                const occurance = Math.floor(this.multipliers[mult.type] / mult.requiredSymbols);
-
-                if (this.match3.onMultiplierJackpotTrigger) {
-                    await this.match3.onMultiplierJackpotTrigger({
-                        multiplier: mult,
-                        occurance,
-                    });
-                }
+        for (const configJackpot of configJackpots) {
+            const piecesOfType = piecesByType[configJackpot.type] || [];
+            if (piecesOfType.length >= configJackpot.requiredSymbols) {
+                groupPieces.push(piecesOfType);
+            } else if (piecesOfType.length > 0) {
+                nonWinPieces.push(...piecesOfType);
             }
+        }
+
+        // Sort by piece count, descending (most pieces first)
+        groupPieces.sort((a, b) => b.length - a.length);
+
+        // Process winning groups one at a time
+        for (const symbols of groupPieces) {
+            const positions: Match3Position[] = symbols.map((symbol) => ({ row: symbol.row, column: symbol.column }));
+            await this.match3.board.playPieces(positions);
+            await this.match3.onJackpotMatch?.({
+                symbols,
+            });
+        }
+
+        // Animate non-winning pieces all at once
+        if (nonWinPieces.length > 0) {
+            const positions: Match3Position[] = nonWinPieces.map((symbol) => ({
+                row: symbol.row,
+                column: symbol.column,
+            }));
+            await this.match3.board.playPieces(positions);
+            await this.match3.onJackpotMatch?.({
+                symbols: nonWinPieces,
+            });
         }
     }
 }

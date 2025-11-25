@@ -8,9 +8,9 @@ import {
     match3GetPieceType,
     match3GridToString,
     slotGetMatches,
-    slotGetMultiplierMatches,
     Match3Position,
-} from './Match3Utility';
+    slotGetJackpotMatches,
+} from './SlotUtility';
 import { SlotSymbol } from './SlotSymbol';
 
 /**
@@ -223,7 +223,7 @@ export class Match3FreeSpinProcess {
 
         // Step #4 - Process special matches
         this.queue.add(async () => {
-            await this.processSpecialMatches();
+            await this.processJackpotMatches();
         });
 
         // Step #5 - Create new pieces that falls from the top to fill up remaining empty spaces
@@ -270,11 +270,10 @@ export class Match3FreeSpinProcess {
     }
 
     /** Process special matches in the grid */
-    private async processSpecialMatches() {
+    private async processJackpotMatches() {
         if (!this.hasRoundWin) return;
         this.hasRoundWin = false;
-
-        const matches = slotGetMultiplierMatches(this.match3.board.grid);
+        const matches = slotGetJackpotMatches(this.match3.board.grid);
 
         const animePlayPieces = [];
         for (const match of matches) {

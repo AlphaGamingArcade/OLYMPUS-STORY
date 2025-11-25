@@ -10,11 +10,11 @@ export class ConfigAPI {
                 feature: {
                     multiplier: 100,
                 },
-                multipliers: [
+                jackpots: [
                     {
                         id: 'divine',
                         name: 'DIVINE',
-                        type: 9,
+                        type: 12,
                         multiplier: 100,
                         requiredSymbols: 5,
                         order: 2,
@@ -22,7 +22,7 @@ export class ConfigAPI {
                     {
                         id: 'blessed',
                         name: 'BLESSED',
-                        type: 10,
+                        type: 11,
                         multiplier: 50,
                         requiredSymbols: 4,
                         order: 3,
@@ -30,7 +30,7 @@ export class ConfigAPI {
                     {
                         id: 'angelic',
                         name: 'ANGELIC',
-                        type: 11,
+                        type: 10,
                         multiplier: 20.0,
                         requiredSymbols: 3,
                         order: 4,
@@ -38,7 +38,7 @@ export class ConfigAPI {
                     {
                         id: 'grand',
                         name: 'GRAND',
-                        type: 12,
+                        type: 9,
                         multiplier: 10.0,
                         requiredSymbols: 2,
                         order: 5,

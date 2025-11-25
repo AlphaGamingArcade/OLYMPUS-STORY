@@ -1,5 +1,5 @@
 import { Container, Ticker } from 'pixi.js';
-import { Match3, SlotOnMultiplierJackpotTriggerData, SlotOnMultiplierMatchData } from '../slot/Match3';
+import { Match3, SlotOnJackpotMatchData, SlotOnMultiplierJackpotTriggerData } from '../slot/Match3';
 import { Pillar } from '../ui/Pillar';
 import { navigation } from '../utils/navigation';
 import { GameEffects } from '../ui/GameEffects';
@@ -124,7 +124,7 @@ export class GameScreen extends Container {
 
         this.match3 = new Match3();
         this.match3.onSpinStart = this.onSpinStart.bind(this);
-        this.match3.onMultiplierMatch = this.onMultiplierMatch.bind(this);
+        this.match3.onJackpotMatch = this.onJackpotMatch.bind(this);
         this.match3.onMultiplierJackpotTrigger = this.onMultiplierJackpotTriggerMatch.bind(this);
         this.match3.onFreeSpinTrigger = this.onFreeSpinTrigger.bind(this);
         this.match3.onFreeSpinStart = this.onFreeSpinStart.bind(this);
@@ -176,7 +176,7 @@ export class GameScreen extends Container {
     }
 
     private updateMultiplierAmounts() {
-        const multipliers = gameConfig.getMultipliers();
+        const multipliers = gameConfig.getJackpots();
         for (let index = 0; index < multipliers.length; index++) {
             const element = multipliers[index];
             if (element.id == 'grand') {
@@ -332,8 +332,8 @@ export class GameScreen extends Container {
     }
 
     /** Fires when the match3 grid finishes auto-processing */
-    private async onMultiplierMatch(data: SlotOnMultiplierMatchData) {
-        await this.vfx?.onMultiplierMatch(data);
+    private async onJackpotMatch(data: SlotOnJackpotMatchData) {
+        await this.vfx?.onJackpotMatch(data);
     }
 
     /** Fires when the match3 grid finishes auto-processing */

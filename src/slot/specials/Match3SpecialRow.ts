@@ -1,5 +1,5 @@
 import { Match3 } from '../Match3';
-import { Match3Position, Match3Type } from '../Match3Utility';
+import { Match3Position, Match3Type } from '../SlotUtility';
 
 /**
  * Process a match list to find out vertical matches 4 pieces long, then spawns the Row Blast piece in the middle.

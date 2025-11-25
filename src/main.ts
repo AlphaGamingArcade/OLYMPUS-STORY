@@ -90,7 +90,7 @@ async function loadGameConfig() {
     gameConfig.setSpecialBlocks(result.specialBlocks);
     gameConfig.setScatterBlocks(result.scatterBlocks);
     gameConfig.setScatterBlocksTrigger(result.scatterBlocksTrigger);
-    gameConfig.setMultipliers(result.multipliers);
+    gameConfig.setJackpots(result.jackpots);
 }
 
 /** Setup app and initialise assets */

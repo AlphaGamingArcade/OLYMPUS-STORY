@@ -1,4 +1,4 @@
-import { Block, Multiplier, Paytable } from '../slot/Match3Config';
+import { Block, Jackpot, Paytable } from '../slot/Match3Config';
 
 // Default fallbacks (keep your existing arrays as fallbacks)
 const defaultBlocks: Block[] = [
@@ -97,37 +97,37 @@ const defaultSpecialBlocks: Block[] = [
     },
 ];
 
-const defaultMultiplier: Multiplier[] = [
+const defaultJackpot: Jackpot[] = [
     {
-        id: 'grand',
-        name: 'GRAND',
-        type: 9,
+        id: 'divine',
+        name: 'DIVINE',
+        type: 12,
         multiplier: 100,
         requiredSymbols: 5,
         order: 2,
     },
     {
-        id: 'major',
-        name: 'MAJOR',
-        type: 10,
+        id: 'blessed',
+        name: 'BLESSED',
+        type: 11,
         multiplier: 50,
         requiredSymbols: 4,
         order: 3,
     },
     {
-        id: 'minor',
-        name: 'MINOR',
+        id: 'angelic',
+        name: 'ANGELIC',
+        type: 10,
         multiplier: 20.0,
         requiredSymbols: 3,
-        type: 11,
         order: 4,
     },
     {
-        id: 'mini',
-        name: 'MINI',
+        id: 'grand',
+        name: 'GRAND',
+        type: 9,
         multiplier: 10.0,
         requiredSymbols: 2,
-        type: 12,
         order: 5,
     },
 ];
@@ -218,7 +218,7 @@ class GameConfig {
     private scatterBlocksTrigger: number = defaultScatterBlocksTrigger;
     private scatterBlocks: Block[] = defaultScatterBlocks;
     private paytable: Paytable[] = defaultPaytable;
-    private multipliers: Multiplier[] = defaultMultiplier;
+    private jackpots: Jackpot[] = defaultJackpot;
 
     public constructor() {}
 
@@ -243,8 +243,8 @@ class GameConfig {
         this.paytable = paytable;
     }
 
-    setMultipliers(tiers: Multiplier[]) {
-        this.multipliers = tiers;
+    setJackpots(jackpots: Jackpot[]) {
+        this.jackpots = jackpots;
     }
 
     // Getters
@@ -268,8 +268,8 @@ class GameConfig {
         return this.paytable;
     }
 
-    getMultipliers(): Multiplier[] {
-        return this.multipliers;
+    getJackpots(): Jackpot[] {
+        return this.jackpots;
     }
 
     // Useful for debugging

@@ -10,7 +10,7 @@ import {
     match3ForEach,
     Match3Grid,
     Match3Type,
-} from './Match3Utility';
+} from './SlotUtility';
 import { SlotSymbol } from './SlotSymbol';
 import { BetAPI } from '../api/betApi';
 

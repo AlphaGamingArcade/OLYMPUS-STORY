@@ -1,6 +1,6 @@
 import { Container } from 'pixi.js';
 import { Match3Config, slotGetConfig } from '../Match3Config';
-import { Match3Position, Match3Type } from '../Match3Utility';
+import { Match3Position, Match3Type } from '../SlotUtility';
 import { Match3BoardPreview } from './Match3BoardPreview';
 
 /** Interface for onMatch event data */

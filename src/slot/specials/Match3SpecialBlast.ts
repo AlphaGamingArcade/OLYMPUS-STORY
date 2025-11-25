@@ -5,7 +5,7 @@ import {
     match3PositionToString,
     match3StringToPosition,
     Match3Type,
-} from '../Match3Utility';
+} from '../SlotUtility';
 
 /**
  * Process a match list to find out crossed matches, then spawns the Blast piece in crossing point.

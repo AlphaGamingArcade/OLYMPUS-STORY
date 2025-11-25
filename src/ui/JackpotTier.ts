@@ -11,6 +11,7 @@ const defaultJackpotTierOptions = {
     dotInactive: 'multiplier_bullet_outline',
     points: 0,
     totalDots: 0,
+    totalOccurance: 0,
     currency: '$',
     activeDots: 0,
 };
@@ -40,6 +41,7 @@ export class JackpotTier extends Container {
     private readonly config: Required<JackpotTierOptions>;
 
     /** State */
+    private totalOccurance: number;
     private totalDots: number;
     private activeDots: number;
     private currency: String;
@@ -54,6 +56,7 @@ export class JackpotTier extends Container {
         this.config = { ...defaultJackpotTierOptions, ...options };
         this.currency = this.config.currency;
         this.points = this.config.points;
+        this.totalOccurance = this.config.totalOccurance;
         this.totalDots = this.config.totalDots;
         this.activeDots = this.config.activeDots;
 
@@ -203,16 +206,23 @@ export class JackpotTier extends Container {
 
     /** Set the number of active dots with optional animation */
     public setActiveDots(active: number, animated = true) {
-        const clampedActive = Math.max(0, Math.min(active, this.totalDots));
-        if (this.activeDots === clampedActive) return;
+        const newOccurrence = Math.floor(active / this.totalDots);
+        const activeInSet = active % this.totalDots; // Remainder after full sets
+        const clampedActive = Math.max(0, Math.min(activeInSet, this.totalDots));
+
+        // Check if both dots AND occurrence are unchanged
+        if (this.activeDots === clampedActive && this.totalOccurance === newOccurrence) return;
 
         const previousActive = this.activeDots;
+        const previousOccurrence = this.totalOccurance;
+
         this.activeDots = clampedActive;
+        this.totalOccurance = newOccurrence;
         this.updateDots();
 
-        const occurrence = Math.floor(active / this.totalDots);
-        if (occurrence > 0) {
-            this.occuranceLabel.text = `x${occurrence}`;
+        // Only animate occurrence label if it changed
+        if (this.totalOccurance > 0 && this.totalOccurance !== previousOccurrence) {
+            this.occuranceLabel.text = `x${this.totalOccurance}`;
 
             // Kill any existing tweens
             gsap.killTweensOf(this.occuranceLabel);
@@ -240,7 +250,7 @@ export class JackpotTier extends Container {
             gsap.to(this.occuranceLabel, {
                 alpha: 0,
                 duration: 0.5,
-                delay: 2.3,
+                delay: 4.3,
                 ease: 'power2.out',
             });
         }

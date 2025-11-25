@@ -9,7 +9,7 @@ import { sfx } from '../utils/audio';
 import { PopExplosion } from './PopExplosion';
 import { waitFor } from '../utils/asyncUtils';
 import { SlotSymbol } from '../slot/SlotSymbol';
-import { SlotOnMultiplierMatchData } from '../slot/Match3';
+import { SlotOnJackpotMatchData } from '../slot/Match3';
 
 /**
  * All gameplay special effects, isolated on its own class in a way that can be changed freely, without affecting gameplay.
@@ -41,17 +41,18 @@ export class GameEffects extends Container {
     }
 
     /** Fired when a match is detected */
-    public async onMultiplierMatch(data: SlotOnMultiplierMatchData) {
+    public async onJackpotMatch(data: SlotOnJackpotMatchData) {
         sfx.play('common/sfx-match.wav');
-        let animPromises = [];
         let pieces = []; // Store pieces to clean up later
+        const animPromise: Promise<void>[] = [];
 
-        for (let i = 0; i < data.pieces.length; i++) {
-            const position = this.toLocal(data.pieces[i].getGlobalPosition());
+        // Process each group sequentially
+        for (let i = 0; i < data.symbols.length; i++) {
+            const position = this.toLocal(data.symbols[i].getGlobalPosition());
             const piece = pool.get(SlotSymbol);
             piece.setup({
-                name: data.pieces[i].name,
-                type: data.pieces[i].type,
+                name: data.symbols[i].name,
+                type: data.symbols[i].type,
                 size: this.game.match3.board.tileSize,
                 interactive: false,
             });
@@ -63,7 +64,7 @@ export class GameEffects extends Container {
             let x = 0;
             let y = 0;
 
-            // IDENFITY PIECE WHERE THEY FLY TO
+            // IDENTIFY PIECE WHERE THEY FLY TO
             if (piece.type == 9 && this.game.grandJackpotTier) {
                 x = this.game.grandJackpotTier.x + randomRange(-20, 20);
                 y = this.game.grandJackpotTier.y;
@@ -78,13 +79,10 @@ export class GameEffects extends Container {
                 y = this.game.divineJackpotTier.y;
             }
 
-            animPromises.push(this.playFlyToMultiplier(piece, { x, y }));
+            animPromise.push(this.playFlyToMultiplier(piece, { x, y }));
         }
 
-        // Wait for ALL animations to complete
-        await Promise.all(animPromises);
-
-        // Update special blocks records
+        await Promise.all(animPromise);
 
         // Now clean up after animations are done
         for (const piece of pieces) {
@@ -102,49 +100,34 @@ export class GameEffects extends Container {
         gsap.killTweensOf(piece.scale);
         gsap.killTweensOf(piece, 'rotation');
 
-        // Create a timeline for better control
         const tl = gsap.timeline();
 
-        // Smooth curved movement to target
         tl.to(
             piece,
             {
                 x: to.x,
                 y: to.y,
                 duration: duration,
-                ease: 'power1.inOut', // Smooth ease throughout
+                ease: 'power1.inOut',
             },
             0,
         );
 
-        // Rotation throughout the entire movement
-        // tl.to(
-        //     piece,
-        //     {
-        //         rotation: randomRange(Math.PI * 2, Math.PI * 3), // 2-3 full rotations
-        //         duration: duration,
-        //         ease: 'none',
-        //     },
-        //     0,
-        // );
-
-        // Smooth scale down
         tl.to(
             piece.scale,
             {
                 x: 0.5,
                 y: 0.5,
                 duration: duration,
-                ease: 'power1.in', // Gradual scale down
+                ease: 'power1.in',
             },
             0,
         );
 
-        // Smooth fade out
         tl.to(
             piece,
             {
-                alpha: 0.2,
+                alpha: 0,
                 duration: duration * 0.5,
                 ease: 'power1.in',
             },
@@ -154,17 +137,17 @@ export class GameEffects extends Container {
         await tl;
 
         /** Evaluate special matches */
-        const multipliers = this.game.match3.jackpot.multipliers;
-        const multiplierValue = multipliers[piece.type];
+        const jackpots = this.game.match3.jackpot.jackpots;
+        const active = jackpots[piece.type].active;
 
         if (piece.type == 9) {
-            this.game.grandJackpotTier.setActiveDots(multiplierValue);
+            this.game.grandJackpotTier.setActiveDots(active);
         } else if (piece.type == 10) {
-            this.game.angelicJackpotTier.setActiveDots(multiplierValue);
+            this.game.angelicJackpotTier.setActiveDots(active);
         } else if (piece.type == 11) {
-            this.game.blessedJackpotTier.setActiveDots(multiplierValue);
+            this.game.blessedJackpotTier.setActiveDots(active);
         } else if (piece.type == 12) {
-            this.game.divineJackpotTier.setActiveDots(multiplierValue);
+            this.game.divineJackpotTier.setActiveDots(active);
         }
 
         sfx.play('common/sfx-bubble.wav');
