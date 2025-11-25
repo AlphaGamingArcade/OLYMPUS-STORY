@@ -10,10 +10,11 @@ export class ConfigAPI {
                 feature: {
                     multiplier: 100,
                 },
-                jackpots: [
+                multipliers: [
                     {
                         id: 'grand',
                         name: 'GRAND',
+                        type: 9,
                         multiplier: 100,
                         requiredSymbols: 5,
                         order: 2,
@@ -21,6 +22,7 @@ export class ConfigAPI {
                     {
                         id: 'major',
                         name: 'MAJOR',
+                        type: 10,
                         multiplier: 50,
                         requiredSymbols: 4,
                         order: 3,
@@ -30,6 +32,7 @@ export class ConfigAPI {
                         name: 'MINOR',
                         multiplier: 20.0,
                         requiredSymbols: 3,
+                        type: 11,
                         order: 4,
                     },
                     {
@@ -37,6 +40,7 @@ export class ConfigAPI {
                         name: 'MINI',
                         multiplier: 10.0,
                         requiredSymbols: 2,
+                        type: 12,
                         order: 5,
                     },
                 ],

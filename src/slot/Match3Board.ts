@@ -10,7 +10,6 @@ import {
     match3ForEach,
     Match3Grid,
     Match3Type,
-    Match3GlobalPosition,
 } from './Match3Utility';
 import { SlotSymbol } from './SlotSymbol';
 import { BetAPI } from '../api/betApi';
@@ -274,11 +273,11 @@ export class Match3Board {
      * @param position The grid position of the piece to be popped out
      * @param causedBySpecial If the pop was caused by special effect
      */
-    public async playSpecialPiece(position: Match3Position, targetPos: Match3GlobalPosition) {
+    public async playSpecialPiece(position: Match3Position) {
         const piece = this.getPieceByPosition(position);
         const type = match3GetPieceType(this.grid, position);
         if (!type || !piece) return;
-        await piece.animateSpecialPlay(targetPos.x, targetPos.y);
+        await piece.animateSpecialPlay();
     }
 
     /**
@@ -322,10 +321,10 @@ export class Match3Board {
      * @param positions List of positions to be popped out
      * @param causedBySpecial If this was caused by special effects
      */
-    public async playSpecialPieces(positions: Match3Position[], targetPosition: Match3GlobalPosition) {
+    public async playSpecialPieces(positions: Match3Position[]) {
         const animPromises = [];
         for (const position of positions) {
-            animPromises.push(this.playSpecialPiece(position, targetPosition));
+            animPromises.push(this.playSpecialPiece(position));
         }
         await Promise.all(animPromises);
     }

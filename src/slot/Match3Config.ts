@@ -34,6 +34,18 @@ export function slotGetBlocks(): Block[] {
     return gameConfig.getBlocks();
 }
 
+/** Default special block tier configuration */
+const defaultMultiplier = {
+    id: 'grand',
+    name: 'GRAND',
+    type: 9,
+    multiplier: 100,
+    requiredSymbols: 5,
+    order: 2,
+};
+
+export type Multiplier = typeof defaultMultiplier;
+
 /** Default pattern configuration */
 
 export type Pattern = {
@@ -50,6 +62,6 @@ const defaultPaytable = {
 export type Paytable = typeof defaultPaytable;
 
 /** Mount a list of patterns available*/
-export function slotGetPaytable(): Paytable[] {
-    return gameConfig.getPaytable();
+export function slotGetPaytables(): Paytable[] {
+    return gameConfig.getPaytables();
 }

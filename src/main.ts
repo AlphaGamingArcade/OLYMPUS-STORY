@@ -11,7 +11,6 @@ import { GameScreen } from './screens/GameScreen';
 import { ResultScreen } from './screens/ResultScreen';
 import { ConfigAPI } from './api/configApi';
 import { gameConfig } from './utils/gameConfig';
-import { FreeSpinPopup } from './popups/FreeSpinPopup';
 import { FreeSpinWinPopup } from './popups/FreeSpinWinPopup';
 
 /** The PixiJS app Application instance, shared across the project */
@@ -87,10 +86,11 @@ async function loadGameConfig() {
 
     // Game configuration from server
     gameConfig.setBlocks(result.blocks);
-    gameConfig.setPaytable(result.paytable);
+    gameConfig.setPaytables(result.paytable);
     gameConfig.setSpecialBlocks(result.specialBlocks);
     gameConfig.setScatterBlocks(result.scatterBlocks);
     gameConfig.setScatterBlocksTrigger(result.scatterBlocksTrigger);
+    gameConfig.setMultipliers(result.multipliers);
 }
 
 /** Setup app and initialise assets */

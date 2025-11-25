@@ -9,8 +9,9 @@ const defaultMultiplierTierOptions = {
     tier: 'frame_multiplier_grand',
     dotActive: 'multiplier_bullet_grand',
     dotInactive: 'multiplier_bullet_outline',
-    multiplier: '100',
-    totalDots: 5,
+    points: 0,
+    totalDots: 0,
+    currency: '$',
     activeDots: 0,
 };
 
@@ -39,9 +40,9 @@ export class MultiplierTier extends Container {
     /** State */
     private totalDots: number;
     private activeDots: number;
+    private currency: String;
     private points = -1;
     private showing = true;
-    private animatedPoints = 0;
     private intensity = 0;
 
     constructor(options: Partial<MultiplierTierOptions> = {}) {
@@ -49,6 +50,8 @@ export class MultiplierTier extends Container {
 
         // Merge options with defaults
         this.config = { ...defaultMultiplierTierOptions, ...options };
+        this.currency = this.config.currency;
+        this.points = this.config.points;
         this.totalDots = this.config.totalDots;
         this.activeDots = this.config.activeDots;
 
@@ -96,7 +99,7 @@ export class MultiplierTier extends Container {
             },
         });
 
-        this.messageLabel = new Label(this.config.multiplier, style);
+        this.messageLabel = new Label(`${this.currency}${this.config.points}`, style);
         this.messageLabel.style.fill = verticalGradient;
         this.container.addChild(this.messageLabel);
         this.fitTextToContainer();
@@ -218,17 +221,16 @@ export class MultiplierTier extends Container {
     /** Reset score to 0 */
     public reset() {
         this.points = 0;
-        this.animatedPoints = 0;
         this.messageLabel.text = '0';
         this.messageLabel.scale.set(1);
         this.intensity = 0;
     }
 
     /** Set the score and play the points animation */
-    public setScore(value: number) {
+    public set amount(value: number) {
         if (this.points === value) return;
         this.points = value;
-        this.playPoints();
+        this.printPoints();
     }
 
     /** Show the component */
@@ -272,32 +274,9 @@ export class MultiplierTier extends Container {
         this.visible = false;
     }
 
-    /** Play points animation, increasing gradually until reaches actual score */
-    private async playPoints() {
-        gsap.killTweensOf(this);
-
-        const diff = this.points - this.animatedPoints;
-        const duration = Math.min(diff * 0.025, 2);
-
-        await gsap.to(this, {
-            intensity: this.intensity + diff,
-            animatedPoints: this.points,
-            duration,
-            ease: 'linear',
-            onUpdate: () => this.printPoints(),
-        });
-
-        gsap.to(this, {
-            intensity: 1,
-            duration: 1.5,
-            ease: 'expo.in',
-        });
-    }
-
     /** Update displayed points and play sound */
     private printPoints() {
-        const points = Math.round(this.animatedPoints);
-        const text = String(points);
+        const text = `${this.currency}${this.points}`;
 
         if (this.messageLabel.text === text) return;
 

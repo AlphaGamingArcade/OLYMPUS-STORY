@@ -203,7 +203,7 @@ export function match3IncludesPosition(positions: Match3Position[], position: Ma
  * @returns A list of positions grouped by match, excluding ones not involving filter positions if provided
  */
 export function slotGetMatches(grid: Match3Grid) {
-    const paytable = gameConfig.getPaytable();
+    const paytable = gameConfig.getPaytables();
     const specialBlocks = gameConfig.getSpecialBlocks();
     const specialTypes = specialBlocks.map((sb) => sb.type);
 

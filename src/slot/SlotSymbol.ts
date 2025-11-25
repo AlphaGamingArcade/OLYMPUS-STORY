@@ -1,4 +1,4 @@
-import { Container, Texture, AnimatedSprite, Text, Sprite } from 'pixi.js';
+import { Container, Texture, AnimatedSprite, Text } from 'pixi.js';
 import gsap from 'gsap';
 import { resolveAndKillTweens, registerCustomEase, pauseTweens, resumeTweens } from '../utils/animation';
 import { Spine } from '@esotericsoftware/spine-pixi-v8';
@@ -173,48 +173,8 @@ export class SlotSymbol extends Container {
     }
 
     /** Play animation */
-    public async animateSpecialPlay(x: number, y: number): Promise<void> {
+    public async animateSpecialPlay(): Promise<void> {
         this.lock();
-
-        console.log('FLY TO THIS POSITION', { x, y });
-
-        // Create a light particle/sprite
-        const light = Sprite.from('glow'); // or use a particle texture
-        light.anchor.set(0.5);
-        light.scale.set(0.3);
-        light.tint = 0xffd579; // Golden light color
-        light.alpha = 0.8;
-        light.blendMode = 'add';
-
-        // Position at piece's current position
-        light.x = this.x;
-        light.y = this.y;
-
-        // // Add to parent so it's visible outside piece container
-        // if (this.parent) {
-        //     this..addChild(light);
-        // }
-
-        // Animate light flying to target position
-        const duration = 0.5; // seconds
-        gsap.to(light, {
-            x: x,
-            y: y,
-            duration: duration,
-            ease: 'power2.out',
-            onComplete: () => {
-                light.destroy();
-            },
-        });
-
-        // Also add a fade out effect
-        gsap.to(light.scale, {
-            x: 0.6,
-            y: 0.6,
-            duration: duration,
-            ease: 'power2.in',
-        });
-
         return new Promise((resolve) => {
             const listener = {
                 complete: () => {

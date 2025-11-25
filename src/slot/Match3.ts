@@ -6,12 +6,19 @@ import { Match3Process } from './Match3Process';
 import { Match3Special } from './Match3Special';
 import { Match3Stats } from './Match3Stats';
 import { Match3FreeSpinProcess } from './Match3FreeSpinProcess';
+import { SlotSymbol } from './SlotSymbol';
 
 // Match3.ts - Holds the state
 export enum SpinState {
     IDLE = 'idle',
     SPINNING = 'spinning',
     COMPLETE = 'complete',
+}
+
+/** Interface for onMatch event data */
+export interface SlotOnSpecialMatchData {
+    /** List of all matches detected in the grid */
+    pieces: SlotSymbol[];
 }
 
 /**
@@ -37,8 +44,12 @@ export class Match3 extends Container {
     /** Handles pieces with special powers */
     public special: Match3Special;
 
+    /** Firew when a spin started, regardless of the spin type */
+    public onSpinStart?: () => void;
     /** Firew when free spin triggered */
     public onFreeSpinTrigger?: () => void;
+    /** Fires when special triggered */
+    public onSpecialMatch?: (data: SlotOnSpecialMatchData) => Promise<void>;
 
     /** Fires when the game start auto-processing the grid */
     public onFreeSpinStart?: (count: number) => void;

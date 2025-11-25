@@ -1,4 +1,4 @@
-import { Block, Match3Config, Paytable } from '../slot/Match3Config';
+import { Block, Match3Config, Multiplier, Paytable } from '../slot/Match3Config';
 
 // Default fallbacks (keep your existing arrays as fallbacks)
 const defaultBlocks: Block[] = [
@@ -97,6 +97,41 @@ const defaultSpecialBlocks: Block[] = [
     },
 ];
 
+const defaultMultiplier: Multiplier[] = [
+    {
+        id: 'grand',
+        name: 'GRAND',
+        type: 9,
+        multiplier: 100,
+        requiredSymbols: 5,
+        order: 2,
+    },
+    {
+        id: 'major',
+        name: 'MAJOR',
+        type: 10,
+        multiplier: 50,
+        requiredSymbols: 4,
+        order: 3,
+    },
+    {
+        id: 'minor',
+        name: 'MINOR',
+        multiplier: 20.0,
+        requiredSymbols: 3,
+        type: 11,
+        order: 4,
+    },
+    {
+        id: 'mini',
+        name: 'MINI',
+        multiplier: 10.0,
+        requiredSymbols: 2,
+        type: 12,
+        order: 5,
+    },
+];
+
 const defaultPaytable: Paytable[] = [
     {
         type: 1,
@@ -189,6 +224,7 @@ class GameConfig {
     private scatterBlocksTrigger: number = defaultScatterBlocksTrigger;
     private scatterBlocks: Block[] = defaultScatterBlocks;
     private paytable: Paytable[] = defaultPaytable;
+    private multipliers: Multiplier[] = defaultMultiplier;
     private config: Match3Config = defaultConfig;
 
     public constructor() {}
@@ -210,12 +246,16 @@ class GameConfig {
         this.scatterBlocks = blocks;
     }
 
-    setPaytable(paytable: Paytable[]) {
+    setPaytables(paytable: Paytable[]) {
         this.paytable = paytable;
     }
 
     setConfig(config: Match3Config) {
         this.config = config;
+    }
+
+    setMultipliers(tiers: Multiplier[]) {
+        this.multipliers = tiers;
     }
 
     // Getters
@@ -235,8 +275,12 @@ class GameConfig {
         return this.scatterBlocks;
     }
 
-    getPaytable(): Paytable[] {
+    getPaytables(): Paytable[] {
         return this.paytable;
+    }
+
+    getMultipliers(): Multiplier[] {
+        return this.multipliers;
     }
 
     getConfig(): Match3Config {

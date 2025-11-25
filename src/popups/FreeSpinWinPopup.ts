@@ -280,17 +280,16 @@ export class FreeSpinWinPopup extends Container {
             Texture.from('coin-08'),
             Texture.from('coin-09'),
         ];
+
         // LEFTCOINS
         for (let count = 0; count < 10; count++) {
             let coin = new AnimatedSprite(coinTextures);
-            let accelX = randomRange(7.5, 11.5);
-            let coinSpeed = 0.15;
-            const gravity = 0.15;
+            let accelX = randomRange(12, 18); // Increased from 7.5-11.5
+            let coinSpeed = 0.25; // Increased from 0.15
+            const gravity = 0.25; // Increased from 0.15
             coin.scale.set(randomRange(0.75, 1));
             coin.anchor.set(0.5);
             coin.animationSpeed = randomRange(0.3, 0.5);
-            coin.x += coin.width;
-            coin.y += coin.height;
             coin.x = -coin.width;
             coin.y = this.bg.height - randomRange(100, 550);
 
@@ -314,8 +313,8 @@ export class FreeSpinWinPopup extends Container {
                     if (accelX < 0) accelX = 0;
 
                     if (coin.y > this.bg.height) {
-                        coinSpeed = 0.15;
-                        accelX = randomRange(7.5, 11.5);
+                        coinSpeed = 0.25; // Reset to faster speed
+                        accelX = randomRange(12, 18); // Reset to faster speed
                         coin.y = this.bg.height - randomRange(100, 550);
                         coin.scale.set(randomRange(0.75, 1));
                         coin.x = -coin.width;
@@ -328,14 +327,13 @@ export class FreeSpinWinPopup extends Container {
         // RIGHTCOINS
         for (let count = 0; count < 10; count++) {
             let coin = new AnimatedSprite(coinTextures);
-            let accelX = randomRange(7.5, 11.5);
-            let coinSpeed = 0.15;
-            const gravity = 0.15;
+            let accelX = randomRange(12, 18); // Increased from 7.5-11.5
+            let coinSpeed = 0.25; // Increased from 0.15
+            const gravity = 0.25; // Increased from 0.15
             coin.scale.set(randomRange(0.75, 1));
             coin.anchor.set(0.5);
-            coin.x += coin.width;
-            coin.y += coin.height;
-            coin.x = this.bg.width + coin.width / 2;
+            coin.animationSpeed = randomRange(0.3, 0.5);
+            coin.x = this.bg.width + coin.width;
             coin.y = this.bg.height - randomRange(100, 550);
 
             this.coinContainer.addChild(coin);
@@ -358,11 +356,11 @@ export class FreeSpinWinPopup extends Container {
                     if (accelX < 0) accelX = 0;
 
                     if (coin.y > this.bg.height) {
-                        coinSpeed = 0.15;
-                        accelX = randomRange(7.5, 11.5);
+                        coinSpeed = 0.25; // Reset to faster speed
+                        accelX = randomRange(12, 18); // Reset to faster speed
                         coin.y = this.bg.height - randomRange(100, 550);
                         coin.scale.set(randomRange(0.75, 1));
-                        coin.x = this.bg.width;
+                        coin.x = this.bg.width + coin.width;
                         this.rightCoinAnimation?.repeat();
                     }
                 },

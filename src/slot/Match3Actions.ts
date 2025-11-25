@@ -21,6 +21,8 @@ export class Match3Actions {
     }
 
     public async actionSpin() {
+        this.match3.onSpinStart?.();
+
         await this.match3.board.fallToBottomGrid();
         this.match3.board.reset();
 

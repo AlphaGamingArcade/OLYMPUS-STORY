@@ -1,5 +1,5 @@
 import { Container, Ticker } from 'pixi.js';
-import { Match3 } from '../slot/Match3';
+import { Match3, SlotOnSpecialMatchData } from '../slot/Match3';
 import { Pillar } from '../ui/Pillar';
 import { navigation } from '../utils/navigation';
 import { GameEffects } from '../ui/GameEffects';
@@ -16,6 +16,7 @@ import { BetAction, userSettings } from '../utils/userSettings';
 import { BabyZeus } from '../ui/BabyZeus';
 import { FreeSpinPopup } from '../popups/FreeSpinPopup';
 import { FreeSpinWinPopup } from '../popups/FreeSpinWinPopup';
+import { gameConfig } from '../utils/gameConfig';
 
 /** The screen tha holds the Match3 game */
 export class GameScreen extends Container {
@@ -30,16 +31,14 @@ export class GameScreen extends Container {
     /** The match3 book shelf background */
     public readonly pillar?: Pillar;
 
-    /** The Multiplier Container */
-    public readonly multiplierTierContainer: Container;
     /** The Divine Multiplier */
-    public readonly divineMultiplierTier?: MultiplierTier;
+    public readonly divineMultiplierTier: MultiplierTier;
     /** The Blessed Multiplier */
-    public readonly blessedMultiplierTier?: MultiplierTier;
+    public readonly blessedMultiplierTier: MultiplierTier;
     /** The Angelic Multiplier */
-    public readonly angelicMultiplierTier?: MultiplierTier;
+    public readonly angelicMultiplierTier: MultiplierTier;
     /** The Grand Multiplier */
-    public readonly grandMultiplier?: MultiplierTier;
+    public readonly grandMultiplier: MultiplierTier;
 
     /** The game logo */
     public readonly gameLogo: GameLogo;
@@ -70,9 +69,6 @@ export class GameScreen extends Container {
         this.pillar = new Pillar();
         this.gameContainer.addChild(this.pillar);
 
-        this.multiplierTierContainer = new Container();
-        this.addChild(this.multiplierTierContainer);
-
         this.gameLogo = new GameLogo();
         this.addChild(this.gameLogo);
 
@@ -89,42 +85,45 @@ export class GameScreen extends Container {
             name: 'multiplier-label-divine',
             tier: 'frame_multiplier_divine',
             dotActive: 'multiplier_bullet_divine',
-            multiplier: '1000',
+            points: 100,
         });
-        this.multiplierTierContainer.addChild(this.divineMultiplierTier);
-        this.divineMultiplierTier.setTotalDots(6);
-        this.divineMultiplierTier.setActiveDots(2);
+        this.addChild(this.divineMultiplierTier);
+        this.divineMultiplierTier.setTotalDots(5);
+        this.divineMultiplierTier.setActiveDots(0);
 
         this.blessedMultiplierTier = new MultiplierTier({
             name: 'multiplier-label-blessed',
             tier: 'frame_multiplier_blessed',
             dotActive: 'multiplier_bullet_blessed',
-            multiplier: '50',
+            points: 50,
         });
-        this.blessedMultiplierTier.y = this.divineMultiplierTier.y + this.divineMultiplierTier.height + 20;
-        this.multiplierTierContainer.addChild(this.blessedMultiplierTier);
-        this.blessedMultiplierTier.setTotalDots(6);
-        this.blessedMultiplierTier.setActiveDots(2);
+        this.addChild(this.blessedMultiplierTier);
+        this.blessedMultiplierTier.setTotalDots(4);
+        this.blessedMultiplierTier.setActiveDots(0);
 
         this.angelicMultiplierTier = new MultiplierTier({
             name: 'multiplier-label-angelic',
             tier: 'frame_multiplier_angelic',
             dotActive: 'multiplier_bullet_angelic',
-            multiplier: '20',
+            points: 20,
         });
-        this.angelicMultiplierTier.y = this.blessedMultiplierTier.y + this.blessedMultiplierTier.height + 20;
-        this.multiplierTierContainer.addChild(this.angelicMultiplierTier);
+        this.addChild(this.angelicMultiplierTier);
+        this.angelicMultiplierTier.setTotalDots(3);
+        this.angelicMultiplierTier.setActiveDots(0);
 
         this.grandMultiplier = new MultiplierTier({
             name: 'multiplier-label-grand',
             tier: 'frame_multiplier_grand',
             dotActive: 'multiplier_bullet_grand',
-            multiplier: '10',
+            points: 10,
         });
-        this.grandMultiplier.y = this.angelicMultiplierTier.y + this.angelicMultiplierTier.height + 20;
-        this.multiplierTierContainer.addChild(this.grandMultiplier);
+        this.addChild(this.grandMultiplier);
+        this.grandMultiplier.setTotalDots(2);
+        this.grandMultiplier.setActiveDots(0);
 
         this.match3 = new Match3();
+        this.match3.onSpinStart = this.onSpinStart.bind(this);
+        this.match3.onSpecialMatch = this.onSpecialMatch.bind(this);
         this.match3.onFreeSpinTrigger = this.onFreeSpinTrigger.bind(this);
         this.match3.onFreeSpinStart = this.onFreeSpinStart.bind(this);
         this.match3.onFreeSpinComplete = this.onFreeSpinComplete.bind(this);
@@ -151,19 +150,43 @@ export class GameScreen extends Container {
         this.controlPanel.onSpacebar(() => this.startSpinning());
         this.controlPanel.onAutoplay(() => {});
 
+        // Init multiplier scores
+        this.updateMultiplierAmounts();
+
         this.controlPanel.setBet(userSettings.getBet());
         this.controlPanel.onIncreaseBet(() => {
+            if (this.finished) return;
             userSettings.setBet(BetAction.INCREASE);
             this.controlPanel.setBet(userSettings.getBet());
+            this.updateMultiplierAmounts();
+
             // TODO: Do more here if bet is changed
         });
         this.controlPanel.onDecreaseBet(() => {
+            if (this.finished) return;
             userSettings.setBet(BetAction.DECREASE);
             this.controlPanel.setBet(userSettings.getBet());
+            this.updateMultiplierAmounts();
             // TODO: Do more here if bet is changed
         });
 
         this.finished = false;
+    }
+
+    private updateMultiplierAmounts() {
+        const multipliers = gameConfig.getMultipliers();
+        for (let index = 0; index < multipliers.length; index++) {
+            const element = multipliers[index];
+            if (element.id == 'grand') {
+                this.grandMultiplier.amount = userSettings.getBet() * element.multiplier;
+            } else if (element.id == 'angelic') {
+                this.angelicMultiplierTier.amount = userSettings.getBet() * element.multiplier;
+            } else if (element.id == 'blessed') {
+                this.blessedMultiplierTier.amount = userSettings.getBet() * element.multiplier;
+            } else if (element.id == 'divine') {
+                this.divineMultiplierTier.amount = userSettings.getBet() * element.multiplier;
+            }
+        }
     }
 
     public startSpinning() {
@@ -211,13 +234,29 @@ export class GameScreen extends Container {
             this.gameContainer.x = centerX;
             this.gameContainer.y = this.gameContainer.height * 0.5;
 
-            this.multiplierTierContainer.scale.set(1);
-            this.multiplierTierContainer.x = width - this.multiplierTierContainer.width * 0.75;
-            this.multiplierTierContainer.y = this.multiplierTierContainer.height * 0.5 + 40;
-
             this.gameLogo.scale.set(1);
             this.gameLogo.x = width - this.gameLogo.width + 50;
             this.gameLogo.y = this.gameLogo.height * 0.5;
+
+            const multiplierX = width;
+            const multiplierTierY = 340;
+            const multiplierScale = 1;
+
+            this.divineMultiplierTier.scale.set(multiplierScale);
+            this.divineMultiplierTier.x = multiplierX - this.divineMultiplierTier.width * 0.75;
+            this.divineMultiplierTier.y = multiplierTierY;
+
+            this.blessedMultiplierTier.scale.set(multiplierScale);
+            this.blessedMultiplierTier.x = multiplierX - this.blessedMultiplierTier.width * 0.75;
+            this.blessedMultiplierTier.y = multiplierTierY + 150;
+
+            this.angelicMultiplierTier.scale.set(multiplierScale);
+            this.angelicMultiplierTier.x = multiplierX - this.angelicMultiplierTier.width * 0.75;
+            this.angelicMultiplierTier.y = multiplierTierY + 290;
+
+            this.grandMultiplier.scale.set(multiplierScale);
+            this.grandMultiplier.x = multiplierX - this.grandMultiplier.width * 0.75;
+            this.grandMultiplier.y = multiplierTierY + 430;
 
             this.buyFreeSpin.scale.set(1);
             this.buyFreeSpin.x = 220;
@@ -238,10 +277,6 @@ export class GameScreen extends Container {
             this.gameContainer.x = centerX;
             this.gameContainer.y = this.gameContainer.height * 0.5;
 
-            this.multiplierTierContainer.scale.set(0.65);
-            this.multiplierTierContainer.x = centerX;
-            this.multiplierTierContainer.y = height - this.multiplierTierContainer.height - 380;
-
             this.buyFreeSpin.scale.set(0.65);
             this.buyFreeSpin.x = 220;
             this.buyFreeSpin.y = height * 0.65 - 20;
@@ -249,6 +284,25 @@ export class GameScreen extends Container {
             this.gameLogo.scale.set(0.75);
             this.gameLogo.x = 220;
             this.gameLogo.y = height - this.gameLogo.height - divY;
+
+            const multiplierTierY = height * 0.6;
+            const multiplierScale = 0.75;
+
+            this.divineMultiplierTier.scale.set(multiplierScale);
+            this.divineMultiplierTier.x = width * 0.5;
+            this.divineMultiplierTier.y = multiplierTierY;
+
+            this.blessedMultiplierTier.scale.set(multiplierScale);
+            this.blessedMultiplierTier.x = width * 0.5;
+            this.blessedMultiplierTier.y = multiplierTierY + 110;
+
+            this.angelicMultiplierTier.scale.set(multiplierScale);
+            this.angelicMultiplierTier.x = width * 0.5;
+            this.angelicMultiplierTier.y = multiplierTierY + 220;
+
+            this.grandMultiplier.scale.set(multiplierScale);
+            this.grandMultiplier.x = width * 0.5;
+            this.grandMultiplier.y = multiplierTierY + 330;
 
             this.roundResult.scale.set(0.75);
             this.roundResult.x = width - this.roundResult.width * 0.5 - 40;
@@ -276,8 +330,27 @@ export class GameScreen extends Container {
     }
 
     /** Fires when the match3 grid finishes auto-processing */
-    private onPatternMatch() {
-        console.log('PATTERN MATCHED');
+    private async onSpecialMatch(data: SlotOnSpecialMatchData) {
+        await this.vfx?.onSpecialMatch(data);
+
+        /** Evaluate special matches */
+        const specialBlocksRecord = this.match3.process.getSpecialBlocksRecord();
+        Object.entries(specialBlocksRecord)
+            .map(([type, count]) => ({
+                type: Number(type),
+                count,
+            }))
+            .forEach((block) => {
+                if (block.type == 9) {
+                    this.grandMultiplier.setActiveDots(block.count);
+                } else if (block.type == 10) {
+                    this.angelicMultiplierTier.setActiveDots(block.count);
+                } else if (block.type == 11) {
+                    this.blessedMultiplierTier.setActiveDots(block.count);
+                } else if (block.type == 12) {
+                    this.divineMultiplierTier.setActiveDots(block.count);
+                }
+            });
     }
 
     /** Fires when the match3 grid finishes auto-processing */
@@ -290,6 +363,16 @@ export class GameScreen extends Container {
                 resolve;
             });
         });
+    }
+
+    /** Fires when the match3 spins tart */
+    private async onSpinStart() {
+        console.log('Clear multiplier stats');
+
+        this.divineMultiplierTier.setActiveDots(0);
+        this.blessedMultiplierTier.setActiveDots(0);
+        this.angelicMultiplierTier.setActiveDots(0);
+        this.grandMultiplier.setActiveDots(0);
     }
 
     /** Fires when the match3 grid finishes auto-processing */
