@@ -3,10 +3,11 @@ import { Match3Actions } from './Match3Actions';
 import { Match3Board } from './Match3Board';
 import { Match3Config, slotGetConfig } from './Match3Config';
 import { Match3Process } from './Match3Process';
-import { Match3Special } from './Match3Special';
+import { Match3Multiplier } from './Match3Multiplier';
 import { Match3Stats } from './Match3Stats';
 import { Match3FreeSpinProcess } from './Match3FreeSpinProcess';
 import { SlotSymbol } from './SlotSymbol';
+import { Match3RoundResults } from './Match3RounResults';
 
 // Match3.ts - Holds the state
 export enum SpinState {
@@ -16,7 +17,7 @@ export enum SpinState {
 }
 
 /** Interface for onMatch event data */
-export interface SlotOnSpecialMatchData {
+export interface SlotOnMultiplierMatchData {
     /** List of all matches detected in the grid */
     pieces: SlotSymbol[];
 }
@@ -33,6 +34,8 @@ export class Match3 extends Container {
     public config: Match3Config;
     /** Compute score, grade, number of matches */
     public stats: Match3Stats;
+    /** Display number of matches */
+    public roundResults: Match3RoundResults;
     /** Holds the grid state and display */
     public board: Match3Board;
     /** Sort out actions that the player can take */
@@ -42,14 +45,14 @@ export class Match3 extends Container {
     /** Process matches and fills up the grid */
     public freeSpinProcess: Match3FreeSpinProcess;
     /** Handles pieces with special powers */
-    public special: Match3Special;
+    public multiplier: Match3Multiplier;
 
     /** Firew when a spin started, regardless of the spin type */
     public onSpinStart?: () => void;
     /** Firew when free spin triggered */
     public onFreeSpinTrigger?: () => void;
     /** Fires when special triggered */
-    public onSpecialMatch?: (data: SlotOnSpecialMatchData) => Promise<void>;
+    public onMultiplierMatch?: (data: SlotOnMultiplierMatchData) => Promise<void>;
 
     /** Fires when the game start auto-processing the grid */
     public onFreeSpinStart?: (count: number) => void;
@@ -72,11 +75,12 @@ export class Match3 extends Container {
         // Game sub-systems
         this.config = slotGetConfig();
         this.stats = new Match3Stats(this);
+        this.roundResults = new Match3RoundResults(this);
         this.board = new Match3Board(this);
         this.actions = new Match3Actions(this);
         this.process = new Match3Process(this);
         this.freeSpinProcess = new Match3FreeSpinProcess(this);
-        this.special = new Match3Special(this);
+        this.multiplier = new Match3Multiplier(this);
     }
 
     /**
@@ -94,7 +98,7 @@ export class Match3 extends Container {
         this.interactiveChildren = false;
         this.stats.reset();
         this.board.reset();
-        this.special.reset();
+        this.multiplier.reset();
         this.process.reset();
     }
 

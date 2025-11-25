@@ -19,7 +19,7 @@ import { BetAPI } from '../api/betApi';
  * As a convention for this game, 'grid' is usually referring to the match3 state (array of types),
  * and 'board' is its visual representation with sprites.
  */
-export class Match3Board {
+export class Match3RoundResults {
     /** The Match3 instance */
     public match3: Match3;
     /** The grid state, with only numbers */
@@ -298,6 +298,9 @@ export class Match3Board {
 
         await piece.animatePop();
         this.disposePiece(piece);
+
+        // Trigger any specials related to this piece, if there is any
+        await this.match3.multiplier.trigger(type, position);
     }
 
     /**

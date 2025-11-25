@@ -267,7 +267,7 @@ export function slotGetMatches(grid: Match3Grid) {
  * @param grid The grid to be analysed
  * @returns An array of position groups, where each group contains positions of the same special type
  */
-export function slotGetSpecialMatches(grid: Match3Grid): Match3Position[][] {
+export function slotGetMultiplierMatches(grid: Match3Grid): Match3Position[][] {
     const specialBlocks = gameConfig.getSpecialBlocks();
     const specialTypes = specialBlocks.map((sb) => sb.type);
 

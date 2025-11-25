@@ -8,7 +8,7 @@ import {
     match3GetPieceType,
     match3GridToString,
     slotGetMatches,
-    slotGetSpecialMatches,
+    slotGetMultiplierMatches,
     Match3Position,
 } from './Match3Utility';
 import { SlotSymbol } from './SlotSymbol';
@@ -243,8 +243,6 @@ export class Match3FreeSpinProcess {
         const matches = slotGetMatches(this.match3.board.grid);
         if (!matches.length) return;
         console.log('[Match3] Update free spin stats');
-        const matchData = { matches, combo: this.getProcessRound() };
-        this.match3.stats.registerMatch(matchData);
     }
 
     /** Clear all matches in the grid */
@@ -276,7 +274,7 @@ export class Match3FreeSpinProcess {
         if (!this.hasRoundWin) return;
         this.hasRoundWin = false;
 
-        const matches = slotGetSpecialMatches(this.match3.board.grid);
+        const matches = slotGetMultiplierMatches(this.match3.board.grid);
 
         const animePlayPieces = [];
         for (const match of matches) {

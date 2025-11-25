@@ -1,4 +1,4 @@
-import { Match3, Match3OnMatchData, Match3OnPopData } from './Match3';
+import { Match3 } from './Match3';
 
 /** Default gameplay stats data */
 const defaultStatsData = {
@@ -33,30 +33,30 @@ export class Match3Stats {
         this.data = { ...defaultStatsData };
     }
 
-    /**
-     * Update stats params based on given params
-     * @param data The piece pop data
-     */
-    public registerPop(data: Match3OnPopData) {
-        const points = data.causedBySpecial ? 3 : 1;
-        this.data.score += points;
-        this.data.pops += 1;
-        if (data.isSpecial) {
-            this.data.specials += 1;
-        }
-    }
+    // /**
+    //  * Update stats params based on given params
+    //  * @param data The piece pop data
+    //  */
+    // public registerPop(data: Match3OnPopData) {
+    //     const points = data.causedBySpecial ? 3 : 1;
+    //     this.data.score += points;
+    //     this.data.pops += 1;
+    //     if (data.isSpecial) {
+    //         this.data.specials += 1;
+    //     }
+    // }
 
-    /**
-     * Update stats params based on given match data
-     * @param data The match data
-     */
-    public registerMatch(data: Match3OnMatchData) {
-        for (const match of data.matches) {
-            const points = match.length + data.matches.length * data.combo;
-            this.data.score += points;
-            this.data.matches += 1;
-        }
-    }
+    // /**
+    //  * Update stats params based on given match data
+    //  * @param data The match data
+    //  */
+    // public registerMatch(data: Match3OnMatchData) {
+    //     for (const match of data.matches) {
+    //         const points = match.length + data.matches.length * data.combo;
+    //         this.data.score += points;
+    //         this.data.matches += 1;
+    //     }
+    // }
 
     /**
      * Calculate a grade from 0 (worst) to 3 (best) based on given score and playtime

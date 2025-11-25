@@ -1,5 +1,5 @@
 import { Container, Ticker } from 'pixi.js';
-import { Match3, SlotOnSpecialMatchData } from '../slot/Match3';
+import { Match3, SlotOnMultiplierMatchData } from '../slot/Match3';
 import { Pillar } from '../ui/Pillar';
 import { navigation } from '../utils/navigation';
 import { GameEffects } from '../ui/GameEffects';
@@ -123,7 +123,7 @@ export class GameScreen extends Container {
 
         this.match3 = new Match3();
         this.match3.onSpinStart = this.onSpinStart.bind(this);
-        this.match3.onSpecialMatch = this.onSpecialMatch.bind(this);
+        this.match3.onMultiplierMatch = this.onMultiplierMatch.bind(this);
         this.match3.onFreeSpinTrigger = this.onFreeSpinTrigger.bind(this);
         this.match3.onFreeSpinStart = this.onFreeSpinStart.bind(this);
         this.match3.onFreeSpinComplete = this.onFreeSpinComplete.bind(this);
@@ -330,24 +330,24 @@ export class GameScreen extends Container {
     }
 
     /** Fires when the match3 grid finishes auto-processing */
-    private async onSpecialMatch(data: SlotOnSpecialMatchData) {
+    private async onMultiplierMatch(data: SlotOnMultiplierMatchData) {
         await this.vfx?.onSpecialMatch(data);
 
         /** Evaluate special matches */
-        const specialBlocksRecord = this.match3.process.getSpecialBlocksRecord();
-        Object.entries(specialBlocksRecord)
-            .map(([type, count]) => ({
-                type: Number(type),
+        const multipliers = this.match3.multiplier.multipliers;
+        Object.entries(multipliers)
+            .map(([id, count]) => ({
+                id,
                 count,
             }))
             .forEach((block) => {
-                if (block.type == 9) {
+                if (block.id == 'grand') {
                     this.grandMultiplier.setActiveDots(block.count);
-                } else if (block.type == 10) {
+                } else if (block.id == 'angelic') {
                     this.angelicMultiplierTier.setActiveDots(block.count);
-                } else if (block.type == 11) {
+                } else if (block.id == 'blessed') {
                     this.blessedMultiplierTier.setActiveDots(block.count);
-                } else if (block.type == 12) {
+                } else if (block.id == 'divine') {
                     this.divineMultiplierTier.setActiveDots(block.count);
                 }
             });

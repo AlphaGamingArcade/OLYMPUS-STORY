@@ -9,7 +9,6 @@ import {
     match3GetPieceType,
     match3GridToString,
     slotGetMatches,
-    slotGetSpecialMatches,
     slotGetScatterMatches,
 } from './Match3Utility';
 
@@ -30,8 +29,6 @@ export class Match3Process {
     private round = 0;
     /** Flag indicating if the current round resulted in a win */
     private hasRoundWin = false;
-    /** Special record */
-    private specialBlocksRecord: Record<string, number> = {};
     /** The list of queued actions that the grid processing will take */
     private queue: AsyncQueue;
 
@@ -45,11 +42,6 @@ export class Match3Process {
         return this.processing;
     }
 
-    /** Check if is processing */
-    public getSpecialBlocksRecord() {
-        return this.specialBlocksRecord;
-    }
-
     /** Get current process round */
     public getProcessRound() {
         return this.round;
@@ -58,7 +50,6 @@ export class Match3Process {
     /** Interrupt processing and cleanup process queue */
     public reset() {
         this.processing = false;
-        this.specialBlocksRecord = {};
         this.round = 0;
         this.queue.clear();
     }
@@ -78,7 +69,6 @@ export class Match3Process {
         if (this.processing) return;
         this.processing = true;
         this.round = 0;
-        this.specialBlocksRecord = {};
         this.match3.onProcessStart?.();
         console.log('[Match3] ======= PROCESSING START ==========');
         this.runProcessRound();
@@ -119,9 +109,9 @@ export class Match3Process {
             await this.applyGravity();
         });
 
-        // Step #4 - Process jackpot accumulations
+        // Step #4 - Process multiplier accumulations
         this.queue.add(async () => {
-            await this.processSpecialMatches();
+            await this.processMultiplierMatches();
         });
 
         // Step #5 - Create new pieces that falls from the to to fill up remaining empty spaces
@@ -141,8 +131,6 @@ export class Match3Process {
         const matches = slotGetMatches(this.match3.board.grid);
         if (!matches.length) return;
         console.log('[Match3] Update stats');
-        const matchData = { matches, combo: this.getProcessRound() };
-        this.match3.stats.registerMatch(matchData);
     }
 
     /** Clear all matches in the grid */
@@ -170,29 +158,10 @@ export class Match3Process {
     }
 
     /** Clear all matches in the grid */
-    private async processSpecialMatches() {
+    private async processMultiplierMatches() {
         if (!this.hasRoundWin) return;
         this.hasRoundWin = false;
-        const matches = slotGetSpecialMatches(this.match3.board.grid);
-
-        const animePlayPieces = [];
-        const pieces = [];
-        for (const match of matches) {
-            animePlayPieces.push(this.match3.board.playSpecialPieces(match));
-            for (const position of match) {
-                const piece = this.match3.board.getPieceByPosition(position);
-                if (piece) {
-                    pieces.push(piece);
-                    this.specialBlocksRecord[piece.type] = (this.specialBlocksRecord[piece.type] || 0) + 1; // track record
-                }
-            }
-        }
-
-        await Promise.all(animePlayPieces);
-
-        await this.match3.onSpecialMatch?.({
-            pieces: pieces,
-        });
+        await this.match3.multiplier.process();
     }
 
     /** Make existing pieces fall in the grid if there are empty spaces below them */
