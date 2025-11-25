@@ -1,4 +1,5 @@
 import { Match3 } from './Match3';
+import gsap from 'gsap';
 
 /** Interface for actions configuration */
 interface Match3ActionsConfig {

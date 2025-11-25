@@ -1,5 +1,5 @@
 import { Container, Ticker } from 'pixi.js';
-import { Match3, SlotOnMultiplierMatchData } from '../slot/Match3';
+import { Match3, SlotOnMultiplierJackpotTriggerData, SlotOnMultiplierMatchData } from '../slot/Match3';
 import { Pillar } from '../ui/Pillar';
 import { navigation } from '../utils/navigation';
 import { GameEffects } from '../ui/GameEffects';
@@ -7,7 +7,7 @@ import { bgm } from '../utils/audio';
 import { GameOvertime } from '../ui/GameOvertime';
 import { waitFor } from '../utils/asyncUtils';
 import { slotGetConfig } from '../slot/Match3Config';
-import { MultiplierTier } from '../ui/MultiplierTier';
+import { JackpotTier } from '../ui/JackpotTier';
 import { GameLogo } from '../ui/GameLogo';
 import { BuyFreeSpin } from '../ui/BuyFreeSpin';
 import { RoundResult } from '../ui/RoundResult';
@@ -17,6 +17,7 @@ import { BabyZeus } from '../ui/BabyZeus';
 import { FreeSpinPopup } from '../popups/FreeSpinPopup';
 import { FreeSpinWinPopup } from '../popups/FreeSpinWinPopup';
 import { gameConfig } from '../utils/gameConfig';
+import { JackpotWinPopup } from '../popups/JackpotWinPopup';
 
 /** The screen tha holds the Match3 game */
 export class GameScreen extends Container {
@@ -32,13 +33,13 @@ export class GameScreen extends Container {
     public readonly pillar?: Pillar;
 
     /** The Divine Multiplier */
-    public readonly divineMultiplierTier: MultiplierTier;
+    public readonly divineJackpotTier: JackpotTier;
     /** The Blessed Multiplier */
-    public readonly blessedMultiplierTier: MultiplierTier;
+    public readonly blessedJackpotTier: JackpotTier;
     /** The Angelic Multiplier */
-    public readonly angelicMultiplierTier: MultiplierTier;
+    public readonly angelicJackpotTier: JackpotTier;
     /** The Grand Multiplier */
-    public readonly grandMultiplier: MultiplierTier;
+    public readonly grandJackpotTier: JackpotTier;
 
     /** The game logo */
     public readonly gameLogo: GameLogo;
@@ -81,49 +82,50 @@ export class GameScreen extends Container {
         this.babyZeus = new BabyZeus();
         this.addChild(this.babyZeus);
 
-        this.divineMultiplierTier = new MultiplierTier({
+        this.divineJackpotTier = new JackpotTier({
             name: 'multiplier-label-divine',
             tier: 'frame_multiplier_divine',
             dotActive: 'multiplier_bullet_divine',
             points: 100,
         });
-        this.addChild(this.divineMultiplierTier);
-        this.divineMultiplierTier.setTotalDots(5);
-        this.divineMultiplierTier.setActiveDots(0);
+        this.addChild(this.divineJackpotTier);
+        this.divineJackpotTier.setTotalDots(5);
+        this.divineJackpotTier.setActiveDots(0);
 
-        this.blessedMultiplierTier = new MultiplierTier({
+        this.blessedJackpotTier = new JackpotTier({
             name: 'multiplier-label-blessed',
             tier: 'frame_multiplier_blessed',
             dotActive: 'multiplier_bullet_blessed',
             points: 50,
         });
-        this.addChild(this.blessedMultiplierTier);
-        this.blessedMultiplierTier.setTotalDots(4);
-        this.blessedMultiplierTier.setActiveDots(0);
+        this.addChild(this.blessedJackpotTier);
+        this.blessedJackpotTier.setTotalDots(4);
+        this.blessedJackpotTier.setActiveDots(0);
 
-        this.angelicMultiplierTier = new MultiplierTier({
+        this.angelicJackpotTier = new JackpotTier({
             name: 'multiplier-label-angelic',
             tier: 'frame_multiplier_angelic',
             dotActive: 'multiplier_bullet_angelic',
             points: 20,
         });
-        this.addChild(this.angelicMultiplierTier);
-        this.angelicMultiplierTier.setTotalDots(3);
-        this.angelicMultiplierTier.setActiveDots(0);
+        this.addChild(this.angelicJackpotTier);
+        this.angelicJackpotTier.setTotalDots(3);
+        this.angelicJackpotTier.setActiveDots(0);
 
-        this.grandMultiplier = new MultiplierTier({
+        this.grandJackpotTier = new JackpotTier({
             name: 'multiplier-label-grand',
             tier: 'frame_multiplier_grand',
             dotActive: 'multiplier_bullet_grand',
             points: 10,
         });
-        this.addChild(this.grandMultiplier);
-        this.grandMultiplier.setTotalDots(2);
-        this.grandMultiplier.setActiveDots(0);
+        this.addChild(this.grandJackpotTier);
+        this.grandJackpotTier.setTotalDots(2);
+        this.grandJackpotTier.setActiveDots(0);
 
         this.match3 = new Match3();
         this.match3.onSpinStart = this.onSpinStart.bind(this);
         this.match3.onMultiplierMatch = this.onMultiplierMatch.bind(this);
+        this.match3.onMultiplierJackpotTrigger = this.onMultiplierJackpotTriggerMatch.bind(this);
         this.match3.onFreeSpinTrigger = this.onFreeSpinTrigger.bind(this);
         this.match3.onFreeSpinStart = this.onFreeSpinStart.bind(this);
         this.match3.onFreeSpinComplete = this.onFreeSpinComplete.bind(this);
@@ -178,13 +180,13 @@ export class GameScreen extends Container {
         for (let index = 0; index < multipliers.length; index++) {
             const element = multipliers[index];
             if (element.id == 'grand') {
-                this.grandMultiplier.amount = userSettings.getBet() * element.multiplier;
+                this.grandJackpotTier.amount = userSettings.getBet() * element.multiplier;
             } else if (element.id == 'angelic') {
-                this.angelicMultiplierTier.amount = userSettings.getBet() * element.multiplier;
+                this.angelicJackpotTier.amount = userSettings.getBet() * element.multiplier;
             } else if (element.id == 'blessed') {
-                this.blessedMultiplierTier.amount = userSettings.getBet() * element.multiplier;
+                this.blessedJackpotTier.amount = userSettings.getBet() * element.multiplier;
             } else if (element.id == 'divine') {
-                this.divineMultiplierTier.amount = userSettings.getBet() * element.multiplier;
+                this.divineJackpotTier.amount = userSettings.getBet() * element.multiplier;
             }
         }
     }
@@ -242,21 +244,21 @@ export class GameScreen extends Container {
             const multiplierTierY = 340;
             const multiplierScale = 1;
 
-            this.divineMultiplierTier.scale.set(multiplierScale);
-            this.divineMultiplierTier.x = multiplierX - this.divineMultiplierTier.width * 0.75;
-            this.divineMultiplierTier.y = multiplierTierY;
+            this.divineJackpotTier.scale.set(multiplierScale);
+            this.divineJackpotTier.x = multiplierX - this.divineJackpotTier.width * 0.65;
+            this.divineJackpotTier.y = multiplierTierY;
 
-            this.blessedMultiplierTier.scale.set(multiplierScale);
-            this.blessedMultiplierTier.x = multiplierX - this.blessedMultiplierTier.width * 0.75;
-            this.blessedMultiplierTier.y = multiplierTierY + 150;
+            this.blessedJackpotTier.scale.set(multiplierScale);
+            this.blessedJackpotTier.x = multiplierX - this.blessedJackpotTier.width * 0.65;
+            this.blessedJackpotTier.y = multiplierTierY + 150;
 
-            this.angelicMultiplierTier.scale.set(multiplierScale);
-            this.angelicMultiplierTier.x = multiplierX - this.angelicMultiplierTier.width * 0.75;
-            this.angelicMultiplierTier.y = multiplierTierY + 290;
+            this.angelicJackpotTier.scale.set(multiplierScale);
+            this.angelicJackpotTier.x = multiplierX - this.angelicJackpotTier.width * 0.65;
+            this.angelicJackpotTier.y = multiplierTierY + 290;
 
-            this.grandMultiplier.scale.set(multiplierScale);
-            this.grandMultiplier.x = multiplierX - this.grandMultiplier.width * 0.75;
-            this.grandMultiplier.y = multiplierTierY + 430;
+            this.grandJackpotTier.scale.set(multiplierScale);
+            this.grandJackpotTier.x = multiplierX - this.grandJackpotTier.width * 0.65;
+            this.grandJackpotTier.y = multiplierTierY + 430;
 
             this.buyFreeSpin.scale.set(1);
             this.buyFreeSpin.x = 220;
@@ -288,21 +290,21 @@ export class GameScreen extends Container {
             const multiplierTierY = height * 0.6;
             const multiplierScale = 0.75;
 
-            this.divineMultiplierTier.scale.set(multiplierScale);
-            this.divineMultiplierTier.x = width * 0.5;
-            this.divineMultiplierTier.y = multiplierTierY;
+            this.divineJackpotTier.scale.set(multiplierScale);
+            this.divineJackpotTier.x = width * 0.5;
+            this.divineJackpotTier.y = multiplierTierY;
 
-            this.blessedMultiplierTier.scale.set(multiplierScale);
-            this.blessedMultiplierTier.x = width * 0.5;
-            this.blessedMultiplierTier.y = multiplierTierY + 110;
+            this.blessedJackpotTier.scale.set(multiplierScale);
+            this.blessedJackpotTier.x = width * 0.5;
+            this.blessedJackpotTier.y = multiplierTierY + 110;
 
-            this.angelicMultiplierTier.scale.set(multiplierScale);
-            this.angelicMultiplierTier.x = width * 0.5;
-            this.angelicMultiplierTier.y = multiplierTierY + 220;
+            this.angelicJackpotTier.scale.set(multiplierScale);
+            this.angelicJackpotTier.x = width * 0.5;
+            this.angelicJackpotTier.y = multiplierTierY + 220;
 
-            this.grandMultiplier.scale.set(multiplierScale);
-            this.grandMultiplier.x = width * 0.5;
-            this.grandMultiplier.y = multiplierTierY + 330;
+            this.grandJackpotTier.scale.set(multiplierScale);
+            this.grandJackpotTier.x = width * 0.5;
+            this.grandJackpotTier.y = multiplierTierY + 330;
 
             this.roundResult.scale.set(0.75);
             this.roundResult.x = width - this.roundResult.width * 0.5 - 40;
@@ -331,36 +333,28 @@ export class GameScreen extends Container {
 
     /** Fires when the match3 grid finishes auto-processing */
     private async onMultiplierMatch(data: SlotOnMultiplierMatchData) {
-        await this.vfx?.onSpecialMatch(data);
-
-        /** Evaluate special matches */
-        const multipliers = this.match3.multiplier.multipliers;
-        Object.entries(multipliers)
-            .map(([id, count]) => ({
-                id,
-                count,
-            }))
-            .forEach((block) => {
-                if (block.id == 'grand') {
-                    this.grandMultiplier.setActiveDots(block.count);
-                } else if (block.id == 'angelic') {
-                    this.angelicMultiplierTier.setActiveDots(block.count);
-                } else if (block.id == 'blessed') {
-                    this.blessedMultiplierTier.setActiveDots(block.count);
-                } else if (block.id == 'divine') {
-                    this.divineMultiplierTier.setActiveDots(block.count);
-                }
-            });
+        await this.vfx?.onMultiplierMatch(data);
     }
 
     /** Fires when the match3 grid finishes auto-processing */
-    private async onFreeSpinTrigger() {
+    private async onMultiplierJackpotTriggerMatch(data: SlotOnMultiplierJackpotTriggerData): Promise<void> {
+        return new Promise((resolve) => {
+            navigation.presentPopup(JackpotWinPopup, async () => {
+                await navigation.dismissPopup();
+                console.log(data);
+                resolve();
+            });
+        });
+    }
+
+    /** Fires when the match3 grid finishes auto-processing */
+    private async onFreeSpinTrigger(): Promise<void> {
         return new Promise((resolve) => {
             navigation.presentPopup(FreeSpinPopup, async () => {
                 await navigation.dismissPopup();
                 await waitFor(1);
                 this.match3.actions.actionFreeSpin();
-                resolve;
+                resolve();
             });
         });
     }
@@ -369,10 +363,10 @@ export class GameScreen extends Container {
     private async onSpinStart() {
         console.log('Clear multiplier stats');
 
-        this.divineMultiplierTier.setActiveDots(0);
-        this.blessedMultiplierTier.setActiveDots(0);
-        this.angelicMultiplierTier.setActiveDots(0);
-        this.grandMultiplier.setActiveDots(0);
+        this.divineJackpotTier.setActiveDots(0);
+        this.blessedJackpotTier.setActiveDots(0);
+        this.angelicJackpotTier.setActiveDots(0);
+        this.grandJackpotTier.setActiveDots(0);
     }
 
     /** Fires when the match3 grid finishes auto-processing */

@@ -12,7 +12,7 @@ export type Match3Config = typeof defaultConfig;
 
 /** Build a config object overriding default values if suitable */
 export function slotGetConfig(): Match3Config {
-    return gameConfig.getConfig();
+    return defaultConfig;
 }
 
 /**

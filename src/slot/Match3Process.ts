@@ -109,9 +109,9 @@ export class Match3Process {
             await this.applyGravity();
         });
 
-        // Step #4 - Process multiplier accumulations
+        // Step #4 - Process jackpot accumulations
         this.queue.add(async () => {
-            await this.processMultiplierMatches();
+            await this.processJackpotMatches();
         });
 
         // Step #5 - Create new pieces that falls from the to to fill up remaining empty spaces
@@ -158,10 +158,10 @@ export class Match3Process {
     }
 
     /** Clear all matches in the grid */
-    private async processMultiplierMatches() {
+    private async processJackpotMatches() {
         if (!this.hasRoundWin) return;
         this.hasRoundWin = false;
-        await this.match3.multiplier.process();
+        await this.match3.jackpot.process();
     }
 
     /** Make existing pieces fall in the grid if there are empty spaces below them */

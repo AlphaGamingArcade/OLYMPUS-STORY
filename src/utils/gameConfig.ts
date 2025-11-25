@@ -1,4 +1,4 @@
-import { Block, Match3Config, Multiplier, Paytable } from '../slot/Match3Config';
+import { Block, Multiplier, Paytable } from '../slot/Match3Config';
 
 // Default fallbacks (keep your existing arrays as fallbacks)
 const defaultBlocks: Block[] = [
@@ -64,7 +64,7 @@ const defaultBlocks: Block[] = [
     },
 ];
 
-const defaultScatterBlocksTrigger: number = 3;
+const defaultScatterBlocksTrigger: number = 4;
 
 const defaultScatterBlocks: Block[] = [
     {
@@ -211,12 +211,6 @@ const defaultPaytable: Paytable[] = [
     },
 ];
 
-const defaultConfig: Match3Config = {
-    rows: 5,
-    columns: 5,
-    tileSize: 130,
-};
-
 class GameConfig {
     // Configuration data
     private blocks: Block[] = defaultBlocks;
@@ -225,7 +219,6 @@ class GameConfig {
     private scatterBlocks: Block[] = defaultScatterBlocks;
     private paytable: Paytable[] = defaultPaytable;
     private multipliers: Multiplier[] = defaultMultiplier;
-    private config: Match3Config = defaultConfig;
 
     public constructor() {}
 
@@ -248,10 +241,6 @@ class GameConfig {
 
     setPaytables(paytable: Paytable[]) {
         this.paytable = paytable;
-    }
-
-    setConfig(config: Match3Config) {
-        this.config = config;
     }
 
     setMultipliers(tiers: Multiplier[]) {
@@ -283,15 +272,10 @@ class GameConfig {
         return this.multipliers;
     }
 
-    getConfig(): Match3Config {
-        return this.config;
-    }
-
     // Useful for debugging
     reset(): void {
         this.blocks = defaultBlocks;
         this.paytable = defaultPaytable;
-        this.config = defaultConfig;
         this.scatterBlocks = defaultScatterBlocks;
         this.specialBlocks = defaultSpecialBlocks;
     }

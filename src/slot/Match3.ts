@@ -1,13 +1,13 @@
 import { Container } from 'pixi.js';
 import { Match3Actions } from './Match3Actions';
 import { Match3Board } from './Match3Board';
-import { Match3Config, slotGetConfig } from './Match3Config';
+import { Match3Config, Multiplier, slotGetConfig } from './Match3Config';
 import { Match3Process } from './Match3Process';
-import { Match3Multiplier } from './Match3Multiplier';
 import { Match3Stats } from './Match3Stats';
 import { Match3FreeSpinProcess } from './Match3FreeSpinProcess';
 import { SlotSymbol } from './SlotSymbol';
 import { Match3RoundResults } from './Match3RounResults';
+import { Match3Jackpot } from './Match3Jackpot';
 
 // Match3.ts - Holds the state
 export enum SpinState {
@@ -20,6 +20,14 @@ export enum SpinState {
 export interface SlotOnMultiplierMatchData {
     /** List of all matches detected in the grid */
     pieces: SlotSymbol[];
+}
+
+/** Interface for onMatch event data */
+export interface SlotOnMultiplierJackpotTriggerData {
+    /** List of all matches detected in the grid */
+    multiplier: Multiplier;
+    /** Occurance */
+    occurance: number;
 }
 
 /**
@@ -45,7 +53,7 @@ export class Match3 extends Container {
     /** Process matches and fills up the grid */
     public freeSpinProcess: Match3FreeSpinProcess;
     /** Handles pieces with special powers */
-    public multiplier: Match3Multiplier;
+    public jackpot: Match3Jackpot;
 
     /** Firew when a spin started, regardless of the spin type */
     public onSpinStart?: () => void;
@@ -53,6 +61,8 @@ export class Match3 extends Container {
     public onFreeSpinTrigger?: () => void;
     /** Fires when special triggered */
     public onMultiplierMatch?: (data: SlotOnMultiplierMatchData) => Promise<void>;
+    /** Fires when multiplier jackpot triggered */
+    public onMultiplierJackpotTrigger?: (data: SlotOnMultiplierJackpotTriggerData) => Promise<void>;
 
     /** Fires when the game start auto-processing the grid */
     public onFreeSpinStart?: (count: number) => void;
@@ -80,7 +90,7 @@ export class Match3 extends Container {
         this.actions = new Match3Actions(this);
         this.process = new Match3Process(this);
         this.freeSpinProcess = new Match3FreeSpinProcess(this);
-        this.multiplier = new Match3Multiplier(this);
+        this.jackpot = new Match3Jackpot(this);
     }
 
     /**
@@ -98,7 +108,7 @@ export class Match3 extends Container {
         this.interactiveChildren = false;
         this.stats.reset();
         this.board.reset();
-        this.multiplier.reset();
+        this.jackpot.reset();
         this.process.reset();
     }
 

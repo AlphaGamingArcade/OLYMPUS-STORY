@@ -268,7 +268,7 @@ export function slotGetMatches(grid: Match3Grid) {
  * @returns An array of position groups, where each group contains positions of the same special type
  */
 export function slotGetMultiplierMatches(grid: Match3Grid): Match3Position[][] {
-    const specialBlocks = gameConfig.getSpecialBlocks();
+    const specialBlocks = gameConfig.getMultipliers();
     const specialTypes = specialBlocks.map((sb) => sb.type);
 
     // Use Map to efficiently group by type

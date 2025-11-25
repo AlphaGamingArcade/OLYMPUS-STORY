@@ -1,5 +1,4 @@
 import { Container } from 'pixi.js';
-import { SlotOnSpecialMatchData } from '../slot/Match3';
 import { randomRange } from '../utils/random';
 import gsap from 'gsap';
 import { GameScreen } from '../screens/GameScreen';
@@ -10,6 +9,7 @@ import { sfx } from '../utils/audio';
 import { PopExplosion } from './PopExplosion';
 import { waitFor } from '../utils/asyncUtils';
 import { SlotSymbol } from '../slot/SlotSymbol';
+import { SlotOnMultiplierMatchData } from '../slot/Match3';
 
 /**
  * All gameplay special effects, isolated on its own class in a way that can be changed freely, without affecting gameplay.
@@ -41,7 +41,7 @@ export class GameEffects extends Container {
     }
 
     /** Fired when a match is detected */
-    public async onSpecialMatch(data: SlotOnSpecialMatchData) {
+    public async onMultiplierMatch(data: SlotOnMultiplierMatchData) {
         sfx.play('common/sfx-match.wav');
         let animPromises = [];
         let pieces = []; // Store pieces to clean up later
@@ -64,21 +64,21 @@ export class GameEffects extends Container {
             let y = 0;
 
             // IDENFITY PIECE WHERE THEY FLY TO
-            if (piece.type == 9 && this.game.grandMultiplier) {
-                x = this.game.grandMultiplier.x + randomRange(-20, 20);
-                y = this.game.grandMultiplier.y;
-            } else if (piece.type == 10 && this.game.angelicMultiplierTier) {
-                x = this.game.angelicMultiplierTier.x + randomRange(-20, 20);
-                y = this.game.angelicMultiplierTier.y;
-            } else if (piece.type == 11 && this.game.blessedMultiplierTier) {
-                x = this.game.blessedMultiplierTier.x + randomRange(-20, 20);
-                y = this.game.blessedMultiplierTier.y;
-            } else if (piece.type == 12 && this.game.divineMultiplierTier) {
-                x = this.game.divineMultiplierTier.x + randomRange(-20, 20);
-                y = this.game.divineMultiplierTier.y;
+            if (piece.type == 9 && this.game.grandJackpotTier) {
+                x = this.game.grandJackpotTier.x + randomRange(-20, 20);
+                y = this.game.grandJackpotTier.y;
+            } else if (piece.type == 10 && this.game.angelicJackpotTier) {
+                x = this.game.angelicJackpotTier.x + randomRange(-20, 20);
+                y = this.game.angelicJackpotTier.y;
+            } else if (piece.type == 11 && this.game.blessedJackpotTier) {
+                x = this.game.blessedJackpotTier.x + randomRange(-20, 20);
+                y = this.game.blessedJackpotTier.y;
+            } else if (piece.type == 12 && this.game.divineJackpotTier) {
+                x = this.game.divineJackpotTier.x + randomRange(-20, 20);
+                y = this.game.divineJackpotTier.y;
             }
 
-            animPromises.push(this.playFlyTo(piece, { x, y }));
+            animPromises.push(this.playFlyToMultiplier(piece, { x, y }));
         }
 
         // Wait for ALL animations to complete
@@ -94,7 +94,7 @@ export class GameEffects extends Container {
     }
 
     /** Make the piece fly to cauldron with a copy of the original piece created in its place */
-    public async playFlyTo(piece: SlotSymbol, to: { x: number; y: number }) {
+    public async playFlyToMultiplier(piece: SlotSymbol, to: { x: number; y: number }) {
         const distance = getDistance(piece.x, piece.y, to.x, to.y);
         const duration = distance * 0.0008 + randomRange(0.3, 0.6);
 
@@ -152,6 +152,20 @@ export class GameEffects extends Container {
         );
 
         await tl;
+
+        /** Evaluate special matches */
+        const multipliers = this.game.match3.jackpot.multipliers;
+        const multiplierValue = multipliers[piece.type];
+
+        if (piece.type == 9) {
+            this.game.grandJackpotTier.setActiveDots(multiplierValue);
+        } else if (piece.type == 10) {
+            this.game.angelicJackpotTier.setActiveDots(multiplierValue);
+        } else if (piece.type == 11) {
+            this.game.blessedJackpotTier.setActiveDots(multiplierValue);
+        } else if (piece.type == 12) {
+            this.game.divineJackpotTier.setActiveDots(multiplierValue);
+        }
 
         sfx.play('common/sfx-bubble.wav');
     }

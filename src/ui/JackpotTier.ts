@@ -1,10 +1,10 @@
-import { Container, FillGradient, Sprite, Text, TextStyle } from 'pixi.js';
+import { Container, FillGradient, Sprite, TextStyle } from 'pixi.js';
 import gsap from 'gsap';
 import { throttle } from '../utils/throttle';
 import { sfx } from '../utils/audio';
 import { Label } from './Label';
 
-const defaultMultiplierTierOptions = {
+const defaultJackpotTierOptions = {
     name: 'multiplier_label_grand',
     tier: 'frame_multiplier_grand',
     dotActive: 'multiplier_bullet_grand',
@@ -15,12 +15,12 @@ const defaultMultiplierTierOptions = {
     activeDots: 0,
 };
 
-export type MultiplierTierOptions = typeof defaultMultiplierTierOptions;
+export type JackpotTierOptions = typeof defaultJackpotTierOptions;
 
 /**
  * The game multiplier display with animated score and dot indicators
  */
-export class MultiplierTier extends Container {
+export class JackpotTier extends Container {
     /** Inner container for animation */
     private container: Container;
     /** The frame background */
@@ -28,14 +28,16 @@ export class MultiplierTier extends Container {
     /** The label sprite at the top */
     private frameLabel: Sprite;
     /** The multiplier value text */
-    private messageLabel: Text;
+    private messageLabel: Label;
     /** Container for dot indicators */
     private dotsContainer: Container;
     /** Array of dot sprites */
     private dots: Sprite[] = [];
+    /** Occurance */
+    private occuranceLabel: Label;
 
     /** Configuration */
-    private readonly config: Required<MultiplierTierOptions>;
+    private readonly config: Required<JackpotTierOptions>;
 
     /** State */
     private totalDots: number;
@@ -45,11 +47,11 @@ export class MultiplierTier extends Container {
     private showing = true;
     private intensity = 0;
 
-    constructor(options: Partial<MultiplierTierOptions> = {}) {
+    constructor(options: Partial<JackpotTierOptions> = {}) {
         super();
 
         // Merge options with defaults
-        this.config = { ...defaultMultiplierTierOptions, ...options };
+        this.config = { ...defaultJackpotTierOptions, ...options };
         this.currency = this.config.currency;
         this.points = this.config.points;
         this.totalDots = this.config.totalDots;
@@ -103,6 +105,12 @@ export class MultiplierTier extends Container {
         this.messageLabel.style.fill = verticalGradient;
         this.container.addChild(this.messageLabel);
         this.fitTextToContainer();
+
+        this.occuranceLabel = new Label(`x10`, style);
+        this.occuranceLabel.style.fill = verticalGradient;
+        this.occuranceLabel.x = 220;
+        this.occuranceLabel.alpha = 0;
+        this.container.addChild(this.occuranceLabel);
 
         // Setup dots container
         this.dotsContainer = new Container();
@@ -201,6 +209,41 @@ export class MultiplierTier extends Container {
         const previousActive = this.activeDots;
         this.activeDots = clampedActive;
         this.updateDots();
+
+        const occurrence = Math.floor(active / this.totalDots);
+        if (occurrence > 0) {
+            this.occuranceLabel.text = `x${occurrence}`;
+
+            // Kill any existing tweens
+            gsap.killTweensOf(this.occuranceLabel);
+            gsap.killTweensOf(this.occuranceLabel.scale);
+
+            // Set initial state
+            this.occuranceLabel.alpha = 0;
+            this.occuranceLabel.scale.set(0.5);
+
+            // Animate in with scale and fade
+            gsap.to(this.occuranceLabel, {
+                alpha: 1,
+                duration: 0.3,
+                ease: 'back.out(2)',
+            });
+
+            gsap.to(this.occuranceLabel.scale, {
+                x: 1,
+                y: 1,
+                duration: 0.3,
+                ease: 'back.out(2)',
+            });
+
+            // Hide the label after 2 seconds
+            gsap.to(this.occuranceLabel, {
+                alpha: 0,
+                duration: 0.5,
+                delay: 2.3,
+                ease: 'power2.out',
+            });
+        }
 
         // Animate the newly activated dot
         if (animated && clampedActive > previousActive) {

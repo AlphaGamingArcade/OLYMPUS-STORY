@@ -298,9 +298,6 @@ export class Match3RoundResults {
 
         await piece.animatePop();
         this.disposePiece(piece);
-
-        // Trigger any specials related to this piece, if there is any
-        await this.match3.multiplier.trigger(type, position);
     }
 
     /**
