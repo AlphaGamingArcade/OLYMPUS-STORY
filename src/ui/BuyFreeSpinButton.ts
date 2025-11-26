@@ -1,4 +1,5 @@
-import { Container, FillGradient, Sprite, TextStyle } from 'pixi.js';
+import { FancyButton } from '@pixi/ui';
+import { Container, FillGradient, Sprite, TextStyle, Texture } from 'pixi.js';
 import gsap from 'gsap';
 import { Label } from './Label';
 import { sfx } from '../utils/audio';
@@ -6,8 +7,8 @@ import { sfx } from '../utils/audio';
 /**
  * Buy Free Spin button with hover and press effects
  */
-export class BuyFreeSpin extends Container {
-    /** Inner container for the cauldron */
+export class BuyFreeSpinButton extends FancyButton {
+    /** Inner container for the button content */
     private container: Container;
     private scroll: Sprite;
     private pen: Sprite;
@@ -17,7 +18,17 @@ export class BuyFreeSpin extends Container {
     private messageLabel2: Label;
 
     constructor() {
-        super();
+        // Create a transparent hit area sprite for the button
+        const defaultView = new Sprite(Texture.WHITE);
+        defaultView.width = 300;
+        defaultView.height = 300;
+        defaultView.anchor.set(0.5);
+        defaultView.alpha = 0.01; // Nearly invisible but still interactive
+
+        super({
+            defaultView,
+            anchor: 0.5,
+        });
 
         this.container = new Container();
         this.addChild(this.container);
@@ -102,18 +113,12 @@ export class BuyFreeSpin extends Container {
         this.amountLabel.y = 100;
         this.container.addChild(this.amountLabel);
 
-        // Setup interactivity
-        this.setupInteractivity();
-    }
-
-    /** Setup hover interactivity */
-    private setupInteractivity() {
-        this.eventMode = 'static';
-        this.cursor = 'pointer';
-
-        this.on('pointerover', this.handleHover.bind(this));
+        // Connect FancyButton events
+        this.onDown.connect(this.handleDown.bind(this));
+        this.onUp.connect(this.handleUp.bind(this));
+        this.onHover.connect(this.handleHover.bind(this));
+        this.on('pointerupoutside', this.handleUp.bind(this));
         this.on('pointerout', this.handleOut.bind(this));
-        this.on('pointerdown', this.handleDown.bind(this));
     }
 
     private handleHover() {
@@ -148,26 +153,28 @@ export class BuyFreeSpin extends Container {
     private handleDown() {
         sfx.play('common/sfx-press.wav');
         gsap.killTweensOf(this.container.scale);
+        gsap.killTweensOf(this.container);
 
-        // Quick press down
+        // Quick press down - scale and move down
         gsap.to(this.container.scale, { x: 0.95, y: 0.95, duration: 0.1, ease: 'power2.out' });
-
-        // Then back up
-        gsap.to(this.container.scale, {
-            x: 1.05,
-            y: 1.05,
-            duration: 0.2,
-            ease: 'back.out',
-            delay: 0.1,
-        });
+        gsap.to(this.container, { y: 0, duration: 0.1, ease: 'power2.out' });
     }
 
-    /** Show cauldron */
+    private handleUp() {
+        gsap.killTweensOf(this.container.scale);
+        gsap.killTweensOf(this.container);
+
+        // Bounce back up with overshoot
+        gsap.to(this.container.scale, { x: 1.05, y: 1.05, duration: 0.2, ease: 'back.out' });
+        gsap.to(this.container, { y: -5, duration: 0.2, ease: 'back.out' });
+    }
+
+    /** Show button */
     public async show(animated = true) {
         gsap.killTweensOf(this.container.scale);
         gsap.killTweensOf(this.container);
         this.visible = true;
-        this.eventMode = 'static';
+        this.interactiveChildren = true;
 
         if (animated) {
             this.container.alpha = 0;
@@ -180,9 +187,9 @@ export class BuyFreeSpin extends Container {
         }
     }
 
-    /** Hide cauldron */
+    /** Hide button */
     public async hide(animated = true) {
-        this.eventMode = 'none';
+        this.interactiveChildren = false;
         gsap.killTweensOf(this.container.scale);
         gsap.killTweensOf(this.container);
         gsap.killTweensOf(this.pen);
@@ -195,5 +202,29 @@ export class BuyFreeSpin extends Container {
             this.container.scale.set(0);
         }
         this.visible = false;
+    }
+
+    /** Fit text to container by scaling down if needed */
+    private fitTextToContainer() {
+        // Get the frame width as the maximum allowed width
+        this.amountLabel.scale.set(1);
+        const maxWidth = this.frame.width * 0.8; // 80% of frame width for padding
+        const textWidth = this.amountLabel.width;
+
+        if (textWidth > maxWidth) {
+            // Scale down proportionally to fit
+            const scale = maxWidth / textWidth;
+            this.amountLabel.scale.set(scale);
+        } else {
+            // Reset to original scale if text fits
+            this.amountLabel.scale.set(1);
+        }
+    }
+
+    /** Update the amount displayed */
+    public setAmount(amount: string) {
+        if (this.amountLabel.text == amount) return;
+        this.amountLabel.text = amount;
+        this.fitTextToContainer();
     }
 }

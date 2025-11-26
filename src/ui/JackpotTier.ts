@@ -182,6 +182,8 @@ export class JackpotTier extends Container {
     /** Fit text to container by scaling down if needed */
     private fitTextToContainer() {
         // Get the frame width as the maximum allowed width
+        // Reset scale to 1 first to get the true text width
+        this.messageLabel.scale.set(1);
         const maxWidth = this.frame.width * 0.8; // 80% of frame width for padding
         const textWidth = this.messageLabel.width;
 

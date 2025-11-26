@@ -185,6 +185,7 @@ export class ConfigAPI {
                     },
                 ],
                 scatterBlocksTrigger: 4,
+                buyFreeSpinBetMultiplier: 100,
                 scatterBlocks: [
                     {
                         type: 8,

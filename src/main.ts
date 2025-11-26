@@ -90,6 +90,7 @@ async function loadGameConfig() {
     gameConfig.setSpecialBlocks(result.specialBlocks);
     gameConfig.setScatterBlocks(result.scatterBlocks);
     gameConfig.setScatterBlocksTrigger(result.scatterBlocksTrigger);
+    gameConfig.setBuyFreeSpinBetMultiplier(result.buyFreeSpinBetMultiplier);
     gameConfig.setJackpots(result.jackpots);
 }
 

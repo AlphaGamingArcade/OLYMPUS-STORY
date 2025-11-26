@@ -66,6 +66,8 @@ const defaultBlocks: Block[] = [
 
 const defaultScatterBlocksTrigger: number = 4;
 
+const defaultBuyFreeSpinBetMultiplier: number = 100;
+
 const defaultScatterBlocks: Block[] = [
     {
         type: 8,
@@ -219,6 +221,7 @@ class GameConfig {
     private scatterBlocks: Block[] = defaultScatterBlocks;
     private paytable: Paytable[] = defaultPaytable;
     private jackpots: Jackpot[] = defaultJackpot;
+    private buyFreeSpinBetMultiplier: number = defaultBuyFreeSpinBetMultiplier;
 
     public constructor() {}
 
@@ -233,6 +236,10 @@ class GameConfig {
 
     setScatterBlocksTrigger(count: number) {
         this.scatterBlocksTrigger = count;
+    }
+
+    setBuyFreeSpinBetMultiplier(multiplier: number) {
+        this.buyFreeSpinBetMultiplier = multiplier;
     }
 
     setScatterBlocks(blocks: Block[]) {
@@ -258,6 +265,10 @@ class GameConfig {
 
     getScatterBlocksTrigger() {
         return this.scatterBlocksTrigger;
+    }
+
+    getBuyFreeSpinBetMultiplier() {
+        return this.buyFreeSpinBetMultiplier;
     }
 
     getScatterBlocks(): Block[] {

@@ -20,9 +20,11 @@ class UserSettings {
     private spinMode: SpinMode;
     private betIndex: number;
     private betOptions: number[];
+    private currency: string;
 
     constructor() {
         this.spinMode = 'normal-spin';
+        this.currency = '$';
 
         this.betOptions = [5, 10, 15, 20, 50, 100, 1000];
         this.betIndex = 0;
@@ -77,6 +79,10 @@ class UserSettings {
 
     public getBet() {
         return this.betOptions[this.betIndex];
+    }
+
+    public getCurrency() {
+        return this.currency;
     }
 
     /** Adjust bet amount */

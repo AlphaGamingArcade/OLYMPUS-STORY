@@ -9,7 +9,7 @@ import { waitFor } from '../utils/asyncUtils';
 import { slotGetConfig } from '../slot/Match3Config';
 import { JackpotTier } from '../ui/JackpotTier';
 import { GameLogo } from '../ui/GameLogo';
-import { BuyFreeSpin } from '../ui/BuyFreeSpin';
+import { BuyFreeSpinButton } from '../ui/BuyFreeSpinButton';
 import { RoundResult } from '../ui/RoundResult';
 import { ControlPanel } from '../ui/ControlPanel';
 import { BetAction, userSettings } from '../utils/userSettings';
@@ -45,7 +45,7 @@ export class GameScreen extends Container {
     public readonly gameLogo: GameLogo;
 
     /** The buy free spin butotn */
-    public readonly buyFreeSpin: BuyFreeSpin;
+    public readonly buyFreeSpinButton: BuyFreeSpinButton;
 
     /** The round result frame */
     public readonly roundResult: RoundResult;
@@ -63,6 +63,7 @@ export class GameScreen extends Container {
 
     constructor() {
         super();
+        const currency = userSettings.getCurrency();
 
         this.gameContainer = new Container();
         this.addChild(this.gameContainer);
@@ -73,8 +74,13 @@ export class GameScreen extends Container {
         this.gameLogo = new GameLogo();
         this.addChild(this.gameLogo);
 
-        this.buyFreeSpin = new BuyFreeSpin();
-        this.addChild(this.buyFreeSpin);
+        this.buyFreeSpinButton = new BuyFreeSpinButton();
+        // Listen for press event (this is FancyButton's built-in click event)
+        this.buyFreeSpinButton.onPress.connect(() => {
+            console.log('Buy Free Spin clicked!');
+            // Your click handler logic here
+        });
+        this.addChild(this.buyFreeSpinButton);
 
         this.roundResult = new RoundResult();
         this.addChild(this.roundResult);
@@ -87,6 +93,7 @@ export class GameScreen extends Container {
             tier: 'frame_multiplier_divine',
             dotActive: 'multiplier_bullet_divine',
             points: 100,
+            currency,
         });
         this.addChild(this.divineJackpotTier);
         this.divineJackpotTier.setTotalDots(5);
@@ -97,6 +104,7 @@ export class GameScreen extends Container {
             tier: 'frame_multiplier_blessed',
             dotActive: 'multiplier_bullet_blessed',
             points: 50,
+            currency,
         });
         this.addChild(this.blessedJackpotTier);
         this.blessedJackpotTier.setTotalDots(4);
@@ -107,6 +115,7 @@ export class GameScreen extends Container {
             tier: 'frame_multiplier_angelic',
             dotActive: 'multiplier_bullet_angelic',
             points: 20,
+            currency,
         });
         this.addChild(this.angelicJackpotTier);
         this.angelicJackpotTier.setTotalDots(3);
@@ -117,6 +126,7 @@ export class GameScreen extends Container {
             tier: 'frame_multiplier_grand',
             dotActive: 'multiplier_bullet_grand',
             points: 10,
+            currency,
         });
         this.addChild(this.grandJackpotTier);
         this.grandJackpotTier.setTotalDots(2);
@@ -154,6 +164,7 @@ export class GameScreen extends Container {
 
         // Init multiplier scores
         this.updateMultiplierAmounts();
+        this.updateBuyFreeSpinAmount();
 
         this.controlPanel.setBet(userSettings.getBet());
         this.controlPanel.onIncreaseBet(() => {
@@ -161,6 +172,7 @@ export class GameScreen extends Container {
             userSettings.setBet(BetAction.INCREASE);
             this.controlPanel.setBet(userSettings.getBet());
             this.updateMultiplierAmounts();
+            this.updateBuyFreeSpinAmount();
 
             // TODO: Do more here if bet is changed
         });
@@ -169,10 +181,17 @@ export class GameScreen extends Container {
             userSettings.setBet(BetAction.DECREASE);
             this.controlPanel.setBet(userSettings.getBet());
             this.updateMultiplierAmounts();
+            this.updateBuyFreeSpinAmount();
             // TODO: Do more here if bet is changed
         });
 
         this.finished = false;
+    }
+
+    private updateBuyFreeSpinAmount() {
+        const currency = userSettings.getCurrency();
+        const amount = userSettings.getBet() * gameConfig.getBuyFreeSpinBetMultiplier();
+        this.buyFreeSpinButton.setAmount(`${currency}${amount}`);
     }
 
     private updateMultiplierAmounts() {
@@ -260,9 +279,9 @@ export class GameScreen extends Container {
             this.grandJackpotTier.x = multiplierX - this.grandJackpotTier.width * 0.65;
             this.grandJackpotTier.y = multiplierTierY + 430;
 
-            this.buyFreeSpin.scale.set(1);
-            this.buyFreeSpin.x = 220;
-            this.buyFreeSpin.y = 200;
+            this.buyFreeSpinButton.scale.set(1);
+            this.buyFreeSpinButton.x = 220;
+            this.buyFreeSpinButton.y = 200;
 
             this.roundResult.scale.set(1);
             this.roundResult.x = 220;
@@ -279,9 +298,9 @@ export class GameScreen extends Container {
             this.gameContainer.x = centerX;
             this.gameContainer.y = this.gameContainer.height * 0.5;
 
-            this.buyFreeSpin.scale.set(0.65);
-            this.buyFreeSpin.x = 220;
-            this.buyFreeSpin.y = height * 0.65 - 20;
+            this.buyFreeSpinButton.scale.set(0.65);
+            this.buyFreeSpinButton.x = 220;
+            this.buyFreeSpinButton.y = height * 0.65 - 20;
 
             this.gameLogo.scale.set(0.75);
             this.gameLogo.x = 220;
