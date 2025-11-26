@@ -1,7 +1,7 @@
 import { Match3 } from './Match3';
 import { Match3Position, slotGetJackpotMatches } from './SlotUtility';
-import { gameConfig } from '../utils/gameConfig';
 import { SlotSymbol } from './SlotSymbol';
+import { Jackpot } from './Match3Config';
 
 /**
  * Controls the special pieces in the game. Each special piece should have its own
@@ -14,9 +14,18 @@ export class Match3Jackpot {
     public match3: Match3;
     /** Jackpot record */
     public jackpots: Record<string, { type: number; active: number }> = {};
+    /** Jackpot record */
+    public winJackpots: Record<string, { type: number; active: number }> = {};
+    /** Config Jackpots */
+    private configJackpots: Jackpot[];
 
     constructor(match3: Match3) {
         this.match3 = match3;
+        this.configJackpots = [];
+    }
+
+    public setup(jackpotConfig: Jackpot[]) {
+        this.configJackpots = jackpotConfig;
     }
 
     /** Remove all specials handlers */
@@ -27,8 +36,8 @@ export class Match3Jackpot {
 
     public async process() {
         this.jackpots = {};
+        this.winJackpots = {};
 
-        const configJackpots = gameConfig.getJackpots();
         const matches = slotGetJackpotMatches(this.match3.board.grid);
         const piecesByType: Record<number, SlotSymbol[]> = {};
 
@@ -47,23 +56,24 @@ export class Match3Jackpot {
             }
         }
 
-        const groupPieces: SlotSymbol[][] = [];
+        // winPieces are grouped per jackpot symbol
+        const winPieces: SlotSymbol[][] = [];
         const nonWinPieces: SlotSymbol[] = [];
 
-        for (const configJackpot of configJackpots) {
+        for (const configJackpot of this.configJackpots) {
             const piecesOfType = piecesByType[configJackpot.type] || [];
             if (piecesOfType.length >= configJackpot.requiredSymbols) {
-                groupPieces.push(piecesOfType);
+                winPieces.push(piecesOfType);
             } else if (piecesOfType.length > 0) {
                 nonWinPieces.push(...piecesOfType);
             }
         }
 
         // Sort by piece count, descending (most pieces first)
-        groupPieces.sort((a, b) => b.length - a.length);
+        winPieces.sort((a, b) => b.length - a.length);
 
         // Process winning groups one at a time
-        for (const symbols of groupPieces) {
+        for (const symbols of winPieces) {
             const positions: Match3Position[] = symbols.map((symbol) => ({ row: symbol.row, column: symbol.column }));
             await this.match3.board.playPieces(positions);
             await this.match3.onJackpotMatch?.({
@@ -80,6 +90,36 @@ export class Match3Jackpot {
             await this.match3.board.playPieces(positions);
             await this.match3.onJackpotMatch?.({
                 symbols: nonWinPieces,
+            });
+        }
+
+        await this.displayJackpotWins();
+    }
+
+    private async displayJackpotWins() {
+        console.log(this.jackpots, this.configJackpots);
+        const jackpotWinsByType: Record<string, { times: number; jackpot: Jackpot }> = {};
+
+        for (const [type, jackpotData] of Object.entries(this.jackpots)) {
+            const configJackpot = this.configJackpots.find((config) => config.type === Number(type));
+
+            if (configJackpot && jackpotData.active >= configJackpot.requiredSymbols) {
+                const times = Math.floor(jackpotData.active / configJackpot.requiredSymbols);
+
+                if (times > 0) {
+                    jackpotWinsByType[type] = {
+                        times,
+                        jackpot: configJackpot,
+                    };
+                }
+            }
+        }
+
+        // Display modals for each winning jackpot
+        for (const [_, jackpotWin] of Object.entries(jackpotWinsByType)) {
+            await this.match3.onJackpotTrigger?.({
+                jackpot: jackpotWin.jackpot,
+                times: jackpotWin.times,
             });
         }
     }

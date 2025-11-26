@@ -1,5 +1,5 @@
 import { Container, Ticker } from 'pixi.js';
-import { Match3, SlotOnJackpotMatchData, SlotOnMultiplierJackpotTriggerData } from '../slot/Match3';
+import { Match3, SlotOnJackpotMatchData, SlotOnJackpotTriggerData } from '../slot/Match3';
 import { Pillar } from '../ui/Pillar';
 import { navigation } from '../utils/navigation';
 import { GameEffects } from '../ui/GameEffects';
@@ -125,7 +125,7 @@ export class GameScreen extends Container {
         this.match3 = new Match3();
         this.match3.onSpinStart = this.onSpinStart.bind(this);
         this.match3.onJackpotMatch = this.onJackpotMatch.bind(this);
-        this.match3.onMultiplierJackpotTrigger = this.onMultiplierJackpotTriggerMatch.bind(this);
+        this.match3.onJackpotTrigger = this.onJackpotTrigger.bind(this);
         this.match3.onFreeSpinTrigger = this.onFreeSpinTrigger.bind(this);
         this.match3.onFreeSpinStart = this.onFreeSpinStart.bind(this);
         this.match3.onFreeSpinComplete = this.onFreeSpinComplete.bind(this);
@@ -337,7 +337,7 @@ export class GameScreen extends Container {
     }
 
     /** Fires when the match3 grid finishes auto-processing */
-    private async onMultiplierJackpotTriggerMatch(data: SlotOnMultiplierJackpotTriggerData): Promise<void> {
+    private async onJackpotTrigger(data: SlotOnJackpotTriggerData): Promise<void> {
         return new Promise((resolve) => {
             navigation.presentPopup(JackpotWinPopup, async () => {
                 await navigation.dismissPopup();

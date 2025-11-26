@@ -136,7 +136,7 @@ export class GameEffects extends Container {
 
         await tl;
 
-        /** Evaluate special matches */
+        /** Evaluate jackpot matches */
         const jackpots = this.game.match3.jackpot.jackpots;
         const active = jackpots[piece.type].active;
 

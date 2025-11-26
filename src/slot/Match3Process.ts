@@ -109,17 +109,25 @@ export class Match3Process {
             await this.applyGravity();
         });
 
-        // Step #4 - Process jackpot accumulations
-        this.queue.add(async () => {
-            await this.processJackpotMatches();
-        });
+        // Step #4 & #5 - Process jackpot and refill in parallel, but store jackpot promise
+        let jackpotPromise: Promise<void> | null = null;
 
-        // Step #5 - Create new pieces that falls from the to to fill up remaining empty spaces
         this.queue.add(async () => {
+            // Start jackpot processing (don't await here)
+            jackpotPromise = this.processJackpotMatches();
+
+            // Refill can happen while jackpot modals are showing
             await this.refillGrid();
         });
 
-        // Step #5 - Finish up this sequence round and check if it needs a re-run, otherwise stop processing
+        // Step #6 - Wait for jackpot to complete before checkpoint
+        this.queue.add(async () => {
+            if (jackpotPromise) {
+                await jackpotPromise;
+            }
+        });
+
+        // Step #7 - Finish up this sequence round and check if it needs a re-run, otherwise stop processing
         this.queue.add(async () => {
             console.log(`[Match3] -- SEQUENCE ROUND #${this.round} FINISH`);
             this.processCheckpoint();

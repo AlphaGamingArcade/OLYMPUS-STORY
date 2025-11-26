@@ -8,6 +8,7 @@ import { Match3FreeSpinProcess } from './Match3FreeSpinProcess';
 import { SlotSymbol } from './SlotSymbol';
 import { Match3RoundResults } from './Match3RounResults';
 import { Match3Jackpot } from './Match3Jackpot';
+import { gameConfig } from '../utils/gameConfig';
 
 // Match3.ts - Holds the state
 export enum SpinState {
@@ -23,11 +24,11 @@ export interface SlotOnJackpotMatchData {
 }
 
 /** Interface for onMatch event data */
-export interface SlotOnMultiplierJackpotTriggerData {
-    /** List of all matches detected in the grid */
+export interface SlotOnJackpotTriggerData {
+    /** List of all jackpot matches detected in the grid */
     jackpot: Jackpot;
     /** Occurance */
-    occurance: number;
+    times: number;
 }
 
 /**
@@ -62,7 +63,7 @@ export class Match3 extends Container {
     /** Fires when special triggered */
     public onJackpotMatch?: (data: SlotOnJackpotMatchData) => Promise<void>;
     /** Fires when multiplier jackpot triggered */
-    public onMultiplierJackpotTrigger?: (data: SlotOnMultiplierJackpotTriggerData) => Promise<void>;
+    public onJackpotTrigger?: (data: SlotOnJackpotTriggerData) => Promise<void>;
 
     /** Fires when the game start auto-processing the grid */
     public onFreeSpinStart?: (count: number) => void;
@@ -89,8 +90,8 @@ export class Match3 extends Container {
         this.board = new Match3Board(this);
         this.actions = new Match3Actions(this);
         this.process = new Match3Process(this);
-        this.freeSpinProcess = new Match3FreeSpinProcess(this);
         this.jackpot = new Match3Jackpot(this);
+        this.freeSpinProcess = new Match3FreeSpinProcess(this);
     }
 
     /**
@@ -98,8 +99,11 @@ export class Match3 extends Container {
      * @param config The config object in which the game will be based on
      */
     public setup(config: Match3Config) {
+        const jackpotConfig = gameConfig.getJackpots();
         this.config = config;
         this.reset();
+
+        this.jackpot.setup(jackpotConfig);
         this.board.setup(config);
     }
 
@@ -108,8 +112,9 @@ export class Match3 extends Container {
         this.interactiveChildren = false;
         this.stats.reset();
         this.board.reset();
-        this.jackpot.reset();
         this.process.reset();
+        this.freeSpinProcess.reset();
+        this.jackpot.reset();
     }
 
     /** Start the spin and disable interaction */
