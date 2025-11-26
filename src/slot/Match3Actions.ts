@@ -1,5 +1,4 @@
 import { Match3 } from './Match3';
-import gsap from 'gsap';
 
 /** Interface for actions configuration */
 interface Match3ActionsConfig {
@@ -28,6 +27,8 @@ export class Match3Actions {
         this.match3.board.reset();
 
         await this.match3.board.fillGrid();
+
+        this.match3.jackpot.reset();
         this.match3.process.start();
     }
 

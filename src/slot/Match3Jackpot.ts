@@ -36,9 +36,6 @@ export class Match3Jackpot {
     }
 
     public async process() {
-        this.jackpots = {};
-        this.winJackpots = {};
-
         const matches = slotGetJackpotMatches(this.match3.board.grid);
         const piecesByType: Record<number, SlotSymbol[]> = {};
 
@@ -93,11 +90,9 @@ export class Match3Jackpot {
                 symbols: nonWinPieces,
             });
         }
-
-        await this.displayJackpotWins();
     }
 
-    private async displayJackpotWins() {
+    public async displayJackpotWins() {
         const jackpotWinsByType: Record<string, { times: number; jackpot: Jackpot }> = {};
 
         for (const [type, jackpotData] of Object.entries(this.jackpots)) {

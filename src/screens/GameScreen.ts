@@ -366,8 +366,6 @@ export class GameScreen extends Container {
 
     /** Fires when the match3 spins tart */
     private async onSpinStart() {
-        console.log('Clear multiplier stats');
-
         this.divineJackpotTier.setActiveDots(0);
         this.blessedJackpotTier.setActiveDots(0);
         this.angelicJackpotTier.setActiveDots(0);

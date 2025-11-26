@@ -255,9 +255,10 @@ export class Match3Process {
 
         if (newMatches.length || emptySpaces.length) {
             console.log('[Match3] Checkpoint - Another sequence run is needed');
-            // Run it again if there are any new matches or empty spaces in the grid
             await this.runProcessRound();
         } else {
+            console.log('[Match3] Checkpoint - Check for jackpot wins then check free spin wins');
+            await this.match3.jackpot.displayJackpotWins();
             await this.processFreeSpinCheckpoint();
         }
     }

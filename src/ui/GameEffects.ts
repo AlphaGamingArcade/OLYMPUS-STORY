@@ -79,7 +79,7 @@ export class GameEffects extends Container {
                 y = this.game.divineJackpotTier.y;
             }
 
-            animPromise.push(this.playFlyToMultiplier(piece, { x, y }));
+            animPromise.push(this.playFlyToJackpotTier(piece, { x, y }));
         }
 
         await Promise.all(animPromise);
@@ -92,7 +92,7 @@ export class GameEffects extends Container {
     }
 
     /** Make the piece fly to cauldron with a copy of the original piece created in its place */
-    public async playFlyToMultiplier(piece: SlotSymbol, to: { x: number; y: number }) {
+    public async playFlyToJackpotTier(piece: SlotSymbol, to: { x: number; y: number }) {
         const distance = getDistance(piece.x, piece.y, to.x, to.y);
         const duration = distance * 0.0008 + randomRange(0.3, 0.6);
 
@@ -136,18 +136,14 @@ export class GameEffects extends Container {
 
         await tl;
 
-        /** Evaluate jackpot matches */
-        const jackpots = this.game.match3.jackpot.jackpots;
-        const active = jackpots[piece.type].active;
-
         if (piece.type == 9) {
-            this.game.grandJackpotTier.setActiveDots(active);
+            this.game.grandJackpotTier.addActiveDot();
         } else if (piece.type == 10) {
-            this.game.angelicJackpotTier.setActiveDots(active);
+            this.game.angelicJackpotTier.addActiveDot();
         } else if (piece.type == 11) {
-            this.game.blessedJackpotTier.setActiveDots(active);
+            this.game.blessedJackpotTier.addActiveDot();
         } else if (piece.type == 12) {
-            this.game.divineJackpotTier.setActiveDots(active);
+            this.game.divineJackpotTier.addActiveDot();
         }
 
         sfx.play('common/sfx-bubble.wav');

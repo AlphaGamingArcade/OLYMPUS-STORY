@@ -261,6 +261,59 @@ export class JackpotTier extends Container {
         }
     }
 
+    /** Add one active dot with animation */
+    public addActiveDot() {
+        const nextActive = this.activeDots + 1;
+
+        // Check if we're completing a set
+        if (nextActive > this.totalDots) {
+            this.activeDots = 1;
+        } else {
+            this.activeDots = nextActive;
+        }
+
+        if (this.activeDots == this.totalDots) {
+            this.totalOccurance++;
+
+            // Animate occurrence label
+            this.occuranceLabel.text = `x${this.totalOccurance}`;
+
+            // Kill any existing tweens
+            gsap.killTweensOf(this.occuranceLabel);
+            gsap.killTweensOf(this.occuranceLabel.scale);
+
+            // Set initial state
+            this.occuranceLabel.alpha = 0;
+            this.occuranceLabel.scale.set(0.5);
+
+            // Animate in with scale and fade
+            gsap.to(this.occuranceLabel, {
+                alpha: 1,
+                duration: 0.3,
+                ease: 'back.out(2)',
+            });
+
+            gsap.to(this.occuranceLabel.scale, {
+                x: 1,
+                y: 1,
+                duration: 0.3,
+                ease: 'back.out(2)',
+            });
+
+            // Hide the label after delay
+            gsap.to(this.occuranceLabel, {
+                alpha: 0,
+                duration: 0.5,
+                delay: 4.3,
+                ease: 'power2.out',
+            });
+        }
+
+        // Update dots to show empty set (no animation needed)
+        this.updateDots();
+        this.animateDot(this.activeDots - 1);
+    }
+
     /** Get the current number of active dots */
     public getActiveDots(): number {
         return this.activeDots;

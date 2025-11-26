@@ -25,18 +25,18 @@ let scatterReels = [
 
 let winReels = [
     [1, 4, 2, 2, 5],
-    [6, 2, 2, 2, 10],
-    [1, 11, 11, 11, 11],
-    [1, 12, 11, 11, 11],
-    [4, 7, 2, 11, 11],
+    [6, 2, 3, 2, 5],
+    [12, 9, 2, 9, 9],
+    [12, 12, 2, 2, 9],
+    [12, 12, 2, 9, 9],
 ];
 
 let grandReels = [
     [11, 4, 2, 2, 5],
-    [6, 2, 2, 12, 10],
-    [1, 9, 12, 12, 9],
-    [12, 12, 9, 9, 12],
-    [3, 3, 2, 2, 12],
+    [9, 9, 2, 12, 10],
+    [1, 11, 12, 12, 9],
+    [12, 12, 12, 9, 12],
+    [11, 11, 12, 2, 12],
 ];
 
 app.get('/spin', async (req, res) => {
@@ -46,7 +46,7 @@ app.get('/spin', async (req, res) => {
     const reels = Array.from({ length: 5 }, () => Array.from({ length: 5 }, () => getRandomInt(1, 12)));
 
     res.json({
-        reels: grandReels,
+        reels: winReels,
     });
 });
 
