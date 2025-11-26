@@ -2,6 +2,7 @@ import { Match3 } from './Match3';
 import { Match3Position, slotGetJackpotMatches } from './SlotUtility';
 import { SlotSymbol } from './SlotSymbol';
 import { Jackpot } from './Match3Config';
+import { waitFor } from '../utils/asyncUtils';
 
 /**
  * Controls the special pieces in the game. Each special piece should have its own
@@ -97,7 +98,6 @@ export class Match3Jackpot {
     }
 
     private async displayJackpotWins() {
-        console.log(this.jackpots, this.configJackpots);
         const jackpotWinsByType: Record<string, { times: number; jackpot: Jackpot }> = {};
 
         for (const [type, jackpotData] of Object.entries(this.jackpots)) {
@@ -117,10 +117,12 @@ export class Match3Jackpot {
 
         // Display modals for each winning jackpot
         for (const [_, jackpotWin] of Object.entries(jackpotWinsByType)) {
+            await waitFor(0.5);
             await this.match3.onJackpotTrigger?.({
                 jackpot: jackpotWin.jackpot,
                 times: jackpotWin.times,
             });
+            await waitFor(0.5);
         }
     }
 }

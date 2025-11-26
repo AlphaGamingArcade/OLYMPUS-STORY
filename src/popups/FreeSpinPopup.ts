@@ -279,6 +279,33 @@ export class FreeSpinPopup extends Container {
             },
             0,
         );
+
+        // Congratulations idle animation - gentle breathing scale
+        this.animationTimeline.to(
+            this.congratulations.scale,
+            {
+                x: 1.05,
+                y: 1.05,
+                duration: 1.5,
+                ease: 'sine.inOut',
+                yoyo: true,
+                repeat: 1,
+            },
+            0,
+        );
+
+        // // Optional: Add subtle float motion
+        // this.animationTimeline.to(
+        //     this.congratulations,
+        //     {
+        //         y: -345,
+        //         duration: 2,
+        //         ease: 'sine.inOut',
+        //         yoyo: true,
+        //         repeat: 1,
+        //     },
+        //     0,
+        // );
     }
 
     /** Resize the popup, fired whenever window size changes */

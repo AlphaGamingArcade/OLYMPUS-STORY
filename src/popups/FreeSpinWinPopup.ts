@@ -4,6 +4,7 @@ import { navigation } from '../utils/navigation';
 import { ShadowLabel } from '../ui/ShadowLabel';
 import { registerCustomEase, resolveAndKillTweens } from '../utils/animation';
 import { randomRange } from '../utils/random';
+import { waitFor } from '../utils/asyncUtils';
 
 /** Custom ease curve for y animation of falling pieces - minimal bounce */
 const easeSingleBounce = registerCustomEase(
@@ -468,6 +469,11 @@ export class FreeSpinWinPopup extends Container {
     /** Start all continuous animations in a single optimized timeline */
     private startContinuousAnimations() {
         if (this.animationTimeline) this.animationTimeline.kill();
+        resolveAndKillTweens(this.glow1);
+        resolveAndKillTweens(this.glow1.scale);
+        resolveAndKillTweens(this.glow2);
+        resolveAndKillTweens(this.glow2.scale);
+        resolveAndKillTweens(this.congratulations.scale);
 
         this.animationTimeline = gsap.timeline({ repeat: -1 });
 
@@ -518,6 +524,20 @@ export class FreeSpinWinPopup extends Container {
             },
             0,
         );
+
+        // Congratulations idle animation - gentle breathing scale
+        this.animationTimeline.to(
+            this.congratulations.scale,
+            {
+                x: 1.05,
+                y: 1.05,
+                duration: 1.5,
+                ease: 'sine.inOut',
+                yoyo: true,
+                repeat: -1,
+            },
+            0,
+        );
     }
 
     /** Resize the popup, fired whenever window size changes */
@@ -564,7 +584,6 @@ export class FreeSpinWinPopup extends Container {
         resolveAndKillTweens(this.clickAnywhere);
         resolveAndKillTweens(this);
         this.coinContainer.removeChildren();
-        this.startContinuousAnimations();
 
         this.panel.alpha = 1;
         this.clickAnywhere.alpha = 0;
@@ -702,6 +721,12 @@ export class FreeSpinWinPopup extends Container {
         );
 
         await entranceTl;
+
+        this.startContinuousAnimations();
+
+        // Close modal automatically
+        await waitFor(1);
+        console.log('Close Modal automatically');
     }
 
     /** Dismiss the popup, animated */

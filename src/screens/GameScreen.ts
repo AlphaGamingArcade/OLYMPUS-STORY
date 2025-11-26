@@ -17,7 +17,7 @@ import { BabyZeus } from '../ui/BabyZeus';
 import { FreeSpinPopup } from '../popups/FreeSpinPopup';
 import { FreeSpinWinPopup } from '../popups/FreeSpinWinPopup';
 import { gameConfig } from '../utils/gameConfig';
-import { JackpotWinPopup } from '../popups/JackpotWinPopup';
+import { JackpotWinPopup, JackpotWinPopupData } from '../popups/JackpotWinPopup';
 
 /** The screen tha holds the Match3 game */
 export class GameScreen extends Container {
@@ -339,10 +339,15 @@ export class GameScreen extends Container {
     /** Fires when the match3 grid finishes auto-processing */
     private async onJackpotTrigger(data: SlotOnJackpotTriggerData): Promise<void> {
         return new Promise((resolve) => {
-            navigation.presentPopup(JackpotWinPopup, async () => {
-                await navigation.dismissPopup();
-                console.log(data);
-                resolve();
+            const amount = data.jackpot.multiplier * userSettings.getBet();
+            navigation.presentPopup<JackpotWinPopupData>(JackpotWinPopup, {
+                name: data.jackpot.id,
+                times: data.times,
+                amount: amount * data.times,
+                callback: async () => {
+                    await navigation.dismissPopup();
+                    resolve();
+                },
             });
         });
     }

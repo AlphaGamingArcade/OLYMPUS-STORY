@@ -14,7 +14,7 @@ interface AppScreen extends Container {
     /** Resume the screen */
     resume?(): Promise<void>;
     /** Prepare screen, before showing */
-    prepare?<T>(callback?: T): void;
+    prepare?(data?: any): void;
     /** Reset screen, after hidden */
     reset?(): void;
     /** Update the screen, passing delta time/step */
@@ -161,7 +161,7 @@ class Navigation {
     /**
      * Show up a popup over current screen
      */
-    public async presentPopup<T>(ctor: AppScreenConstructor, callback?: T) {
+    public async presentPopup<T>(ctor: AppScreenConstructor, data?: T) {
         if (this.currentScreen) {
             this.currentScreen.interactiveChildren = false;
             await this.currentScreen.pause?.();
@@ -172,7 +172,7 @@ class Navigation {
         }
 
         this.currentPopup = new ctor();
-        await this.addAndShowScreen(this.currentPopup, callback);
+        await this.addAndShowScreen(this.currentPopup, data);
     }
 
     /**
