@@ -85,13 +85,16 @@ export async function initAssets() {
     Assets.addBundle('fonts', {
         'Spartan MB Bold': 'fonts/SpartanMB-Bold.otf',
         'Spartan MB Extra Bold': 'fonts/SpartanMB-Extra-Bold.otf',
+        'Arial Rounded MT Bold': 'fonts/ArialRoundedMT-Bold.ttf',
     });
 
     // Init PixiJS assets with this asset manifest
     await Assets.init({ manifest: assetsManifest, basePath: 'assets' });
 
     // Load the fonts bundle BEFORE preload
-    await Assets.loadBundle('fonts');
+    const fonts = await Assets.loadBundle('fonts');
+
+    console.log(fonts);
 
     // Load assets for the load screen
     // await loadBundles('preload');

@@ -241,10 +241,12 @@ export class ControlPanel extends Container {
             this.spinButton.x = contentWidth / 2;
             this.spinButton.y = panelHeight * 0.5;
 
-            this.minusButton.x = width / 2 - 220;
+            const betBtnX = 220;
+
+            this.minusButton.x = width / 2 - betBtnX;
             this.minusButton.y = panelHeight * 0.5;
 
-            this.plusButton.x = width / 2 + 220;
+            this.plusButton.x = width / 2 + betBtnX;
             this.plusButton.y = panelHeight * 0.5;
 
             // Right side buttons (vertical stack on far right)
@@ -431,13 +433,15 @@ export class ControlPanel extends Container {
             const rightCenterX = contentWidth - 200;
             const buttonY = 40;
 
-            this.minusButton.x = rightCenterX - 130;
+            const betBtnX = 125;
+
+            this.minusButton.x = rightCenterX - betBtnX;
             this.minusButton.y = buttonY;
 
             this.spinButton.x = rightCenterX;
             this.spinButton.y = buttonY;
 
-            this.plusButton.x = rightCenterX + 130;
+            this.plusButton.x = rightCenterX + betBtnX;
             this.plusButton.y = buttonY;
 
             // Autoplay button (bottom right)

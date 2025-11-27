@@ -19,6 +19,7 @@ import { FreeSpinWinPopup } from '../popups/FreeSpinWinPopup';
 import { gameConfig } from '../utils/gameConfig';
 import { JackpotWinPopup, JackpotWinPopupData } from '../popups/JackpotWinPopup';
 import { BuyFreeSpinPopup, BuyFreeSpinPopupData } from '../popups/BuyFreeSpinPopup';
+import { AutoplayPopup } from '../popups/AutoplayPopup';
 
 /** The screen tha holds the Match3 game */
 export class GameScreen extends Container {
@@ -76,6 +77,7 @@ export class GameScreen extends Container {
         this.buyFreeSpinButton = new BuyFreeSpinButton();
         // Listen for press event (this is FancyButton's built-in click event)
         this.buyFreeSpinButton.onPress.connect(() => {
+            if (this.finished) return;
             const amount = userSettings.getBet() * gameConfig.getBuyFreeSpinBetMultiplier();
             navigation.presentPopup<BuyFreeSpinPopupData>(BuyFreeSpinPopup, {
                 amount: `${this.currency}${amount.toLocaleString()}`,
@@ -165,7 +167,10 @@ export class GameScreen extends Container {
 
         this.controlPanel.onSpin(() => this.startSpinning());
         this.controlPanel.onSpacebar(() => this.startSpinning());
-        this.controlPanel.onAutoplay(() => {});
+        this.controlPanel.onAutoplay(() => {
+            if (this.finished) return;
+            navigation.presentPopup(AutoplayPopup);
+        });
 
         // Init multiplier scores
         this.updateMultiplierAmounts();
@@ -295,7 +300,7 @@ export class GameScreen extends Container {
 
             this.roundResult.scale.set(1);
             this.roundResult.x = 220;
-            this.roundResult.y = height - this.roundResult.height - 60;
+            this.roundResult.y = height - this.roundResult.height - 20;
 
             this.babyZeus.x = 500;
             this.babyZeus.y = height - this.babyZeus.height * 0.5 - 100;

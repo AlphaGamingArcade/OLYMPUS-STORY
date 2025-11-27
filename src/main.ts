@@ -11,7 +11,7 @@ import { GameScreen } from './screens/GameScreen';
 import { ResultScreen } from './screens/ResultScreen';
 import { ConfigAPI } from './api/configApi';
 import { gameConfig } from './utils/gameConfig';
-import { BuyFreeSpinPopup } from './popups/BuyFreeSpinPopup';
+import { AutoplayPopup } from './popups/AutoplayPopup';
 
 /** The PixiJS app Application instance, shared across the project */
 export const app = new Application();
@@ -144,7 +144,7 @@ async function init() {
     } else if (getUrlParam('result') !== null) {
         await navigation.showScreen(ResultScreen);
     } else if (getUrlParam('modal') !== null) {
-        navigation.presentPopup(BuyFreeSpinPopup);
+        navigation.presentPopup(AutoplayPopup);
     } else {
         await navigation.showScreen(LoadScreen);
     }

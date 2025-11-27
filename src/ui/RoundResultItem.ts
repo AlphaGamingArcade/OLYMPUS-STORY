@@ -141,8 +141,7 @@ export class RoundResultItem extends Container {
         gsap.killTweensOf(this.container);
 
         if (animated) {
-            gsap.to(this.container, { alpha: 0, duration: 0.3, ease: 'linear' });
-            await gsap.to(this.container.scale, { x: 1.5, y: 1.5, duration: 0.3, ease: 'back.in' });
+            gsap.to(this.container, { alpha: 0, duration: 0.6, ease: 'linear' });
         } else {
             this.container.alpha = 0;
             this.container.scale.set(0);

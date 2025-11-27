@@ -12,8 +12,8 @@ import { SmallButton } from '../ui/SmallButton';
 import { ImageButton } from '../ui/ImageButton';
 import { RippleButton } from '../ui/RippleButton';
 import { InfoPopup } from '../popups/InfoPopup';
-import { SettingsPopup } from '../popups/SettingsPopup';
 import { bgm } from '../utils/audio';
+import { SettingsPopup } from '../popups/SettingsPopup';
 
 /** Custom ease curve for y animation of the base to reveal the screen */
 const easeSoftBackOut = registerCustomEase(

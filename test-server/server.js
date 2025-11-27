@@ -46,7 +46,7 @@ app.get('/spin', async (req, res) => {
     const reels = Array.from({ length: 5 }, () => Array.from({ length: 5 }, () => getRandomInt(1, 12)));
 
     res.json({
-        reels: winReels,
+        reels: reels,
     });
 });
 
