@@ -134,7 +134,7 @@ const defaultJackpot: Jackpot[] = [
     },
 ];
 
-const defaultPaytable: Paytable[] = [
+const defaultPaytables: Paytable[] = [
     {
         type: 1,
         patterns: [
@@ -219,11 +219,20 @@ class GameConfig {
     private specialBlocks: Block[] = defaultSpecialBlocks;
     private scatterBlocksTrigger: number = defaultScatterBlocksTrigger;
     private scatterBlocks: Block[] = defaultScatterBlocks;
-    private paytable: Paytable[] = defaultPaytable;
+    private paytables: Paytable[] = defaultPaytables;
+    private paytablesByType: Record<number, Paytable> = {};
     private jackpots: Jackpot[] = defaultJackpot;
     private buyFreeSpinBetMultiplier: number = defaultBuyFreeSpinBetMultiplier;
 
-    public constructor() {}
+    public constructor() {
+        this.paytablesByType = this.paytables.reduce(
+            (acc, paytable) => {
+                acc[paytable.type] = paytable;
+                return acc;
+            },
+            {} as Record<number, Paytable>,
+        );
+    }
 
     // Setters
     setBlocks(blocks: Block[]) {
@@ -246,8 +255,16 @@ class GameConfig {
         this.scatterBlocks = blocks;
     }
 
-    setPaytables(paytable: Paytable[]) {
-        this.paytable = paytable;
+    setPaytables(paytables: Paytable[]) {
+        this.paytables = paytables;
+
+        this.paytablesByType = this.paytables.reduce(
+            (acc, paytable) => {
+                acc[paytable.type] = paytable;
+                return acc;
+            },
+            {} as Record<number, Paytable>,
+        );
     }
 
     setJackpots(jackpots: Jackpot[]) {
@@ -276,7 +293,12 @@ class GameConfig {
     }
 
     getPaytables(): Paytable[] {
-        return this.paytable;
+        return this.paytables;
+    }
+
+    getPaytableByType(type: number): Paytable | undefined {
+        const paytable = this.paytablesByType[type];
+        return paytable;
     }
 
     getJackpots(): Jackpot[] {
@@ -286,7 +308,7 @@ class GameConfig {
     // Useful for debugging
     reset(): void {
         this.blocks = defaultBlocks;
-        this.paytable = defaultPaytable;
+        this.paytables = defaultPaytables;
         this.scatterBlocks = defaultScatterBlocks;
         this.specialBlocks = defaultSpecialBlocks;
     }

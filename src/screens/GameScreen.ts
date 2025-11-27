@@ -1,5 +1,5 @@
 import { Container, Ticker } from 'pixi.js';
-import { Match3, SlotOnJackpotMatchData, SlotOnJackpotTriggerData } from '../slot/Match3';
+import { Match3, SlotOnJackpotMatchData, SlotOnJackpotTriggerData, SlotOnMatchData } from '../slot/Match3';
 import { Pillar } from '../ui/Pillar';
 import { navigation } from '../utils/navigation';
 import { GameEffects } from '../ui/GameEffects';
@@ -52,20 +52,18 @@ export class GameScreen extends Container {
     public readonly roundResult: RoundResult;
     /** The floading mascot */
     public readonly babyZeus: BabyZeus;
-
     /** The Control Panel */
     public readonly controlPanel: ControlPanel;
-
     /** The special effects layer for the match3 */
     public readonly vfx?: GameEffects;
-
     /** Track if finish */
     public finished: boolean;
+    /** Currency */
+    public currency: string;
 
     constructor() {
         super();
-        const currency = userSettings.getCurrency();
-
+        this.currency = '$';
         this.gameContainer = new Container();
         this.addChild(this.gameContainer);
 
@@ -80,7 +78,7 @@ export class GameScreen extends Container {
         this.buyFreeSpinButton.onPress.connect(() => {
             const amount = userSettings.getBet() * gameConfig.getBuyFreeSpinBetMultiplier();
             navigation.presentPopup<BuyFreeSpinPopupData>(BuyFreeSpinPopup, {
-                amount: `${currency}${amount.toLocaleString()}`,
+                amount: `${this.currency}${amount.toLocaleString()}`,
                 callback: () => {
                     navigation.dismissPopup();
                 },
@@ -99,7 +97,7 @@ export class GameScreen extends Container {
             tier: 'frame_multiplier_divine',
             dotActive: 'multiplier_bullet_divine',
             points: 100,
-            currency,
+            currency: this.currency,
         });
         this.addChild(this.divineJackpotTier);
         this.divineJackpotTier.setTotalDots(5);
@@ -110,7 +108,7 @@ export class GameScreen extends Container {
             tier: 'frame_multiplier_blessed',
             dotActive: 'multiplier_bullet_blessed',
             points: 50,
-            currency,
+            currency: this.currency,
         });
         this.addChild(this.blessedJackpotTier);
         this.blessedJackpotTier.setTotalDots(4);
@@ -121,7 +119,7 @@ export class GameScreen extends Container {
             tier: 'frame_multiplier_angelic',
             dotActive: 'multiplier_bullet_angelic',
             points: 20,
-            currency,
+            currency: this.currency,
         });
         this.addChild(this.angelicJackpotTier);
         this.angelicJackpotTier.setTotalDots(3);
@@ -132,13 +130,14 @@ export class GameScreen extends Container {
             tier: 'frame_multiplier_grand',
             dotActive: 'multiplier_bullet_grand',
             points: 10,
-            currency,
+            currency: this.currency,
         });
         this.addChild(this.grandJackpotTier);
         this.grandJackpotTier.setTotalDots(2);
         this.grandJackpotTier.setActiveDots(0);
 
         this.match3 = new Match3();
+        this.match3.onMatch = this.onMatch.bind(this);
         this.match3.onSpinStart = this.onSpinStart.bind(this);
         this.match3.onJackpotMatch = this.onJackpotMatch.bind(this);
         this.match3.onJackpotTrigger = this.onJackpotTrigger.bind(this);
@@ -220,12 +219,16 @@ export class GameScreen extends Container {
     public startSpinning() {
         if (this.finished) return;
         this.finished = true;
+
+        this.roundResult.clearResults();
         this.match3.spin();
     }
 
     /** Prepare the screen just before showing */
     public prepare() {
         const match3Config = slotGetConfig();
+        this.currency = userSettings.getCurrency();
+
         this.pillar?.setup(match3Config);
         this.match3.setup(match3Config);
     }
@@ -355,6 +358,31 @@ export class GameScreen extends Container {
         this.overtime.hide();
         this.vfx?.playGridExplosion();
         await waitFor(0.3);
+    }
+
+    /** Fires when the match3 spins tart */
+    private onMatch(data: SlotOnMatchData) {
+        if (data.types.length < 0) return;
+        for (const symbols of data.types) {
+            if (symbols.length > 0) {
+                const symbol = symbols[0];
+                const paytable = gameConfig.getPaytableByType(symbol);
+                if (paytable) {
+                    const patterns = paytable.patterns;
+                    const symbolCount = symbols.length;
+
+                    // Find the pattern that matches the symbol count
+                    const matchedPattern = patterns.find(
+                        (pattern) => symbolCount >= pattern.min && symbolCount <= pattern.max,
+                    );
+
+                    if (matchedPattern) {
+                        const winAmount = userSettings.getBet() * matchedPattern.multiplier;
+                        this.roundResult.addResult(symbolCount, `symbol-${symbol}`, winAmount, this.currency);
+                    }
+                }
+            }
+        }
     }
 
     /** Fires when the match3 grid finishes auto-processing */

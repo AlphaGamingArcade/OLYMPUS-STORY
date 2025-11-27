@@ -151,13 +151,22 @@ export class Match3Process {
         }
 
         const animePlayPieces = [];
+        const types = [];
+
         for (const match of matches) {
             animePlayPieces.push(this.match3.board.playPieces(match));
+            types.push(this.match3.board.getTypesByPositions(match));
         }
 
         await Promise.all(animePlayPieces);
 
+        /** Fire on match */
+        this.match3.onMatch?.({
+            types,
+        });
+
         const animPopPromises = [];
+
         for (const match of matches) {
             animPopPromises.push(this.match3.board.popPieces(match));
         }

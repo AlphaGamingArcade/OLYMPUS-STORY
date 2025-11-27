@@ -375,6 +375,19 @@ export class Match3Board {
         return match3GetPieceType(this.grid, position);
     }
 
+    /**
+     * Find out the piece type in a grid position
+     * @param position
+     * @returns The type of the piece
+     */
+    public getTypesByPositions(positions: Match3Position[]) {
+        let types = [];
+        for (const position of positions) {
+            types.push(this.getTypeByPosition(position));
+        }
+        return types;
+    }
+
     /** Get the visual width of the board */
     public getWidth() {
         return this.tileSize * this.columns;

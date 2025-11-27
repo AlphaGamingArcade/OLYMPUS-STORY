@@ -18,6 +18,12 @@ export enum SpinState {
 }
 
 /** Interface for onMatch event data */
+export interface SlotOnMatchData {
+    /** List of all matches detected in the grid */
+    types: number[][];
+}
+
+/** Interface for onMatch event data */
 export interface SlotOnJackpotMatchData {
     /** List of all matches detected in the grid */
     symbols: SlotSymbol[];
@@ -55,6 +61,9 @@ export class Match3 extends Container {
     public freeSpinProcess: Match3FreeSpinProcess;
     /** Handles pieces with special powers */
     public jackpot: Match3Jackpot;
+
+    /** Fires when matches */
+    public onMatch?: (data: SlotOnMatchData) => void;
 
     /** Firew when a spin started, regardless of the spin type */
     public onSpinStart?: () => void;

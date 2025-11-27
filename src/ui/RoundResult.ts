@@ -1,17 +1,20 @@
-import { Container, FillGradient, Sprite, TextStyle } from 'pixi.js';
+import { Container, FillGradient, Sprite, TextStyle, Texture } from 'pixi.js';
 import gsap from 'gsap';
 import { Label } from './Label';
+import { RoundResultItem } from './RoundResultItem';
 
 /**
- * Buy Free Spin button with hover and press effects
+ * Round Result container with title and result items
  */
 export class RoundResult extends Container {
-    /** Inner container for the cauldron */
+    /** Inner container */
     private container: Container;
     private frame: Sprite;
     private messageLabel1: Label;
     private messageLabel2: Label;
     private messageContainer: Container;
+    private resultItemsContainer: Container;
+    private resultItems: RoundResultItem[] = [];
 
     constructor() {
         super();
@@ -58,9 +61,71 @@ export class RoundResult extends Container {
         this.messageContainer.addChild(this.messageLabel2);
 
         this.messageContainer.y = -100;
+
+        // Container for result items
+        this.resultItemsContainer = new Container();
+        this.resultItemsContainer.y = -30;
+        this.container.addChild(this.resultItemsContainer);
+
+        // Create a mask for the result items container
+        const maskHeight = 325; // Maximum height for visible items
+        const mask = new Sprite(Texture.WHITE);
+        mask.width = this.frame.width - 110;
+        mask.height = maskHeight;
+        mask.anchor.set(0.5, 0);
+        mask.y = -65;
+        this.container.addChild(mask);
+        this.resultItemsContainer.mask = mask;
     }
 
-    /** Show cauldron */
+    /** Add a result item */
+    public addResult(total: number, symbolTexture: string, amount: number, currency: string) {
+        const resultItem = new RoundResultItem();
+        resultItem.scale.set(0.5);
+        resultItem.setup(total, symbolTexture, amount, currency);
+
+        const itemSpacing = 60; // Vertical spacing between items
+
+        // Add new item at the beginning of the array
+        this.resultItems.unshift(resultItem);
+
+        // Add to container at the bottom (last position)
+        this.resultItemsContainer.addChild(resultItem);
+
+        // Reposition all items - new item starts at y=0 (bottom), older items move up
+        this.resultItems.forEach((item, index) => {
+            const targetY = index * itemSpacing;
+            gsap.to(item, { y: targetY, duration: 0.3, ease: 'back.out' });
+        });
+
+        // Animate the new item in
+        resultItem.show(true);
+
+        return resultItem;
+    }
+
+    /** Clear all result items */
+    public async clearResults() {
+        let animPromise = [];
+        for (const resultItem of this.resultItems) {
+            animPromise.push(resultItem.hide());
+        }
+
+        await Promise.all(animPromise);
+
+        this.resultItems.forEach((item) => {
+            item.destroy();
+        });
+        this.resultItems = [];
+        this.resultItemsContainer.removeChildren();
+    }
+
+    /** Get all result items */
+    public getResults(): RoundResultItem[] {
+        return this.resultItems;
+    }
+
+    /** Show round result */
     public async show(animated = true) {
         gsap.killTweensOf(this.container.scale);
         gsap.killTweensOf(this.container);
@@ -78,7 +143,7 @@ export class RoundResult extends Container {
         }
     }
 
-    /** Hide cauldron */
+    /** Hide round result */
     public async hide(animated = true) {
         this.eventMode = 'none';
         gsap.killTweensOf(this.container.scale);

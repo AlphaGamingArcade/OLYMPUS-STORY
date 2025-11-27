@@ -184,7 +184,7 @@ export class ConfigAPI {
                         name: 'Divine',
                     },
                 ],
-                scatterBlocksTrigger: 4,
+                scatterBlocksTrigger: 6,
                 buyFreeSpinBetMultiplier: 100,
                 scatterBlocks: [
                     {
