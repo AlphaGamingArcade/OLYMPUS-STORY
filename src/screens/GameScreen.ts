@@ -18,6 +18,7 @@ import { FreeSpinPopup } from '../popups/FreeSpinPopup';
 import { FreeSpinWinPopup } from '../popups/FreeSpinWinPopup';
 import { gameConfig } from '../utils/gameConfig';
 import { JackpotWinPopup, JackpotWinPopupData } from '../popups/JackpotWinPopup';
+import { BuyFreeSpinPopup, BuyFreeSpinPopupData } from '../popups/BuyFreeSpinPopup';
 
 /** The screen tha holds the Match3 game */
 export class GameScreen extends Container {
@@ -77,8 +78,13 @@ export class GameScreen extends Container {
         this.buyFreeSpinButton = new BuyFreeSpinButton();
         // Listen for press event (this is FancyButton's built-in click event)
         this.buyFreeSpinButton.onPress.connect(() => {
-            console.log('Buy Free Spin clicked!');
-            // Your click handler logic here
+            const amount = userSettings.getBet() * gameConfig.getBuyFreeSpinBetMultiplier();
+            navigation.presentPopup<BuyFreeSpinPopupData>(BuyFreeSpinPopup, {
+                amount: `${currency}${amount.toLocaleString()}`,
+                callback: () => {
+                    navigation.dismissPopup();
+                },
+            });
         });
         this.addChild(this.buyFreeSpinButton);
 
@@ -191,21 +197,22 @@ export class GameScreen extends Container {
     private updateBuyFreeSpinAmount() {
         const currency = userSettings.getCurrency();
         const amount = userSettings.getBet() * gameConfig.getBuyFreeSpinBetMultiplier();
-        this.buyFreeSpinButton.setAmount(`${currency}${amount}`);
+        this.buyFreeSpinButton.setAmount(`${currency}${amount.toLocaleString()}`);
     }
 
     private updateMultiplierAmounts() {
         const multipliers = gameConfig.getJackpots();
         for (let index = 0; index < multipliers.length; index++) {
-            const element = multipliers[index];
-            if (element.id == 'grand') {
-                this.grandJackpotTier.amount = userSettings.getBet() * element.multiplier;
-            } else if (element.id == 'angelic') {
-                this.angelicJackpotTier.amount = userSettings.getBet() * element.multiplier;
-            } else if (element.id == 'blessed') {
-                this.blessedJackpotTier.amount = userSettings.getBet() * element.multiplier;
-            } else if (element.id == 'divine') {
-                this.divineJackpotTier.amount = userSettings.getBet() * element.multiplier;
+            const multiplier = multipliers[index];
+            const amount = userSettings.getBet() * multiplier.multiplier;
+            if (multiplier.id == 'grand') {
+                this.grandJackpotTier.amount = amount;
+            } else if (multiplier.id == 'angelic') {
+                this.angelicJackpotTier.amount = amount;
+            } else if (multiplier.id == 'blessed') {
+                this.blessedJackpotTier.amount = amount;
+            } else if (multiplier.id == 'divine') {
+                this.divineJackpotTier.amount = amount;
             }
         }
     }

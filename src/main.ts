@@ -11,7 +11,7 @@ import { GameScreen } from './screens/GameScreen';
 import { ResultScreen } from './screens/ResultScreen';
 import { ConfigAPI } from './api/configApi';
 import { gameConfig } from './utils/gameConfig';
-import { JackpotWinPopup } from './popups/JackpotWinPopup';
+import { BuyFreeSpinPopup } from './popups/BuyFreeSpinPopup';
 
 /** The PixiJS app Application instance, shared across the project */
 export const app = new Application();
@@ -144,19 +144,7 @@ async function init() {
     } else if (getUrlParam('result') !== null) {
         await navigation.showScreen(ResultScreen);
     } else if (getUrlParam('modal') !== null) {
-        const data = {
-            jackpot: { id: 'grand', name: 'GRAND', type: 9, multiplier: 10, requiredSymbols: 2 },
-            times: 2,
-        };
-        navigation.presentPopup(JackpotWinPopup, {
-            jackpot: data.jackpot,
-            times: data.times,
-            amount: 1999,
-            callback: async () => {
-                await navigation.dismissPopup();
-                console.log(data);
-            },
-        });
+        navigation.presentPopup(BuyFreeSpinPopup);
     } else {
         await navigation.showScreen(LoadScreen);
     }

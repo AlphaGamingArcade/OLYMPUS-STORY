@@ -384,7 +384,7 @@ export class JackpotTier extends Container {
 
     /** Update displayed points and play sound */
     private printPoints() {
-        const text = `${this.currency}${this.points}`;
+        const text = `${this.currency}${this.points.toLocaleString()}`;
 
         if (this.messageLabel.text === text) return;
 
