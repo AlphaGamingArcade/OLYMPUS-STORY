@@ -138,7 +138,7 @@ export class AutoplayPopup extends Container {
 
         const isMobile = document.documentElement.id === 'isMobile';
         if (isMobile) {
-            this.panel.scale.set(1.75);
+            this.panel.scale.set(1.5);
         } else {
             this.panel.scale.set(1);
         }

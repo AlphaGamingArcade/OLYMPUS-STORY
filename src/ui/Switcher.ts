@@ -27,6 +27,6 @@ export class Switcher extends FancyButton {
      */
     public forceSwitch(value: boolean) {
         // Force the visual switched state to be the muted state
-        this.switcher.forceSwitch(value ? 1 : 0);
+        this.switcher.forceSwitch(value ? 0 : 1);
     }
 }

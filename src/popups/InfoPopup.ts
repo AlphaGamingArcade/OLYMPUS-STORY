@@ -102,7 +102,6 @@ export class InfoPopup extends Container {
         this.ambientMusicSwitcher = new AudioSwitcher({
             title: 'Ambient music',
             description: 'Ambient music sub text',
-            elementsMargin: 30,
         });
         this.ambientMusicSwitcher.onPress(() => {
             const bgmVolume = bgm.getVolume();
@@ -125,7 +124,6 @@ export class InfoPopup extends Container {
         this.soundFXSwitcher = new AudioSwitcher({
             title: 'Sound FX',
             description: 'Sound FX Description',
-            elementsMargin: 70,
         });
         this.soundFXSwitcher.onPress(() => {
             const sfxVolumn = sfx.getVolume();
@@ -149,9 +147,75 @@ export class InfoPopup extends Container {
     }
 
     /** Resize the popup, fired whenever window size changes */
+    /** Resize the popup, fired whenever window size changes */
     public resize(width: number, height: number) {
         this.bg.width = width;
         this.bg.height = height;
+
+        const isMobile = document.documentElement.id === 'isMobile';
+        const isPortrait = width < height;
+
+        if (isMobile && isPortrait) {
+            // Portrait - make panel fill most of the screen
+            const panelWidth = width * 0.9;
+            const panelHeight = height * 0.85;
+
+            this.panel.clear();
+            this.panel
+                .fill('#000000b3')
+                .roundRect(0, 0, panelWidth, panelHeight, 10)
+                .fill('#000000b3')
+                .roundRect(0, 0, panelWidth, panelHeight, 10);
+
+            this.panel.pivot.set(panelWidth / 2, panelHeight / 2);
+            this.panel.scale.set(1);
+
+            // Reposition elements
+            this.title.x = panelWidth * 0.5;
+            this.closeButton.x = panelWidth - 60;
+            this.mainLayout.x = panelWidth * 0.5 - this.mainLayout.width * 0.5;
+            this.mainLayout.y = panelHeight * 0.5 - this.mainLayout.height * 0.5;
+        } else if (isMobile && !isPortrait) {
+            // Landscape - wider panel
+            const panelWidth = width * 0.85;
+            const panelHeight = height * 0.9;
+
+            this.panel.clear();
+            this.panel
+                .fill('#000000b3')
+                .roundRect(0, 0, panelWidth, panelHeight, 10)
+                .fill('#000000b3')
+                .roundRect(0, 0, panelWidth, panelHeight, 10);
+
+            this.panel.pivot.set(panelWidth / 2, panelHeight / 2);
+            this.panel.scale.set(1);
+
+            // Reposition elements
+            this.title.x = panelWidth * 0.5;
+            this.closeButton.x = panelWidth - 60;
+            this.mainLayout.x = panelWidth * 0.5 - this.mainLayout.width * 0.5;
+            this.mainLayout.y = panelHeight * 0.5 - this.mainLayout.height * 0.5;
+        } else {
+            // Desktop - keep original size
+            const panelWidth = 1400;
+            const panelHeight = 800;
+
+            this.panel.clear();
+            this.panel
+                .fill('#000000b3')
+                .roundRect(0, 0, panelWidth, panelHeight, 10)
+                .fill('#000000b3')
+                .roundRect(0, 0, panelWidth, panelHeight, 10);
+
+            this.panel.pivot.set(panelWidth / 2, panelHeight / 2);
+            this.panel.scale.set(1);
+
+            // Reposition elements
+            this.title.x = panelWidth * 0.5;
+            this.closeButton.x = panelWidth - 60;
+            this.mainLayout.x = panelWidth * 0.5 - this.mainLayout.width * 0.5;
+            this.mainLayout.y = panelHeight * 0.5 - this.mainLayout.height * 0.5;
+        }
 
         this.panel.x = width * 0.5;
         this.panel.y = height * 0.5;
@@ -173,9 +237,5 @@ export class InfoPopup extends Container {
         // this.betInfo.enabled = !Boolean(data.isSpinning);
     }
 
-    public update() {
-        // if (formatCurrency(controllerSettings.bet) != this.betInfo.text) {
-        //     this.betInfo.text = formatCurrency(controllerSettings.bet);
-        // }
-    }
+    public update() {}
 }
