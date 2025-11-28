@@ -12,6 +12,7 @@ import { ResultScreen } from './screens/ResultScreen';
 import { ConfigAPI } from './api/configApi';
 import { gameConfig } from './utils/gameConfig';
 import { AutoplayPopup } from './popups/AutoplayPopup';
+import { SettingsPopup } from './popups/SettingsPopup';
 
 /** The PixiJS app Application instance, shared across the project */
 export const app = new Application();
@@ -144,7 +145,7 @@ async function init() {
     } else if (getUrlParam('result') !== null) {
         await navigation.showScreen(ResultScreen);
     } else if (getUrlParam('modal') !== null) {
-        navigation.presentPopup(AutoplayPopup);
+        navigation.presentPopup(SettingsPopup);
     } else {
         await navigation.showScreen(LoadScreen);
     }

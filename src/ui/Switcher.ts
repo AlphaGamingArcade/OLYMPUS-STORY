@@ -12,7 +12,7 @@ export class Switcher extends FancyButton {
     private switcher: PIXISwitcher;
 
     constructor() {
-        const switcher = new PIXISwitcher(['controller-modal-switch-on', 'controller-modal-switch-off']); // Force the visual switched state to be the muted state
+        const switcher = new PIXISwitcher(['switch-on', 'switch-off']); // Force the visual switched state to be the muted state
         super({
             // Add the switcher as a view for the FancyButton
             defaultView: switcher,

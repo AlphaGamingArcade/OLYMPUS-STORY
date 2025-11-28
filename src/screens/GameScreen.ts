@@ -20,6 +20,7 @@ import { gameConfig } from '../utils/gameConfig';
 import { JackpotWinPopup, JackpotWinPopupData } from '../popups/JackpotWinPopup';
 import { BuyFreeSpinPopup, BuyFreeSpinPopupData } from '../popups/BuyFreeSpinPopup';
 import { AutoplayPopup } from '../popups/AutoplayPopup';
+import { SettingsPopup } from '../popups/SettingsPopup';
 
 /** The screen tha holds the Match3 game */
 export class GameScreen extends Container {
@@ -170,6 +171,10 @@ export class GameScreen extends Container {
         this.controlPanel.onAutoplay(() => {
             if (this.finished) return;
             navigation.presentPopup(AutoplayPopup);
+        });
+        this.controlPanel.onSettings(() => {
+            if (this.finished) return;
+            navigation.presentPopup(SettingsPopup);
         });
 
         // Init multiplier scores

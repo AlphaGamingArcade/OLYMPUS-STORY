@@ -26,7 +26,7 @@ class UserSettings {
         this.spinMode = 'normal-spin';
         this.currency = '$';
 
-        this.betOptions = [5, 10, 15, 20, 50, 100, 1000];
+        this.betOptions = [0.5, 1, 5, 10, 15, 20, 50, 100, 1000];
         this.betIndex = 0;
 
         setMasterVolume(this.getMasterVolume());
