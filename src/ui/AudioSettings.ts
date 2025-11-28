@@ -36,8 +36,6 @@ export class AudioSettings extends Container {
             const bgmVolume = bgm.getVolume();
             const newState = bgmVolume <= 0; // If currently off, turn on
 
-            console.log('TURN ON AMBIENT PRESSES', newState);
-
             bgm.setVolume(newState ? 1 : 0);
             this.ambientMusicSwitcher.forceSwitch(!newState);
 
@@ -75,9 +73,7 @@ export class AudioSettings extends Container {
      * Initialize the switchers with current audio state
      */
     public setup(): void {
-        console.log('SETTING UP');
         const bgmVolume = bgm.getVolume();
-        console.log('BGM Volume', bgmVolume);
         this.ambientMusicSwitcher.forceSwitch(bgmVolume > 0);
 
         const sfxVolume = sfx.getVolume();

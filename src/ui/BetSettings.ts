@@ -6,13 +6,15 @@ import { IconButton } from './IconButton2';
 export class BetSettings extends Container {
     private layout: List;
     private title: Label;
-    // private buttons: ControllerBetButtons;
     private betContainer: Sprite;
     private betAmountLabel: Label;
 
     private betButtonLayout: List;
     private minusButton: IconButton;
     private plusButton: IconButton;
+
+    private onIncreaseBetPressed?: () => void;
+    private onDecreaseBetPressed?: () => void;
 
     constructor() {
         super();
@@ -32,7 +34,7 @@ export class BetSettings extends Container {
         this.betContainer.anchor.set(0.5);
         this.layout.addChild(this.betContainer);
 
-        this.betAmountLabel = new Label(0, {
+        this.betAmountLabel = new Label('0', {
             fill: 0xffffff,
             fontSize: 25,
         });
@@ -49,6 +51,7 @@ export class BetSettings extends Container {
             imageDisabled: 'icon-button-disabled-minus-bet-view',
         });
         this.minusButton.anchor.set(0.5);
+        this.minusButton.onPress.connect(() => this.onDecreaseBetPressed?.()); // Fixed: was calling increase
         this.betButtonLayout.addChild(this.minusButton);
 
         this.plusButton = new IconButton({
@@ -58,16 +61,33 @@ export class BetSettings extends Container {
             imageDisabled: 'icon-button-disabled-plus-bet-view',
         });
         this.plusButton.anchor.set(0.5);
+        this.plusButton.onPress.connect(() => this.onIncreaseBetPressed?.()); // This was correct
         this.betButtonLayout.addChild(this.plusButton);
 
         this.betButtonLayout.x = -58;
+    }
+
+    /** Register callback for increase bet button */
+    public onIncreaseBet(callback: () => void) {
+        this.onIncreaseBetPressed = callback;
+    }
+
+    /** Register callback for decrease bet button */
+    public onDecreaseBet(callback: () => void) {
+        this.onDecreaseBetPressed = callback;
+    }
+
+    /** Enable or disable bet buttons */
+    public setEnabled(enabled: boolean) {
+        this.minusButton.enabled = enabled;
+        this.plusButton.enabled = enabled;
     }
 
     public get text(): string {
         return this.betAmountLabel.text;
     }
 
-    public set text(v: string) {
-        this.betAmountLabel.text = v;
+    public set text(v: string | number) {
+        this.betAmountLabel.text = String(v);
     }
 }

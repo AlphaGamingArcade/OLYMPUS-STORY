@@ -20,7 +20,7 @@ import { gameConfig } from '../utils/gameConfig';
 import { JackpotWinPopup, JackpotWinPopupData } from '../popups/JackpotWinPopup';
 import { BuyFreeSpinPopup, BuyFreeSpinPopupData } from '../popups/BuyFreeSpinPopup';
 import { AutoplayPopup } from '../popups/AutoplayPopup';
-import { SettingsPopup } from '../popups/SettingsPopup';
+import { SettingsPopup, SettingsPopupData } from '../popups/SettingsPopup';
 
 /** The screen tha holds the Match3 game */
 export class GameScreen extends Container {
@@ -60,6 +60,8 @@ export class GameScreen extends Container {
     public readonly vfx?: GameEffects;
     /** Track if finish */
     public finished: boolean;
+    /** Finish callbacks for subscription */
+    private finishedCallbacks: ((finished: boolean) => void)[] = [];
     /** Currency */
     public currency: string;
 
@@ -173,8 +175,14 @@ export class GameScreen extends Container {
             navigation.presentPopup(AutoplayPopup);
         });
         this.controlPanel.onSettings(() => {
-            if (this.finished) return;
-            navigation.presentPopup(SettingsPopup);
+            navigation.presentPopup<SettingsPopupData>(SettingsPopup, {
+                finished: this.finished,
+                onBetChanged: () => {
+                    this.controlPanel.setBet(userSettings.getBet());
+                    this.updateMultiplierAmounts();
+                    this.updateBuyFreeSpinAmount();
+                },
+            });
         });
 
         // Init multiplier scores
@@ -481,6 +489,14 @@ export class GameScreen extends Container {
     private async finish() {
         if (!this.finished) return;
         this.finished = false;
+
+        // Notify all listeners
+        this.finishedCallbacks.forEach((cb) => cb(this.finished));
+    }
+
+    // Method to subscribe to finished changes
+    public onFinishedChange(callback: (finished: boolean) => void) {
+        this.finishedCallbacks.push(callback);
     }
 
     /** Auto pause the game when window go out of focus */

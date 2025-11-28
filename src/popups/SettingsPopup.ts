@@ -4,6 +4,12 @@ import { IconButton } from '../ui/IconButton2';
 import { navigation } from '../utils/navigation';
 import { AudioSettings } from '../ui/AudioSettings';
 import { BetSettings } from '../ui/BetSettings';
+import { BetAction, userSettings } from '../utils/userSettings';
+
+export type SettingsPopupData = {
+    finished: boolean;
+    onBetChanged: () => void;
+};
 
 /** Popup for volume and game mode settings */
 export class SettingsPopup extends Container {
@@ -13,6 +19,7 @@ export class SettingsPopup extends Container {
     private panel: Graphics;
     private betSettings: BetSettings;
     private audioSettings: AudioSettings;
+    private onBetChanged?: () => void;
 
     constructor() {
         super();
@@ -61,6 +68,17 @@ export class SettingsPopup extends Container {
 
         /** Bet Selector */
         this.betSettings = new BetSettings();
+        this.betSettings.onIncreaseBet(() => {
+            userSettings.setBet(BetAction.INCREASE);
+            this.betSettings.text = userSettings.getBet();
+            this.onBetChanged?.();
+        });
+        this.betSettings.onDecreaseBet(() => {
+            userSettings.setBet(BetAction.DECREASE);
+            this.betSettings.text = userSettings.getBet();
+            this.onBetChanged?.();
+        });
+
         this.panel.addChild(this.betSettings);
 
         /** Audio Settings */
@@ -175,7 +193,10 @@ export class SettingsPopup extends Container {
     }
 
     /** Set things up just before showing the popup */
-    public prepare() {
+    public prepare(data: SettingsPopupData) {
+        this.betSettings.text = `${userSettings.getBet()}`;
+        this.onBetChanged = data.onBetChanged;
+
         this.audioSettings.setup();
     }
 

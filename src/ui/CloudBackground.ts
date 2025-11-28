@@ -1,124 +1,123 @@
-import { Container, Sprite } from 'pixi.js';
-import { app } from '../main';
+import { Container, Sprite, Texture } from 'pixi.js';
+
+interface Cloud {
+    sprite: Sprite;
+    speed: number;
+    startX: number;
+}
 
 /**
- * Animated cloud background with alternating full-screen cloud sprites moving horizontally
+ * Animated cloud background with randomly moving cloud sprites
  */
 export class CloudBackground extends Container {
-    /** Speed of cloud movement (pixels per frame) */
+    /** Speed multiplier for cloud movement */
     public speed = 1;
-    /** Array to hold all cloud sprites */
-    private clouds: Sprite[] = [];
-    /** Width of each cloud sprite (full screen width) */
-    private cloudWidth = 0;
+    /** Background */
+    public bg: Sprite;
+    /** Image  */
+    private image: Sprite;
+    /** Container for moving clouds (behind main image) */
+    private cloudsContainer: Container;
+    /** Array of cloud objects */
+    private clouds: Cloud[] = [];
+    /** Screen dimensions */
+    private screenWidth = 0;
+    private screenHeight = 0;
+    /** Available cloud textures */
+    private cloudTextures = ['cloud-bg-1', 'cloud-bg-2', 'cloud-bg-3', 'cloud-bg-4', 'cloud-bg-5'];
 
     constructor() {
         super();
 
-        // Create initial clouds to fill the screen plus buffer
-        this.createInitialClouds();
+        this.bg = Sprite.from(Texture.WHITE);
+        this.bg.tint = 0x87ceeb; // Sky blue color (must be hex number)
+        this.addChild(this.bg);
 
-        this.onRender = () => this.renderUpdate();
+        // Container for clouds - behind the main image
+        this.cloudsContainer = new Container();
+        this.addChild(this.cloudsContainer);
+
+        this.image = Sprite.from('cloud-bg-landscape');
+        this.addChild(this.image);
+
+        // Create initial clouds
+        this.createClouds(5);
     }
 
-    /** Create clouds to fill screen width with buffer */
-    private createInitialClouds() {
-        const screenWidth = app.screen.width;
-        const screenHeight = app.screen.height;
+    /** Create random clouds */
+    private createClouds(count: number) {
+        for (let i = 0; i < count; i++) {
+            const cloudSprite = Sprite.from(this.cloudTextures[Math.floor(Math.random() * this.cloudTextures.length)]);
 
-        // Set cloudWidth to screen width
-        this.cloudWidth = screenWidth;
+            // Random position
+            cloudSprite.x = Math.random() * this.screenWidth;
+            cloudSprite.y = Math.random() * this.screenHeight * 0.7; // Keep in upper 70%
 
-        // Calculate how many clouds we need (2 clouds minimum for seamless loop)
-        const numClouds = 3;
+            // Random scale (0.3 to 0.8)
+            const scale = 0.3 + Math.random() * 0.5;
+            cloudSprite.scale.set(scale);
 
-        for (let i = 0; i < numClouds; i++) {
-            // Alternate between cloud_1 and cloud_2
-            const cloudType = i % 2 === 0 ? 'cloud_1' : 'cloud_2';
-            const cloud = Sprite.from(cloudType);
+            // Random opacity (0.3 to 0.7)
+            cloudSprite.alpha = 0.3 + Math.random() * 0.4;
 
-            // Set cloud size to match screen with 1px overlap to prevent gaps
-            cloud.width = screenWidth + 2;
-            cloud.height = screenHeight;
+            cloudSprite.anchor.set(0.5);
 
-            // Position clouds side by side (overlap by 1px)
-            cloud.x = i * this.cloudWidth - 1;
-            cloud.y = 0;
+            const cloud: Cloud = {
+                sprite: cloudSprite,
+                speed: 0.2 + Math.random() * 0.5, // Random speed
+                startX: cloudSprite.x,
+            };
 
             this.clouds.push(cloud);
-            this.addChild(cloud);
+            this.cloudsContainer.addChild(cloudSprite);
         }
     }
 
-    /** Auto-update every frame */
-    public renderUpdate() {
-        const delta = app.ticker.deltaTime;
-        const moveAmount = this.speed * delta;
+    /** Update cloud positions (call this in your game loop) */
+    public update(delta: number = 1) {
+        for (const cloud of this.clouds) {
+            // Move cloud to the right
+            cloud.sprite.x += cloud.speed * this.speed * delta;
 
-        // Move all clouds to the left
-        for (let i = 0; i < this.clouds.length; i++) {
-            const cloud = this.clouds[i];
-            cloud.x -= moveAmount;
-
-            // When a cloud moves completely off the left side, move it to the right
-            if (cloud.x <= -this.cloudWidth) {
-                // Find the rightmost cloud position
-                let rightmostX = -Infinity;
-                for (let j = 0; j < this.clouds.length; j++) {
-                    if (this.clouds[j].x > rightmostX) {
-                        rightmostX = this.clouds[j].x;
-                    }
-                }
-
-                // Position this cloud right after the rightmost cloud (with 1px overlap)
-                cloud.x = rightmostX + this.cloudWidth;
+            // Wrap around when cloud goes off screen
+            if (cloud.sprite.x > this.screenWidth + cloud.sprite.width) {
+                cloud.sprite.x = -cloud.sprite.width;
+                // Randomize Y position when wrapping
+                cloud.sprite.y = Math.random() * this.screenHeight * 0.7;
             }
         }
     }
 
     /** Resize the background, fired whenever window size changes */
     public resize(width: number, height: number) {
-        // Update cloudWidth to new screen width
-        this.cloudWidth = width;
+        this.screenWidth = width;
+        this.screenHeight = height;
 
-        // Update cloud dimensions to match screen with overlap
-        this.clouds.forEach((cloud, index) => {
-            cloud.width = width + 2;
-            cloud.height = height;
-            cloud.x = index * this.cloudWidth - 1;
-            cloud.y = 0;
-        });
+        this.bg.height = height;
+        this.bg.width = width;
 
-        // Recalculate number of clouds needed
-        const numCloudsNeeded = 3;
+        this.image.height = height;
+        this.image.width = width;
 
-        // Add more clouds if needed
-        while (this.clouds.length < numCloudsNeeded) {
-            const cloudType = this.clouds.length % 2 === 0 ? 'cloud_1' : 'cloud_2';
-            const cloud = Sprite.from(cloudType);
-
-            // Set cloud size to match screen with overlap
-            cloud.width = width + 2;
-            cloud.height = height;
-
-            let rightmostX = -Infinity;
-            this.clouds.forEach((c) => {
-                if (c.x > rightmostX) rightmostX = c.x;
-            });
-
-            cloud.x = rightmostX + this.cloudWidth;
-            cloud.y = 0;
-
-            this.clouds.push(cloud);
-            this.addChild(cloud);
+        if (width > height) {
+            this.image.texture = Texture.from('cloud-bg-landscape');
+        } else {
+            this.image.texture = Texture.from('cloud-bg-portrait');
         }
 
-        // Remove excess clouds if screen got smaller
-        while (this.clouds.length > numCloudsNeeded) {
-            const cloud = this.clouds.pop();
-            if (cloud) {
-                this.removeChild(cloud);
+        // Reposition existing clouds if screen size changes
+        for (const cloud of this.clouds) {
+            if (cloud.sprite.y > height * 0.7) {
+                cloud.sprite.y = Math.random() * height * 0.7;
             }
         }
+    }
+
+    /** Clear all clouds */
+    public clearClouds() {
+        for (const cloud of this.clouds) {
+            cloud.sprite.destroy();
+        }
+        this.clouds = [];
     }
 }
