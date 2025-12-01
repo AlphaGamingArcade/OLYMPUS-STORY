@@ -11,6 +11,7 @@ import { GameScreen } from './screens/GameScreen';
 import { ResultScreen } from './screens/ResultScreen';
 import { ConfigAPI } from './api/configApi';
 import { gameConfig } from './utils/gameConfig';
+import { InfoPopup } from './popups/InfoPopup';
 import { SettingsPopup } from './popups/SettingsPopup';
 
 /** The PixiJS app Application instance, shared across the project */
@@ -144,7 +145,7 @@ async function init() {
     } else if (getUrlParam('result') !== null) {
         await navigation.showScreen(ResultScreen);
     } else if (getUrlParam('modal') !== null) {
-        navigation.presentPopup(SettingsPopup);
+        navigation.presentPopup(InfoPopup);
     } else {
         await navigation.showScreen(LoadScreen);
     }

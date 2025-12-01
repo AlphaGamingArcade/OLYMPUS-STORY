@@ -1,8 +1,10 @@
-import { Container, Text, Graphics, Sprite } from 'pixi.js';
-
+import { Container, Text, Graphics } from 'pixi.js';
+import { SoundButton } from './SoundButton';
+import { IconButton } from './IconButton2';
 /**
  * Control panel for the game, displaying credit, bet info, and action buttons
  */
+
 export class ControlPanel extends Container {
     private background: Graphics;
     private contentContainer: Container;
@@ -11,24 +13,20 @@ export class ControlPanel extends Container {
     private betLabel: Text;
     private betValue: Text;
     private messageText: Text;
-    private spinIcon: Sprite;
     // private stopIcon: Sprite;
 
-    private menuButton: Container;
-    private infoButton: Container;
-    private settingsButton: Container;
-    private minusButton: Container;
-    private spinButton: Container;
-    private plusButton: Container;
-    private autoplayButton: Container;
-    private autoplayIcon!: Sprite;
+    private soundButton: SoundButton;
+    private infoButton: IconButton;
+    private settingsButton: IconButton;
+    private minusButton: IconButton;
+    private spinButton: IconButton;
+    private plusButton: IconButton;
+    private autoplayButton: IconButton;
 
     private spacebarHandler?: (e: KeyboardEvent) => void;
 
     // Button states
     private isSpinButtonEnabled: boolean = true;
-    private isSpinning: boolean = false;
-    private canInterrupt: boolean = false;
 
     constructor() {
         super();
@@ -96,15 +94,47 @@ export class ControlPanel extends Container {
         this.contentContainer.addChild(this.messageText);
 
         // Create buttons
-        this.menuButton = this.createButton('control-panel-menu', 0x4a4a4a);
-        this.settingsButton = this.createButton('control-panel-settings', 0x4a4a4a);
-        this.infoButton = this.createButton('control-panel-info', 0x4a4a4a);
-        this.minusButton = this.createButton('control-panel-subtract', 0x4a4a4a);
-        this.spinButton = this.createSpinButton();
-        this.plusButton = this.createButton('control-panel-add', 0x4a4a4a);
-        this.autoplayButton = this.createButton('control-panel-autoplay', 0x4a4a4a);
+        this.soundButton = new SoundButton();
+        this.settingsButton = new IconButton({
+            imageDefault: 'icon-button-settings-default-view',
+            imageHover: 'icon-button-settings-hover-view',
+            imagePressed: 'icon-button-settings-active-view',
+            imageDisabled: 'icon-button-settings-active-view',
+        });
+        this.infoButton = new IconButton({
+            imageDefault: 'icon-button-info-default-view',
+            imageHover: 'icon-button-info-hover-view',
+            imagePressed: 'icon-button-info-active-view',
+            imageDisabled: 'icon-button-info-active-view',
+        });
+        this.minusButton = new IconButton({
+            imageDefault: 'icon-button-minus-default-view',
+            imageHover: 'icon-button-minus-hover-view',
+            imagePressed: 'icon-button-minus-active-view',
+            imageDisabled: 'icon-button-minus-active-view',
+        });
 
-        this.contentContainer.addChild(this.menuButton);
+        this.spinButton = new IconButton({
+            imageDefault: 'icon-button-spin-default-view',
+            imageHover: 'icon-button-spin-hover-view',
+            imagePressed: 'icon-button-spin-active-view',
+            imageDisabled: 'icon-button-spin-active-view',
+        });
+
+        this.plusButton = new IconButton({
+            imageDefault: 'icon-button-add-default-view',
+            imageHover: 'icon-button-add-hover-view',
+            imagePressed: 'icon-button-add-active-view',
+            imageDisabled: 'icon-button-add-active-view',
+        });
+        this.autoplayButton = new IconButton({
+            imageDefault: 'icon-button-autoplay-default-view',
+            imageHover: 'icon-button-autoplay-hover-view',
+            imagePressed: 'icon-button-autoplay-active-view',
+            imageDisabled: 'icon-button-autoplay-active-view',
+        });
+
+        this.contentContainer.addChild(this.soundButton);
         this.contentContainer.addChild(this.infoButton);
         this.contentContainer.addChild(this.settingsButton);
         this.contentContainer.addChild(this.minusButton);
@@ -113,86 +143,10 @@ export class ControlPanel extends Container {
         this.contentContainer.addChild(this.autoplayButton);
 
         // Spin and Stop Buttons
-        this.spinIcon = Sprite.from('control-panel-spin');
-        this.spinIcon.anchor.set(0.5);
-        this.spinIcon.scale.set(0.85);
-        this.spinButton.addChild(this.spinIcon);
         // this.stop = Sprite.from('control-panel-stop');
         // this.stop.anchor.set(0.5);
         // this.stop.scale.set(0.15);
         // this.spinButton.addChild(this.stop);
-    }
-
-    /**
-     * Create a circular button with icon
-     */
-    private createButton(spriteName: string, color: number): Container {
-        const button = new Container();
-        button.eventMode = 'static';
-        button.cursor = 'pointer';
-
-        // Get sprite to determine circle size
-        const icon = Sprite.from(spriteName);
-        icon.anchor.set(0.5);
-
-        // Circle background - sized based on sprite
-        const size = Math.max(icon.width, icon.height) / 2 + 2; // Add padding
-        const circle = new Graphics();
-        circle.circle(0, 0, size);
-        circle.fill(color);
-        button.addChild(circle);
-
-        // Add icon sprite
-        button.addChild(icon);
-
-        // Hover effects
-        button.on('pointerover', () => {
-            circle.tint = 0xcccccc;
-        });
-        button.on('pointerout', () => {
-            circle.tint = 0xffffff;
-        });
-
-        return button;
-    }
-
-    /**
-     * Create the large spin button
-     */
-    private createSpinButton(): Container {
-        const button = new Container();
-        button.eventMode = 'static';
-        button.cursor = 'pointer';
-
-        // Larger circle with white border
-        const circle = new Graphics();
-        circle.circle(0, 0, 75);
-        circle.fill(0x4a4a4a);
-        // circle.stroke({ color: 0x000000, width: 2 });
-        button.addChild(circle);
-
-        // Spin icon (circular arrow) - larger
-        const icon = new Graphics();
-        icon.stroke({ color: 0xffffff, width: 5, alpha: 1 });
-        icon.arc(0, 0, 30, 0, Math.PI * 1.5);
-        icon.moveTo(21, -21);
-        icon.lineTo(30, -12);
-        icon.lineTo(18, -18);
-        button.addChild(icon);
-
-        button.on('pointerover', () => {
-            if (!this.isSpinButtonEnabled) return;
-            circle.tint = 0xcccccc;
-            this.spinIcon.tint = 0xcccccc;
-        });
-
-        button.on('pointerout', () => {
-            if (!this.isSpinButtonEnabled) return;
-            circle.tint = 0xffffff;
-            this.spinIcon.tint = 0xffffff;
-        });
-
-        return button;
     }
 
     /**
@@ -219,7 +173,7 @@ export class ControlPanel extends Container {
             const buttonScale = 2;
             const spinButtonScale = 2;
 
-            this.menuButton.scale.set(buttonScale);
+            this.soundButton.scale.set(buttonScale);
             this.infoButton.scale.set(buttonScale);
             this.settingsButton.scale.set(buttonScale);
             this.minusButton.scale.set(buttonScale);
@@ -234,8 +188,8 @@ export class ControlPanel extends Container {
             this.infoButton.x = leftBtnStartX;
             this.infoButton.y = leftBtnY;
 
-            this.menuButton.x = leftBtnStartX;
-            this.menuButton.y = leftBtnY + 130;
+            this.soundButton.x = leftBtnStartX;
+            this.soundButton.y = leftBtnY + 130;
 
             // Center - Large spin button
             this.spinButton.x = contentWidth / 2;
@@ -308,7 +262,7 @@ export class ControlPanel extends Container {
             const buttonScale = 1.5;
             const spinButtonScale = 1.5;
 
-            this.menuButton.scale.set(buttonScale);
+            this.soundButton.scale.set(buttonScale);
             this.infoButton.scale.set(buttonScale);
             this.settingsButton.scale.set(buttonScale);
             this.minusButton.scale.set(buttonScale);
@@ -317,8 +271,8 @@ export class ControlPanel extends Container {
             this.autoplayButton.scale.set(buttonScale);
 
             // Left side buttons (vertical stack, more compact)
-            this.menuButton.x = 120;
-            this.menuButton.y = 50;
+            this.soundButton.x = 120;
+            this.soundButton.y = 50;
             this.settingsButton.x = 120;
             this.settingsButton.y = 150;
             this.infoButton.x = 210;
@@ -394,7 +348,7 @@ export class ControlPanel extends Container {
             const buttonScale = 1;
             const spinButtonScale = 1;
 
-            this.menuButton.scale.set(buttonScale);
+            this.soundButton.scale.set(buttonScale);
             this.infoButton.scale.set(buttonScale);
             this.settingsButton.scale.set(buttonScale);
             this.minusButton.scale.set(buttonScale);
@@ -403,8 +357,8 @@ export class ControlPanel extends Container {
             this.autoplayButton.scale.set(buttonScale);
 
             // Left side buttons (stacked vertically)
-            this.menuButton.x = 50;
-            this.menuButton.y = 40;
+            this.soundButton.x = 50;
+            this.soundButton.y = 40;
             this.settingsButton.x = 50;
             this.settingsButton.y = 100;
             this.infoButton.x = 120;
@@ -448,11 +402,6 @@ export class ControlPanel extends Container {
             this.autoplayButton.x = contentWidth - 100;
             this.autoplayButton.y = 120;
         }
-    }
-
-    /** Set is spinning */
-    public setIsSpinning(value: boolean) {
-        this.isSpinning = value;
     }
 
     /**
@@ -501,10 +450,6 @@ export class ControlPanel extends Container {
 
     public onDecreaseBet(callback: () => void) {
         this.minusButton.on('pointerdown', callback);
-    }
-
-    public onMenu(callback: () => void) {
-        this.menuButton.on('pointerdown', callback);
     }
 
     public onInfo(callback: () => void) {

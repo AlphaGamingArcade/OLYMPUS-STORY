@@ -1,35 +1,90 @@
 import { Container, Graphics, Sprite, Texture } from 'pixi.js';
-import { List } from '@pixi/ui';
 import { Label } from '../ui/Label';
 import { IconButton } from '../ui/IconButton2';
 import { navigation } from '../utils/navigation';
-import { AudioSwitcher } from '../ui/AudioSwitcher';
-import { bgm, sfx } from '../utils/audio';
+import { List } from '@pixi/ui';
+import { PayTableSection } from '../ui/PaytableSection';
+import { GameRulesSection } from '../ui/GameRules';
+import { HowToPlaySection } from '../ui/HowToPlaySection';
+import { SettingsMenuSection } from '../ui/SettingsMenuSection';
+import { pool } from '../utils/pool';
 
-/** Popup for volume and game mode settings - game mode cannot be changed during gameplay */
+interface ModalSection extends Container {
+    /** Show the screen */
+    show?(): Promise<void>;
+    /** Hide the screen */
+    hide?(): Promise<void>;
+    /** Pause the screen */
+    pause?(): Promise<void>;
+    /** Resume the screen */
+    resume?(): Promise<void>;
+    /** Prepare screen, before showing */
+    prepare?(): void;
+    /** Reset screen, after hidden */
+    reset?(): void;
+    /** Update the screen, passing delta time/step */
+    update?(delta: number): void;
+    /** Check the progress */
+    progress?(progress: number): void;
+    /** Resize the screen */
+    resize?(width: number, height: number): void;
+    /** Blur the screen */
+    blur?(): void;
+    /** Focus the screen */
+    focus?(): void;
+}
+/** Interface for app screens constructors */
+interface SectionConstructor {
+    new (): ModalSection;
+}
+
+export type InfoPopupData = {
+    finished: boolean;
+    onBetChanged: () => void;
+};
+
+/** Popup for volume and game mode settings */
 export class InfoPopup extends Container {
-    /** The dark semi-transparent background covering current screen */
     private bg: Sprite;
-    /** The popup title label */
+    /** Modal title */
     private title: Label;
-    /** Butotn that closes the popup */
+    /** Close buttom */
     private closeButton: IconButton;
-    /** The panel background */
+    /** The board panel  */
     private panel: Graphics;
+    /** Container for the popup UI components */
+    private container: Container;
+    /** Section current index */
+    private sectionIndex: number = 0;
+    /** Page label */
+    private sectionlabel: Label;
     /** Layout that organises the UI components */
-    private mainLayout: List;
-    // /** Bet info */
-    // private betInfo: ControllerBetInfo;
-
-    /** Sounds Wrapper Layout that organises the UI components */
-    private audioLayout: List;
-
-    /** Sound FX Switch */
-    private soundFXSwitcher: AudioSwitcher;
-    /** Ambient Switch */
-    private ambientMusicSwitcher: AudioSwitcher;
-    /** Action handler */
-    private onUpdate?: () => void;
+    private navigationLayout: List;
+    /** Current in viewed section */
+    public currentSection?: ModalSection;
+    /** Left button */
+    public leftButton: IconButton;
+    /** Left button */
+    public rightButton: IconButton;
+    /** Sections */
+    private sections: { title: string; section: SectionConstructor }[] = [
+        {
+            title: 'Paytable',
+            section: PayTableSection,
+        },
+        {
+            title: 'Game Rules',
+            section: GameRulesSection,
+        },
+        {
+            title: 'How to play',
+            section: HowToPlaySection,
+        },
+        {
+            title: 'Settings menu',
+            section: SettingsMenuSection,
+        },
+    ];
 
     constructor() {
         super();
@@ -55,12 +110,13 @@ export class InfoPopup extends Container {
         this.panel.pivot.set(width / 2, height / 2);
         this.addChild(this.panel);
 
-        this.title = new Label('Game Information', {
+        this.title = new Label('Information', {
             fill: '#FCC100',
         });
         this.title.anchor.set(0.5);
         this.title.x = this.panel.width * 0.5;
-        this.title.y = 45;
+        this.title.y = 100;
+        this.title.style.fontSize = 32;
         this.panel.addChild(this.title);
 
         this.closeButton = new IconButton({
@@ -71,82 +127,47 @@ export class InfoPopup extends Container {
         });
         this.closeButton.scale.set(0.5);
         this.closeButton.x = this.panel.width - 60;
-        this.closeButton.y = 45;
+        this.closeButton.y = 60;
         this.closeButton.onPress.connect(() => navigation.dismissPopup());
         this.panel.addChild(this.closeButton);
 
-        this.mainLayout = new List({ type: 'horizontal', elementsMargin: 150 });
-        this.panel.addChild(this.mainLayout);
+        /** Section */
+        this.navigationLayout = new List({ elementsMargin: 1260 });
+        this.panel.addChild(this.navigationLayout);
 
-        /** Bets Adjsuter */
-        // this.betInfo = new ControllerBetInfo();
-        // this.mainLayout.addChild(this.betInfo);
-        // this.betInfo.onPress((action) => {
-        //     if (action == 'increase') {
-        //         controllerSettings.increaseBet();
-        //     }
-        //     if (action == 'decrease') {
-        //         controllerSettings.decreaseBet();
-        //     }
-        //     /** Update ui */
-        //     if (this.onUpdate) {
-        //         this.onUpdate();
-        //     }
-        // });
-
-        /** AMbient and SFX */
-        this.audioLayout = new List({ type: 'vertical', elementsMargin: 50 });
-        this.mainLayout.addChild(this.audioLayout);
-
-        /** Ambient music Switcher */
-        this.ambientMusicSwitcher = new AudioSwitcher({
-            title: 'Ambient music',
-            description: 'Ambient music sub text',
+        this.leftButton = new IconButton({
+            imageDefault: 'controller-modal-left-arrow-btn',
+            imageDisabled: 'controller-modal-left-arrow-btn',
+            imageHover: 'controller-modal-left-arrow-btn',
+            imagePressed: 'controller-modal-left-arrow-btn',
         });
-        this.ambientMusicSwitcher.onPress(() => {
-            const bgmVolume = bgm.getVolume();
-            if (bgmVolume <= 0) {
-                bgm.setVolume(1);
-                this.ambientMusicSwitcher.forceSwitch(true);
-            } else {
-                bgm.setVolume(0);
-                this.ambientMusicSwitcher.forceSwitch(false);
-            }
+        this.leftButton.scale.set(0.75);
+        this.navigationLayout.addChild(this.leftButton);
+        this.leftButton.onPress.connect(() => this.back());
 
-            /** Update ui */
-            if (this.onUpdate) {
-                this.onUpdate();
-            }
+        this.rightButton = new IconButton({
+            imageDefault: 'controller-modal-right-arrow-btn',
+            imageDisabled: 'controller-modal-right-arrow-btn',
+            imageHover: 'controller-modal-right-arrow-btn',
+            imagePressed: 'controller-modal-right-arrow-btn',
         });
-        this.audioLayout.addChild(this.ambientMusicSwitcher);
+        this.rightButton.scale.set(0.75);
+        this.rightButton.onPress.connect(() => this.next());
+        this.navigationLayout.addChild(this.rightButton);
 
-        /** Sound FX */
-        this.soundFXSwitcher = new AudioSwitcher({
-            title: 'Sound FX',
-            description: 'Sound FX Description',
-        });
-        this.soundFXSwitcher.onPress(() => {
-            const sfxVolumn = sfx.getVolume();
-            if (sfxVolumn <= 0) {
-                sfx.setVolume(1);
-                this.soundFXSwitcher.forceSwitch(true);
-            } else {
-                sfx.setVolume(0);
-                this.soundFXSwitcher.forceSwitch(false);
-            }
+        this.container = new Container();
+        this.container.x = this.panel.width * 0.5 - 130;
+        this.container.y = this.panel.height * 0.5 - 100;
+        this.panel.addChild(this.container);
 
-            /** Update ui */
-            if (this.onUpdate) {
-                this.onUpdate();
-            }
-        });
-        this.audioLayout.addChild(this.soundFXSwitcher);
+        this.sectionlabel = new Label('', { fill: '#ffffff', fontSize: 20 });
+        this.sectionlabel.x = this.panel.width * 0.5;
+        this.sectionlabel.y = this.panel.height - 50;
+        this.panel.addChild(this.sectionlabel);
 
-        this.mainLayout.x = this.panel.width * 0.5 - this.mainLayout.width * 0.5;
-        this.mainLayout.y = this.panel.height * 0.5 - this.mainLayout.height * 0.5;
+        this.init();
     }
 
-    /** Resize the popup, fired whenever window size changes */
     /** Resize the popup, fired whenever window size changes */
     public resize(width: number, height: number) {
         this.bg.width = width;
@@ -156,7 +177,6 @@ export class InfoPopup extends Container {
         const isPortrait = width < height;
 
         if (isMobile && isPortrait) {
-            // Portrait - make panel fill most of the screen
             const panelWidth = width * 0.9;
             const panelHeight = height * 0.85;
 
@@ -170,13 +190,13 @@ export class InfoPopup extends Container {
             this.panel.pivot.set(panelWidth / 2, panelHeight / 2);
             this.panel.scale.set(1);
 
-            // Reposition elements
+            this.title.style.fontSize = 52;
             this.title.x = panelWidth * 0.5;
+
+            this.closeButton.scale.set(0.75);
             this.closeButton.x = panelWidth - 60;
-            this.mainLayout.x = panelWidth * 0.5 - this.mainLayout.width * 0.5;
-            this.mainLayout.y = panelHeight * 0.5 - this.mainLayout.height * 0.5;
+            this.closeButton.y = 60;
         } else if (isMobile && !isPortrait) {
-            // Landscape - wider panel
             const panelWidth = width * 0.85;
             const panelHeight = height * 0.9;
 
@@ -190,13 +210,13 @@ export class InfoPopup extends Container {
             this.panel.pivot.set(panelWidth / 2, panelHeight / 2);
             this.panel.scale.set(1);
 
-            // Reposition elements
+            this.title.style.fontSize = 52;
             this.title.x = panelWidth * 0.5;
+
+            this.closeButton.scale.set(0.75);
             this.closeButton.x = panelWidth - 60;
-            this.mainLayout.x = panelWidth * 0.5 - this.mainLayout.width * 0.5;
-            this.mainLayout.y = panelHeight * 0.5 - this.mainLayout.height * 0.5;
+            this.closeButton.y = 60;
         } else {
-            // Desktop - keep original size
             const panelWidth = 1400;
             const panelHeight = 800;
 
@@ -210,11 +230,12 @@ export class InfoPopup extends Container {
             this.panel.pivot.set(panelWidth / 2, panelHeight / 2);
             this.panel.scale.set(1);
 
-            // Reposition elements
+            this.title.style.fontSize = 32;
             this.title.x = panelWidth * 0.5;
+
+            this.closeButton.scale.set(0.5);
             this.closeButton.x = panelWidth - 60;
-            this.mainLayout.x = panelWidth * 0.5 - this.mainLayout.width * 0.5;
-            this.mainLayout.y = panelHeight * 0.5 - this.mainLayout.height * 0.5;
+            this.closeButton.y = 60;
         }
 
         this.panel.x = width * 0.5;
@@ -222,20 +243,111 @@ export class InfoPopup extends Container {
     }
 
     /** Set things up just before showing the popup */
-    public prepare(data: any) {
-        // Game mode switcher should be disabled during gameplay
-        const bgmVolume = bgm.getVolume();
-        bgm.setVolume(bgmVolume <= 0 ? 0 : 1);
-        this.ambientMusicSwitcher.forceSwitch(bgmVolume <= 0);
-
-        // Adjusting sound effects volume and switcher
-        const sfxVolume = sfx.getVolume();
-        sfx.setVolume(sfxVolume <= 0 ? 0 : 1);
-        this.soundFXSwitcher.forceSwitch(sfxVolume <= 0);
-
-        // this.onUpdate = data.updateFn;
-        // this.betInfo.enabled = !Boolean(data.isSpinning);
-    }
+    public prepare(data: InfoPopup) {}
 
     public update() {}
+
+    public updateSectionInfo() {
+        const title = this.sections[this.sectionIndex].title;
+        const sectionLabel = `${'Section'} ${this.sectionIndex + 1}/${this.sections.length}`;
+
+        this.title.text = title;
+        this.sectionlabel.text = sectionLabel;
+    }
+
+    public async init() {
+        await this.showSection(this.sections[this.sectionIndex].section);
+        this.updateSectionInfo();
+    }
+
+    public async next() {
+        // Increase the betIndex if it's not already at the maximum index
+        if (this.sectionIndex < this.sections.length - 1) {
+            this.sectionIndex++;
+        } else {
+            this.sectionIndex = 0;
+        }
+        await this.showSection(this.sections[this.sectionIndex].section);
+
+        this.updateSectionInfo();
+    }
+
+    public async back() {
+        // Decrease the betIndex if it's not already at the minimum index
+        if (this.sectionIndex > 0) {
+            this.sectionIndex--;
+        } else {
+            this.sectionIndex = this.sections.length - 1;
+        }
+        await this.showSection(this.sections[this.sectionIndex].section);
+
+        this.updateSectionInfo();
+    }
+
+    /** Show section */
+    public async showSection(ctor: SectionConstructor) {
+        // Block interactivity in current screen
+        if (this.currentSection) {
+            this.currentSection.interactiveChildren = false;
+        }
+
+        // If there is a screen already created, hide and destroy it
+        if (this.currentSection) {
+            await this.hideAndRemoveSection(this.currentSection);
+        }
+
+        // Create the new screen and add that to the stage
+        this.currentSection = pool.get(ctor);
+        await this.addAndShowSection(this.currentSection);
+    }
+
+    /** Remove screen from the stage, unlink update & resize functions */
+    private async hideAndRemoveSection(section: ModalSection) {
+        // Prevent interaction in the screen
+        section.interactiveChildren = false;
+
+        // Hide screen if method is available
+        if (section.hide) {
+            await section.hide();
+        }
+
+        // Remove screen from its parent (usually app.stage, if not changed)
+        if (section.parent) {
+            section.parent.removeChild(section);
+        }
+
+        // Clean up the screen so that instance can be reused again later
+        if (section.reset) {
+            section.reset();
+        }
+    }
+
+    /** Add screen to the stage, link update & resize functions */
+    private async addAndShowSection(section: ModalSection) {
+        // Add navigation container to stage if it does not have a parent yet
+        if (!this.container.parent) {
+            this.panel.addChild(this.container);
+        }
+
+        // Add screen to stage
+        this.container.addChild(section);
+
+        // Setup things and pre-organise screen before showing
+        if (section.prepare) {
+            section.prepare();
+        }
+
+        // Add screen's resize handler, if available
+        if (section.resize) {
+            // Trigger a first resize
+            section.resize(this.width, this.height);
+        }
+
+        // Show the new screen
+        if (section.show) {
+            section.interactiveChildren = false;
+            await section.show();
+            section.interactiveChildren = true;
+        }
+    }
 }

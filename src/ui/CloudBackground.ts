@@ -73,21 +73,6 @@ export class CloudBackground extends Container {
         }
     }
 
-    /** Update cloud positions (call this in your game loop) */
-    public update(delta: number = 1) {
-        for (const cloud of this.clouds) {
-            // Move cloud to the right
-            cloud.sprite.x += cloud.speed * this.speed * delta;
-
-            // Wrap around when cloud goes off screen
-            if (cloud.sprite.x > this.screenWidth + cloud.sprite.width) {
-                cloud.sprite.x = -cloud.sprite.width;
-                // Randomize Y position when wrapping
-                cloud.sprite.y = Math.random() * this.screenHeight * 0.7;
-            }
-        }
-    }
-
     /** Resize the background, fired whenever window size changes */
     public resize(width: number, height: number) {
         this.screenWidth = width;

@@ -190,14 +190,22 @@ export class SettingsPopup extends Container {
 
         this.panel.x = width * 0.5;
         this.panel.y = height * 0.5;
+
+        console.log('RESIZE MODAL');
     }
 
     /** Set things up just before showing the popup */
     public prepare(data: SettingsPopupData) {
         this.betSettings.text = `${userSettings.getBet()}`;
-        this.onBetChanged = data.onBetChanged;
 
         this.audioSettings.setup();
+
+        if (data) {
+            this.betSettings.setup(!data.finished);
+            if (data.onBetChanged) {
+                this.onBetChanged = data.onBetChanged;
+            }
+        }
     }
 
     public update() {}

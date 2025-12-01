@@ -77,6 +77,11 @@ export class BetSettings extends Container {
         this.onDecreaseBetPressed = callback;
     }
 
+    public setup(enabled: boolean = true) {
+        this.minusButton.enabled = enabled;
+        this.plusButton.enabled = enabled;
+    }
+
     /** Enable or disable bet buttons */
     public setEnabled(enabled: boolean) {
         this.minusButton.enabled = enabled;
