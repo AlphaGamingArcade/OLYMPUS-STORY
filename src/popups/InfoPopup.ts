@@ -2,7 +2,6 @@ import { Container, Graphics, Sprite, Texture } from 'pixi.js';
 import { Label } from '../ui/Label';
 import { IconButton } from '../ui/IconButton2';
 import { navigation } from '../utils/navigation';
-import { List } from '@pixi/ui';
 import { PayTableSection } from '../ui/PaytableSection';
 import { GameRulesSection } from '../ui/GameRules';
 import { HowToPlaySection } from '../ui/HowToPlaySection';
@@ -58,8 +57,6 @@ export class InfoPopup extends Container {
     private sectionIndex: number = 0;
     /** Page label */
     private sectionlabel: Label;
-    /** Layout that organises the UI components */
-    private navigationLayout: List;
     /** Current in viewed section */
     public currentSection?: ModalSection;
     /** Left button */
@@ -123,7 +120,7 @@ export class InfoPopup extends Container {
             imageDefault: 'icon-button-default-close-view',
             imageHover: 'icon-button-active-close-view',
             imagePressed: 'icon-button-active-close-view',
-            imageDisabled: 'icon-button-default-close-view',
+            imageDisabled: 'icon-button-active-close-view',
         });
         this.closeButton.scale.set(0.5);
         this.closeButton.x = this.panel.width - 60;
@@ -131,38 +128,35 @@ export class InfoPopup extends Container {
         this.closeButton.onPress.connect(() => navigation.dismissPopup());
         this.panel.addChild(this.closeButton);
 
-        /** Section */
-        this.navigationLayout = new List({ elementsMargin: 1260 });
-        this.panel.addChild(this.navigationLayout);
-
-        this.leftButton = new IconButton({
-            imageDefault: 'controller-modal-left-arrow-btn',
-            imageDisabled: 'controller-modal-left-arrow-btn',
-            imageHover: 'controller-modal-left-arrow-btn',
-            imagePressed: 'controller-modal-left-arrow-btn',
-        });
-        this.leftButton.scale.set(0.75);
-        this.navigationLayout.addChild(this.leftButton);
-        this.leftButton.onPress.connect(() => this.back());
-
-        this.rightButton = new IconButton({
-            imageDefault: 'controller-modal-right-arrow-btn',
-            imageDisabled: 'controller-modal-right-arrow-btn',
-            imageHover: 'controller-modal-right-arrow-btn',
-            imagePressed: 'controller-modal-right-arrow-btn',
-        });
-        this.rightButton.scale.set(0.75);
-        this.rightButton.onPress.connect(() => this.next());
-        this.navigationLayout.addChild(this.rightButton);
-
         this.container = new Container();
         this.container.x = this.panel.width * 0.5 - 130;
         this.container.y = this.panel.height * 0.5 - 100;
         this.panel.addChild(this.container);
 
+        this.leftButton = new IconButton({
+            imageDefault: 'icon-button-left-arrow-default-view',
+            imageHover: 'icon-button-left-arrow-active-view',
+            imagePressed: 'icon-button-left-arrow-active-view',
+            imageDisabled: 'icon-button-left-arrow-active-view',
+        });
+        this.leftButton.anchor.set(0.5);
+        this.leftButton.scale.set(0.75);
+        this.panel.addChild(this.leftButton);
+        this.leftButton.onPress.connect(() => this.back());
+
+        this.rightButton = new IconButton({
+            imageDefault: 'icon-button-right-arrow-default-view',
+            imageHover: 'icon-button-right-arrow-active-view',
+            imagePressed: 'icon-button-right-arrow-active-view',
+            imageDisabled: 'icon-button-right-arrow-active-view',
+        });
+        this.rightButton.anchor.set(0.5);
+        this.rightButton.scale.set(0.75);
+        this.panel.addChild(this.rightButton);
+        this.rightButton.onPress.connect(() => this.next());
+
         this.sectionlabel = new Label('', { fill: '#ffffff', fontSize: 20 });
-        this.sectionlabel.x = this.panel.width * 0.5;
-        this.sectionlabel.y = this.panel.height - 50;
+        this.sectionlabel.anchor.set(0.5); // Add this
         this.panel.addChild(this.sectionlabel);
 
         this.init();
@@ -196,6 +190,16 @@ export class InfoPopup extends Container {
             this.closeButton.scale.set(0.75);
             this.closeButton.x = panelWidth - 60;
             this.closeButton.y = 60;
+
+            /** Navigations */
+            this.rightButton.x = panelWidth - this.leftButton.width * 0.5 - 40;
+            this.leftButton.x = 40;
+
+            this.sectionlabel.x = panelWidth * 0.5;
+            this.sectionlabel.y = panelHeight - this.sectionlabel.height - 30;
+
+            this.rightButton.y = panelHeight * 0.5 - this.rightButton.height * 0.5;
+            this.leftButton.y = panelHeight * 0.5 - this.leftButton.height * 0.5;
         } else if (isMobile && !isPortrait) {
             const panelWidth = width * 0.85;
             const panelHeight = height * 0.9;
@@ -216,6 +220,16 @@ export class InfoPopup extends Container {
             this.closeButton.scale.set(0.75);
             this.closeButton.x = panelWidth - 60;
             this.closeButton.y = 60;
+
+            /** Navigations */
+            this.rightButton.x = panelWidth - this.leftButton.width * 0.5 - 40;
+            this.leftButton.x = 40;
+
+            this.sectionlabel.x = panelWidth * 0.5;
+            this.sectionlabel.y = panelHeight - this.sectionlabel.height - 30;
+
+            this.rightButton.y = panelHeight * 0.5 - this.rightButton.height * 0.5;
+            this.leftButton.y = panelHeight * 0.5 - this.leftButton.height * 0.5;
         } else {
             const panelWidth = 1400;
             const panelHeight = 800;
@@ -236,6 +250,16 @@ export class InfoPopup extends Container {
             this.closeButton.scale.set(0.5);
             this.closeButton.x = panelWidth - 60;
             this.closeButton.y = 60;
+
+            /** Navigations */
+            this.rightButton.x = panelWidth - this.leftButton.width * 0.5 - 40;
+            this.leftButton.x = 40;
+
+            this.sectionlabel.x = panelWidth * 0.5;
+            this.sectionlabel.y = panelHeight - this.sectionlabel.height - 30;
+
+            this.rightButton.y = panelHeight * 0.5 - this.rightButton.height * 0.5;
+            this.leftButton.y = panelHeight * 0.5 - this.leftButton.height * 0.5;
         }
 
         this.panel.x = width * 0.5;
@@ -243,7 +267,7 @@ export class InfoPopup extends Container {
     }
 
     /** Set things up just before showing the popup */
-    public prepare(data: InfoPopup) {}
+    public prepare(_data: InfoPopup) {}
 
     public update() {}
 
