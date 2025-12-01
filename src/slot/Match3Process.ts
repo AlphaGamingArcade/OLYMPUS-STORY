@@ -13,23 +13,33 @@ import {
 } from './SlotUtility';
 
 /**
- * Sort out the gameplay progression on the board after a player action, clearing matches
- * then filling up empty spaces. The process is organised in 'process rounds' that will keep
- * going until there are no new matches neither empty spaces left in the grid.
+ * Handles the entire board-resolution flow after each player action.
+ * A full resolution consists of a series of async “process rounds.”
  *
- * The process round steps are sequenced in a queue of async functions to keep things simple,
- * in a way each step can be awaited/delayed as needed acording to what makes sense to the game flow.
+ * Each round:
+ *  - detects matches
+ *  - clears them
+ *  - drops remaining pieces (gravity)
+ *  - refills new pieces from the top
+ *
+ * Rounds continue until the grid has no more matches and no empty spaces.
+ * Everything runs through an async task queue, allowing clean sequencing and
+ * precise timing for animations and gameplay transitions.
  */
 export class Match3Process {
-    /** The Match3 instance */
+    /** Reference to the Match3 controller */
     private match3: Match3;
-    /** Tells if it is currently processing or not */
+
+    /** Whether the board is currently resolving */
     private processing = false;
-    /** The current processing round number, resets when a new process starts */
+
+    /** Current round counter, reset at start */
     private round = 0;
-    /** Flag indicating if the current round resulted in a win */
+
+    /** Whether the current round produced at least one match */
     private hasRoundWin = false;
-    /** The list of queued actions that the grid processing will take */
+
+    /** Internal async queue handling ordered flow of animation + logic steps */
     private queue: AsyncQueue;
 
     constructor(match3: Match3) {
@@ -37,48 +47,50 @@ export class Match3Process {
         this.queue = new AsyncQueue();
     }
 
-    /** Check if is processing */
+    /** Whether the process is running */
     public isProcessing() {
         return this.processing;
     }
 
-    /** Get current process round */
+    /** Current round index */
     public getProcessRound() {
         return this.round;
     }
 
-    /** Interrupt processing and cleanup process queue */
+    /** Immediately stop processing and clear pending tasks */
     public reset() {
         this.processing = false;
         this.round = 0;
         this.queue.clear();
     }
 
-    /** Pause processing */
+    /** Pause queued tasks */
     public pause() {
         this.queue.pause();
     }
 
-    /** Resume processing */
+    /** Resume queued tasks */
     public resume() {
         this.queue.resume();
     }
 
-    /** Start processing the grid until there are no new matches or empty spaces left */
+    /** Begin resolving the board until no more actions remain */
     public async start() {
         if (this.processing) return;
         this.processing = true;
         this.round = 0;
         this.match3.onProcessStart?.();
+
         console.log('[Match3] ======= PROCESSING START ==========');
         this.runProcessRound();
     }
 
-    /** Clear process query and stop processing the grid */
+    /** Stop processing and print final debugging information */
     public async stop() {
         if (!this.processing) return;
         this.processing = false;
         this.queue.clear();
+
         console.log('[Match3] Sequence rounds:', this.round);
         console.log('[Match3] Board pieces:', this.match3.board.pieces.length);
         console.log('[Match3] Grid:\n' + match3GridToString(this.match3.board.grid));
@@ -88,67 +100,73 @@ export class Match3Process {
     }
 
     /**
-     * Sequence of logical steps to evolve the board, added to the async queue. Each step can
-     * be awaited/delayed as needed in oder to create a nice gameplay progress flow.
+     * Executes one complete resolution round.
+     * Steps:
+     *  1. Increment round + update stats
+     *  2. Clear regular matches
+     *  3. Apply gravity (drop pieces)
+     *  4. If there were wins:
+     *       - run jackpot logic in parallel
+     *       - refill new pieces at the same time
+     *  5. Check if another round is required
      */
     private async runProcessRound() {
-        // Step #1 - Bump sequence number and update stats with new matches found
+        // Step #1 – Start new round and analyze matches
         this.queue.add(async () => {
             this.round += 1;
             console.log(`[Match3] -- SEQUENCE ROUND #${this.round} START`);
             this.updateStats();
         });
 
-        // Step #2 - Process and clear remaining common matches
+        // Step #2 – Resolve standard matches
         this.queue.add(async () => {
             await this.processRegularMatches();
         });
 
-        // Step #3 - Move down remaining pieces in the grid if there are empty spaces in their columns
+        // Step #3 – Drop pieces (gravity)
         this.queue.add(async () => {
             await this.applyGravity();
         });
 
-        // Step #4 & #5 - Process jackpot and refill in parallel, but store jackpot promise
-        let jackpotPromise: Promise<void> | null = null;
+        // If this round had at least one match, do jackpot + refill
+        if (this.hasRoundWin) {
+            this.hasRoundWin = false;
 
-        this.queue.add(async () => {
-            // Start jackpot processing (don't await here)
-            jackpotPromise = this.processJackpotMatches();
+            let jackpotPromise: Promise<void> | null = null;
 
-            // Refill can happen while jackpot modals are showing
-            await this.refillGrid();
-        });
+            // Step #4 & #5 – Jackpot processing + refill simultaneously
+            this.queue.add(async () => {
+                jackpotPromise = this.processJackpotMatches();
+                await this.refillGrid();
+            });
 
-        // Step #6 - Wait for jackpot to complete before checkpoint
-        this.queue.add(async () => {
-            if (jackpotPromise) {
-                await jackpotPromise;
-            }
-        });
+            // Step #6 – Wait for jackpot to finish
+            this.queue.add(async () => {
+                if (jackpotPromise) await jackpotPromise;
+            });
+        }
 
-        // Step #7 - Finish up this sequence round and check if it needs a re-run, otherwise stop processing
+        // Step #7 – Finalize round and decide if another is needed
         this.queue.add(async () => {
             console.log(`[Match3] -- SEQUENCE ROUND #${this.round} FINISH`);
             this.processCheckpoint();
         });
     }
 
-    /** Update gameplay stats with new matches found in the grid */
+    /** Update internal gameplay stats for any matches found */
     private async updateStats() {
         const matches = slotGetMatches(this.match3.board.grid);
         if (!matches.length) return;
+
         console.log('[Match3] Update stats');
     }
 
-    /** Clear all matches in the grid */
+    /** Resolve and clear all standard pattern matches */
     private async processRegularMatches() {
         console.log('[Match3] Process regular matches');
-        const matches = slotGetMatches(this.match3.board.grid);
 
-        if (matches.length > 0) {
-            this.hasRoundWin = true;
-        }
+        const matches = slotGetMatches(this.match3.board.grid);
+        if (matches.length > 0) this.hasRoundWin = true;
 
         const animePlayPieces = [];
         const types = [];
@@ -160,10 +178,7 @@ export class Match3Process {
 
         await Promise.all(animePlayPieces);
 
-        /** Fire on match */
-        this.match3.onMatch?.({
-            types,
-        });
+        this.match3.onMatch?.({ types });
 
         const animPopPromises = [];
 
@@ -174,17 +189,16 @@ export class Match3Process {
         await Promise.all(animPopPromises);
     }
 
-    /** Clear all matches in the grid */
+    /** Handle jackpot-related matches (e.g., special symbols) */
     private async processJackpotMatches() {
-        if (!this.hasRoundWin) return;
-        this.hasRoundWin = false;
         await this.match3.jackpot.process();
     }
 
-    /** Make existing pieces fall in the grid if there are empty spaces below them */
+    /** Move all existing pieces downward to fill empty cells */
     private async applyGravity() {
         const changes = match3ApplyGravity(this.match3.board.grid);
         console.log('[Match3] Apply gravity - moved pieces:', changes, changes.length);
+
         const animPromises = [];
 
         for (const change of changes) {
@@ -192,8 +206,10 @@ export class Match3Process {
             const to = change[1];
             const piece = this.match3.board.getPieceByPosition(from);
             if (!piece) continue;
+
             piece.row = to.row;
             piece.column = to.column;
+
             const newPosition = this.match3.board.getViewPositionByGridPosition(to);
             animPromises.push(piece.animateFall(newPosition.x, newPosition.y));
         }
@@ -201,10 +217,11 @@ export class Match3Process {
         await Promise.all(animPromises);
     }
 
-    /** Fill up empty spaces in the grid with new pieces falling from the top */
+    /** Create brand-new symbols in empty spaces and animate them falling in */
     private async refillGrid() {
         const result = await BetAPI.spin('r');
         const newPieces = match3FillUp(this.match3.board.grid, this.match3.board.commonTypes, result.reels);
+
         console.log('[Match3] Refill grid - new pieces:', newPieces.length);
 
         const animPromises = [];
@@ -214,51 +231,50 @@ export class Match3Process {
             const pieceType = match3GetPieceType(this.match3.board.grid, position);
             const piece = this.match3.board.createPiece(position, pieceType);
 
-            // Count pieces per column so new pieces can be stacked up accordingly
             if (!piecesPerColumn[piece.column]) piecesPerColumn[piece.column] = 0;
-            piecesPerColumn[piece.column] += 1;
+            piecesPerColumn[piece.column]++;
 
             const x = piece.x;
             const y = piece.y;
-            const columnCount = piecesPerColumn[piece.column];
+
+            const columnIndex = piecesPerColumn[piece.column];
             const height = this.match3.board.getHeight();
-            piece.y = -height * 0.5 - columnCount * this.match3.config.tileSize;
+
+            // Spawn piece above the board, stacked by column
+            piece.y = -height * 0.5 - columnIndex * this.match3.config.tileSize;
+
             animPromises.push(piece.animateFall(x, y));
         }
 
         await Promise.all(animPromises);
     }
 
-    /** Check for scatter matches and trigger free spin bonus if conditions are met */
+    /** Detect scatter symbols and trigger free spins if requirements are met */
     private async processFreeSpinCheckpoint() {
         const scatterMatches = slotGetScatterMatches(this.match3.board.grid);
         const scatterTrigger = gameConfig.getScatterBlocksTrigger();
+
         const hasScatterTrigger = scatterMatches.some((group) => group.length >= scatterTrigger);
 
         if (hasScatterTrigger) {
-            // Play animation 3 times
             for (let i = 0; i < 3; i++) {
-                const animatePlayPieces = scatterMatches.map((match) => this.match3.board.playPieces(match));
+                const animatePlayPieces = scatterMatches.map((m) => this.match3.board.playPieces(m));
                 await Promise.all(animatePlayPieces);
 
-                // Add delay between animations (except after the last one)
-                if (i < 2) {
-                    await waitFor(1);
-                }
+                if (i < 2) await waitFor(1);
             }
 
             await this.match3.onFreeSpinTrigger?.();
-            // The stop will be forwarded to the free spin process
         } else {
             this.stop();
         }
     }
 
-    /** Check if there are empty spaces and/or matches remaining, and run another process round if needed */
+    /** Determine if another resolution round is required or if processing is complete */
     private async processCheckpoint() {
-        // Check if there are any remaining matches or empty spots
         const newMatches = slotGetMatches(this.match3.board.grid);
         const emptySpaces = match3GetEmptyPositions(this.match3.board.grid);
+
         console.log('[Match3] Checkpoint - New matches:', newMatches.length);
         console.log('[Match3] Checkpoint - Empty spaces:', emptySpaces.length);
 
