@@ -66,14 +66,14 @@ export class SettingsMenuSection extends Container {
             this.labels.push(label);
         });
 
-        this.bottomLayout = new List({ type: 'vertical', elementsMargin: 20 });
-        this.mainLayout.addChild(this.bottomLayout);
-
         this.secondTitleLabel = new Label('Main Game Interface', {
             fill: '#FCC100',
         });
         this.secondTitleLabel.anchor.set(0.5);
-        this.bottomLayout.addChild(this.secondTitleLabel);
+        this.mainLayout.addChild(this.secondTitleLabel);
+
+        this.bottomLayout = new List({ type: 'vertical', elementsMargin: 20 });
+        this.mainLayout.addChild(this.bottomLayout);
 
         options.icons2.forEach((icon) => {
             const card = new IconInfoCard({ image: icon.image, label: icon.label, imageScale: 0.75 });

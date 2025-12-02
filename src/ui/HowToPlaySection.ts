@@ -64,14 +64,14 @@ export class HowToPlaySection extends Container {
             this.infoCards.push(card);
         });
 
-        this.bottomLayout = new List({ type: 'vertical', elementsMargin: 20 });
-        this.mainLayout.addChild(this.bottomLayout);
-
-        this.secondTitleLabel = new Label('Main game interface', {
+        this.secondTitleLabel = new Label('Main Game Interface', {
             fill: '#FCC100',
         });
         this.secondTitleLabel.anchor.set(0.5);
-        this.bottomLayout.addChild(this.secondTitleLabel);
+        this.mainLayout.addChild(this.secondTitleLabel);
+
+        this.bottomLayout = new List({ type: 'vertical', elementsMargin: 20 });
+        this.mainLayout.addChild(this.bottomLayout);
 
         this.creditAndBetLabel = new Label('CREDITS and BET labels show the current balance and current total bet.', {
             fill: 0xffffff,
@@ -137,7 +137,7 @@ export class HowToPlaySection extends Container {
             }
         }
 
-        this.mainLayout.elementsMargin = 50;
+        this.mainLayout.elementsMargin = 40;
         this.topLayout.elementsMargin = 20;
         this.bottomLayout.elementsMargin = 20;
         this.mainLayout.x = width * 0.5;
