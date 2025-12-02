@@ -1,6 +1,7 @@
 import { Container } from 'pixi.js';
 import { Label } from './Label';
 import { Switcher } from './Switcher';
+import { sfx } from '../utils/audio';
 
 const defaultAudioSwitcherOptions = {
     title: '',
@@ -70,6 +71,7 @@ export class AudioSwitcher extends Container {
     }
 
     public forceSwitch(value: boolean) {
+        sfx.play('common/sfx-hover.wav');
         this.switcher.forceSwitch(value);
     }
 }

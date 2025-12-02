@@ -38,7 +38,7 @@ export class FeatureSection extends Container {
         this.symbolsContainer = new List({ type: 'horizontal', elementsMargin: 10 });
         this.mainLayout.addChild(this.symbolsContainer);
 
-        for (const jackpot of this.jackpots) {
+        for (const jackpot of this.jackpots.reverse()) {
             const jackpotSprite = Sprite.from(`symbol-${jackpot.type}`);
             jackpotSprite.anchor.y = 0.5;
             jackpotSprite.scale.set(0.5);

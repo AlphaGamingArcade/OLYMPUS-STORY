@@ -21,12 +21,13 @@ export class PaytableCard extends Container {
     private layoutList: List;
     private betAmount: number;
     private currency: string;
+    public labels: Label[] = [];
 
     constructor(options: Partial<PaytableCardOptions> = {}) {
         super();
         const opts = { ...defaultPaytableCardOptions, ...options };
 
-        this.layoutList = new List({ type: 'vertical' });
+        this.layoutList = new List({ type: 'vertical', elementsMargin: 10 });
         this.addChild(this.layoutList);
 
         this.image = Sprite.from(opts.image);
@@ -48,6 +49,14 @@ export class PaytableCard extends Container {
                 },
             );
             this.layoutList.addChild(label);
+            this.labels.push(label);
         });
+    }
+
+    public set fontSize(size: number) {
+        for (const label of this.labels) {
+            label.style.fontSize = size;
+        }
+        this.layoutList.elementsMargin = 10;
     }
 }

@@ -170,15 +170,14 @@ export class InfoPopup extends Container {
         this.bg.height = height;
 
         const isMobile = document.documentElement.id === 'isMobile';
-        const isPortrait = width < height;
 
         let titleFontSize: number;
         let closeScale: number;
         let navScale: number;
 
         if (isMobile) {
-            this.panelWidth = width * (isPortrait ? 0.9 : 0.85);
-            this.panelHeight = height * (isPortrait ? 0.85 : 0.9);
+            this.panelWidth = width;
+            this.panelHeight = height;
             titleFontSize = 52;
             closeScale = 0.75;
             navScale = 1;

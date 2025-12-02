@@ -142,7 +142,7 @@ export class HowToPlaySection extends Container {
         this.mainLayout.y = 80;
     }
 
-    public hide() {
+    public async hide() {
         // Clean up info cards
         for (const card of this.infoCards) {
             card.destroy({ children: true });

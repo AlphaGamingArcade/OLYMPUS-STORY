@@ -17,6 +17,10 @@ export class SettingsPopup extends Container {
     private title: Label;
     private closeButton: IconButton;
     private panel: Graphics;
+    /** Height of the panel */
+    private panelHeight: number = 0;
+    /** Width of the panel */
+    private panelWidth: number = 0;
     private betSettings: BetSettings;
     private audioSettings: AudioSettings;
     private onBetChanged?: () => void;
@@ -30,8 +34,9 @@ export class SettingsPopup extends Container {
         this.bg.tint = 0x000000;
         this.addChild(this.bg);
 
-        const width = 1400;
-        const height = 800;
+        this.panelWidth = 1400;
+        this.panelHeight = 800;
+
         const radius = 10;
         const border = 0;
         const borderColor = '#3B3B3B';
@@ -39,10 +44,10 @@ export class SettingsPopup extends Container {
 
         this.panel = new Graphics()
             .fill(borderColor)
-            .roundRect(0, 0, width, height, radius)
+            .roundRect(0, 0, this.panelWidth, this.panelHeight, radius)
             .fill(backgroundColor)
-            .roundRect(border, border, width - border * 2, height - border * 2, radius);
-        this.panel.pivot.set(width / 2, height / 2);
+            .roundRect(border, border, this.panelWidth - border * 2, this.panelHeight - border * 2, radius);
+        this.panel.pivot.set(this.panelWidth / 2, this.panelHeight / 2);
         this.addChild(this.panel);
 
         this.title = new Label('System Settings', {
@@ -97,101 +102,76 @@ export class SettingsPopup extends Container {
         const isMobile = document.documentElement.id === 'isMobile';
         const isPortrait = width < height;
 
+        let titleFontSize: number;
+        let closeButtonScale: number;
+        let settingsScale: number;
+        let betX: number;
+        let betY: number;
+        let audioX: number;
+        let audioY: number;
+
         if (isMobile && isPortrait) {
-            const panelWidth = width * 0.9;
-            const panelHeight = height * 0.85;
-
-            this.panel.clear();
-            this.panel
-                .fill('#3B3B3B')
-                .roundRect(0, 0, panelWidth, panelHeight, 10)
-                .fill('#3B3B3B')
-                .roundRect(0, 0, panelWidth, panelHeight, 10);
-
-            this.panel.pivot.set(panelWidth / 2, panelHeight / 2);
-            this.panel.scale.set(1);
-
-            this.title.style.fontSize = 52;
-            this.title.x = panelWidth * 0.5;
-
-            this.closeButton.scale.set(0.75);
-            this.closeButton.x = panelWidth - 60;
-            this.closeButton.y = 60;
-
-            // Vertical layout for mobile portrait
-            this.betSettings.scale.set(1.5);
-            this.betSettings.x = panelWidth * 0.5;
-            this.betSettings.y = panelHeight * 0.3;
-
-            this.audioSettings.scale.set(1.5);
-            this.audioSettings.x = panelWidth * 0.5 - this.audioSettings.width * 0.5;
-            this.audioSettings.y = panelHeight * 0.6;
+            this.panelWidth = width;
+            this.panelHeight = height;
+            titleFontSize = 52;
+            closeButtonScale = 0.75;
+            settingsScale = 1.5;
+            betX = this.panelWidth * 0.5;
+            betY = this.panelHeight * 0.3;
+            audioX = this.panelWidth * 0.5 - this.audioSettings.width * 0.5;
+            audioY = this.panelHeight * 0.6;
         } else if (isMobile && !isPortrait) {
-            const panelWidth = width * 0.85;
-            const panelHeight = height * 0.9;
-
-            this.panel.clear();
-            this.panel
-                .fill('#3B3B3B')
-                .roundRect(0, 0, panelWidth, panelHeight, 10)
-                .fill('#3B3B3B')
-                .roundRect(0, 0, panelWidth, panelHeight, 10);
-
-            this.panel.pivot.set(panelWidth / 2, panelHeight / 2);
-            this.panel.scale.set(1);
-
-            this.title.style.fontSize = 52;
-            this.title.x = panelWidth * 0.5;
-
-            this.closeButton.scale.set(0.75);
-            this.closeButton.x = panelWidth - 60;
-            this.closeButton.y = 60;
-
-            // Center bet selector on left side
-            this.betSettings.scale.set(1.5);
-            this.betSettings.x = panelWidth * 0.25;
-            this.betSettings.y = panelHeight * 0.5 - this.betSettings.height * 0.25;
-
-            // Center audio settings on right side
-            this.audioSettings.scale.set(1.5);
-            this.audioSettings.x = panelWidth * 0.5;
-            this.audioSettings.y = panelHeight * 0.5 - this.audioSettings.height * 0.5;
+            this.panelWidth = width;
+            this.panelHeight = height;
+            titleFontSize = 52;
+            closeButtonScale = 0.75;
+            settingsScale = 1.5;
+            betX = this.panelWidth * 0.25;
+            betY = this.panelHeight * 0.5 - this.betSettings.height * 0.25;
+            audioX = this.panelWidth * 0.5;
+            audioY = this.panelHeight * 0.5 - this.audioSettings.height * 0.5;
         } else {
-            const panelWidth = 1400;
-            const panelHeight = 800;
-
-            this.panel.clear();
-            this.panel
-                .fill('#3B3B3B')
-                .roundRect(0, 0, panelWidth, panelHeight, 10)
-                .fill('#3B3B3B')
-                .roundRect(0, 0, panelWidth, panelHeight, 10);
-
-            this.panel.pivot.set(panelWidth / 2, panelHeight / 2);
-            this.panel.scale.set(1);
-
-            this.title.style.fontSize = 32;
-            this.title.x = panelWidth * 0.5;
-
-            this.closeButton.scale.set(0.5);
-            this.closeButton.x = panelWidth - 60;
-            this.closeButton.y = 60;
-
-            // Center bet selector on left side
-            this.betSettings.scale.set(1);
-            this.betSettings.x = panelWidth * 0.25;
-            this.betSettings.y = panelHeight * 0.5 - this.betSettings.height * 0.25;
-
-            // Center audio settings on right side
-            this.audioSettings.scale.set(1);
-            this.audioSettings.x = panelWidth * 0.5;
-            this.audioSettings.y = panelHeight * 0.5 - this.audioSettings.height * 0.5;
+            this.panelWidth = 1400;
+            this.panelHeight = 800;
+            titleFontSize = 32;
+            closeButtonScale = 0.5;
+            settingsScale = 1;
+            betX = this.panelWidth * 0.25;
+            betY = this.panelHeight * 0.5 - this.betSettings.height * 0.25;
+            audioX = this.panelWidth * 0.5;
+            audioY = this.panelHeight * 0.5 - this.audioSettings.height * 0.5;
         }
 
+        // Update panel
+        this.panel.clear();
+        this.panel
+            .fill('#3B3B3B')
+            .roundRect(0, 0, this.panelWidth, this.panelHeight, 10)
+            .fill('#3B3B3B')
+            .roundRect(0, 0, this.panelWidth, this.panelHeight, 10);
+        this.panel.pivot.set(this.panelWidth / 2, this.panelHeight / 2);
+        this.panel.scale.set(1);
         this.panel.x = width * 0.5;
         this.panel.y = height * 0.5;
 
-        console.log('RESIZE MODAL');
+        // Update title
+        this.title.style.fontSize = titleFontSize;
+        this.title.x = this.panelWidth * 0.5;
+
+        // Update close button
+        this.closeButton.scale.set(closeButtonScale);
+        this.closeButton.x = this.panelWidth - 60;
+        this.closeButton.y = 60;
+
+        // Update bet settings
+        this.betSettings.scale.set(settingsScale);
+        this.betSettings.x = betX;
+        this.betSettings.y = betY;
+
+        // Update audio settings
+        this.audioSettings.scale.set(settingsScale);
+        this.audioSettings.x = audioX;
+        this.audioSettings.y = audioY;
     }
 
     /** Set things up just before showing the popup */

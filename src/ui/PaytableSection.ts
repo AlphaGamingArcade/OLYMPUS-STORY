@@ -4,21 +4,7 @@ import { userSettings } from '../utils/userSettings';
 import { Paytable } from '../slot/Match3Config';
 import { List } from '@pixi/ui';
 import { gameConfig } from '../utils/gameConfig';
-
-const defaultPayTableSectionOptions = {
-    paytables: [
-        {
-            type: 0,
-            patterns: [
-                { min: 0, max: 0, multiplier: 0 },
-                { min: 0, max: 0, multiplier: 0 },
-                { min: 0, max: 0, multiplier: 0 },
-            ],
-        },
-    ],
-};
-
-export type PayTableSectionOptions = typeof defaultPayTableSectionOptions;
+import { PaytableCard } from './PaytableCard';
 
 export class PayTableSection extends Container {
     private symbolsDescriptionLabel: Label;
@@ -26,13 +12,18 @@ export class PayTableSection extends Container {
     private betAmount: number;
     private currency: string;
     private paytables: Paytable[];
+    private paytableCardsContainer: Container;
+    private paytableCards: PaytableCard[] = [];
+    private cardsPerRow = 3;
+    private cardSpacing = 20;
+    private cardsTopMargin = 40;
 
-    constructor(opts: Partial<PayTableSectionOptions> = {}) {
+    constructor() {
         super();
 
-        this.betAmount = 0;
-        this.currency = 'USD';
-        this.paytables = opts.paytables ?? [];
+        this.betAmount = userSettings.getBet();
+        this.currency = userSettings.getCurrency();
+        this.paytables = gameConfig.getPaytables();
 
         this.mainLayout = new List({ type: 'vertical', elementsMargin: 25 });
         this.addChild(this.mainLayout);
@@ -50,6 +41,48 @@ export class PayTableSection extends Container {
         );
         this.symbolsDescriptionLabel.anchor.set(0.5);
         this.mainLayout.addChild(this.symbolsDescriptionLabel);
+
+        this.paytableCardsContainer = new Container();
+
+        for (const paytable of this.paytables.slice(0, 7)) {
+            const card = new PaytableCard({
+                image: `symbol-${paytable.type}`,
+                betAmount: this.betAmount,
+                currency: this.currency,
+                patterns: paytable.patterns,
+            });
+            this.paytableCardsContainer.addChild(card);
+            this.paytableCards.push(card);
+        }
+
+        this.mainLayout.addChild(this.paytableCardsContainer);
+
+        this.layoutCards();
+    }
+
+    private layoutCards(): void {
+        if (this.paytableCards.length === 0) return;
+
+        // Get the dimensions of the first card to use as reference
+        const cardWidth = this.paytableCards[0].width;
+        const cardHeight = this.paytableCards[0].height;
+
+        // Calculate total grid dimensions
+        const totalColumns = Math.min(this.cardsPerRow, this.paytableCards.length);
+        const gridWidth = totalColumns * cardWidth + (totalColumns - 1) * this.cardSpacing;
+
+        // Position each card in a grid
+        this.paytableCards.forEach((card, index) => {
+            const col = index % this.cardsPerRow;
+            const row = Math.floor(index / this.cardsPerRow);
+
+            card.x = col * (cardWidth + this.cardSpacing) - gridWidth / 2 + cardWidth / 2;
+            card.y = row * (cardHeight + this.cardSpacing);
+        });
+
+        // Position the cards container below the description
+        this.paytableCardsContainer.y =
+            this.symbolsDescriptionLabel.y + this.symbolsDescriptionLabel.height / 2 + this.cardsTopMargin;
     }
 
     public resize(width: number, height: number) {
@@ -60,28 +93,41 @@ export class PayTableSection extends Container {
             this.symbolsDescriptionLabel.y = 100;
             this.symbolsDescriptionLabel.style.fontSize = 28;
             this.symbolsDescriptionLabel.style.wordWrapWidth = 600;
+            this.cardsPerRow = 3;
+
+            for (const card of this.paytableCards) {
+                card.fontSize = 28;
+            }
+
+            this.mainLayout.y = 100;
         } else if (isMobile && !isPortrait) {
             this.symbolsDescriptionLabel.y = 100;
             this.symbolsDescriptionLabel.style.fontSize = 28;
             this.symbolsDescriptionLabel.style.wordWrapWidth = 1000;
+            this.cardsPerRow = 8;
+
+            for (const card of this.paytableCards) {
+                card.fontSize = 28;
+            }
+
+            this.mainLayout.y = 80;
         } else {
             this.symbolsDescriptionLabel.y = 60;
             this.symbolsDescriptionLabel.style.fontSize = 18;
             this.symbolsDescriptionLabel.style.wordWrapWidth = 800;
+            this.cardsPerRow = 8;
+
+            for (const card of this.paytableCards) {
+                card.fontSize = 18;
+            }
+
+            this.mainLayout.y = 60;
         }
 
         this.symbolsDescriptionLabel.x = width * 0.5;
-    }
+        this.mainLayout.x = width * 0.5;
+        this.mainLayout.elementsMargin = 25;
 
-    public prepare() {
-        this.setup();
-    }
-
-    public setup() {
-        this.betAmount = userSettings.getBet();
-        this.currency = userSettings.getCurrency();
-        this.paytables = gameConfig.getPaytables();
-
-        console.log('SETUP', this.paytables);
+        this.layoutCards();
     }
 }

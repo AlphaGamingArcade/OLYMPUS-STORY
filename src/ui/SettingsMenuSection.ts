@@ -131,7 +131,7 @@ export class SettingsMenuSection extends Container {
         this.mainLayout.y = 80;
     }
 
-    public hide() {
+    public async hide() {
         // Clean up labels
         for (const label of this.labels) {
             label.destroy();
