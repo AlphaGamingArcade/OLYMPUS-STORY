@@ -13,6 +13,10 @@ const defaultHowToPlaySectionOptions = {
             image: 'icon-button-add-default-view',
             label: 'Button to increase the bet value',
         },
+        {
+            image: 'icon-button-autoplay-default-view',
+            label: 'Button to autoplay spin',
+        },
     ],
     icons2: [
         {
@@ -54,23 +58,19 @@ export class HowToPlaySection extends Container {
         this.addChild(this.mainLayout);
 
         this.topLayout = new List({ type: 'vertical', elementsMargin: 20 });
-        this.mainLayout.addChild(this.topLayout);
-
         options.icons1.forEach((icon) => {
             const card = new IconInfoCard({ image: icon.image, label: icon.label, imageScale: 0.75 });
             this.topLayout.addChild(card);
             this.infoCards.push(card);
         });
+        this.mainLayout.addChild(this.topLayout);
 
         this.secondTitleLabel = new Label('Main Game Interface', {
             fill: '#FCC100',
         });
-        this.secondTitleLabel.anchor.set(0.5);
         this.mainLayout.addChild(this.secondTitleLabel);
 
         this.bottomLayout = new List({ type: 'vertical', elementsMargin: 20 });
-        this.mainLayout.addChild(this.bottomLayout);
-
         this.creditAndBetLabel = new Label('CREDITS and BET labels show the current balance and current total bet.', {
             fill: 0xffffff,
             fontSize: 18,
@@ -80,66 +80,61 @@ export class HowToPlaySection extends Container {
         });
         this.bottomLayout.addChild(this.creditAndBetLabel);
 
-        options.icons2.forEach((icon, index) => {
-            let scale = 1;
-            switch (index) {
-                case 1:
-                    scale = 1;
-                    break;
-                case 2:
-                    scale = 1;
-                    break;
-                default:
-                    scale = 1;
-                    break;
-            }
-            const card = new IconInfoCard({ image: icon.image, label: icon.label, imageScale: scale });
+        options.icons2.forEach((icon) => {
+            const card = new IconInfoCard({ image: icon.image, label: icon.label, imageScale: 1 });
             this.bottomLayout.addChild(card);
+            card.updateLayout();
             this.infoCards.push(card);
         });
+
+        this.mainLayout.addChild(this.bottomLayout);
+        console.log(this.mainLayout.elementsMargin);
     }
 
     public resize(width: number, height: number) {
         const isMobile = document.documentElement.id === 'isMobile';
         const isPortrait = width < height;
 
+        let creditWrapWidth: number;
+        let fontSize: number;
+        let secondTitleFontSize: number;
+        let cardWrapWidth: number;
+
         if (isMobile && isPortrait) {
-            this.creditAndBetLabel.style.wordWrapWidth = 800;
-            this.creditAndBetLabel.style.fontSize = 28;
-            this.secondTitleLabel.style.fontSize = 36;
-
-            for (const card of this.infoCards) {
-                card.text.style.fontSize = 28;
-                card.text.style.wordWrapWidth = 600;
-                card.updateLayout();
-            }
+            creditWrapWidth = 800;
+            fontSize = 28;
+            secondTitleFontSize = 36;
+            cardWrapWidth = 600;
         } else if (isMobile && !isPortrait) {
-            this.creditAndBetLabel.style.wordWrapWidth = 1200;
-            this.creditAndBetLabel.style.fontSize = 28;
-            this.secondTitleLabel.style.fontSize = 36;
-
-            for (const card of this.infoCards) {
-                card.text.style.fontSize = 28;
-                card.text.style.wordWrapWidth = 1200;
-                card.updateLayout();
-            }
+            creditWrapWidth = 1200;
+            fontSize = 28;
+            secondTitleFontSize = 36;
+            cardWrapWidth = 1200;
         } else {
-            this.creditAndBetLabel.style.wordWrapWidth = 1000;
-            this.creditAndBetLabel.style.fontSize = 18;
-            this.secondTitleLabel.style.fontSize = 28;
-
-            for (const card of this.infoCards) {
-                card.text.style.fontSize = 18;
-                card.text.style.wordWrapWidth = 1000;
-                card.updateLayout();
-            }
+            creditWrapWidth = 1000;
+            fontSize = 18;
+            secondTitleFontSize = 28;
+            cardWrapWidth = 1000;
         }
 
-        this.mainLayout.elementsMargin = 40;
+        // Apply styles
+        this.creditAndBetLabel.style.wordWrapWidth = creditWrapWidth;
+        this.creditAndBetLabel.style.fontSize = fontSize;
+        this.secondTitleLabel.style.fontSize = secondTitleFontSize;
+
+        // Update cards
+        for (const card of this.infoCards) {
+            card.text.style.fontSize = fontSize;
+            card.text.style.wordWrapWidth = cardWrapWidth;
+            card.updateLayout();
+        }
+
+        // Layout positioning
         this.topLayout.elementsMargin = 20;
         this.bottomLayout.elementsMargin = 20;
+        this.mainLayout.elementsMargin = 40;
         this.mainLayout.x = width * 0.5;
-        this.mainLayout.y = 80;
+        this.mainLayout.y = 60;
     }
 
     public async hide() {

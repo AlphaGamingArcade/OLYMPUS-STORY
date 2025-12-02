@@ -7,6 +7,7 @@ import { FeatureSection } from '../ui/FeatureSection';
 import { HowToPlaySection } from '../ui/HowToPlaySection';
 import { SettingsMenuSection } from '../ui/SettingsMenuSection';
 import { pool } from '../utils/pool';
+import { FreeSpinSection } from '../ui/FreeSpinSection';
 
 interface ModalSection extends Container {
     /** Show the screen */
@@ -76,6 +77,10 @@ export class InfoPopup extends Container {
         {
             title: 'CASCADE FEATURE',
             section: FeatureSection,
+        },
+        {
+            title: 'FREE SPINS',
+            section: FreeSpinSection,
         },
         {
             title: 'How to play',
@@ -170,21 +175,25 @@ export class InfoPopup extends Container {
         this.bg.height = height;
 
         const isMobile = document.documentElement.id === 'isMobile';
+        const isPortrait = width < height;
 
         let titleFontSize: number;
+        let sectionFontSzie: number;
         let closeScale: number;
         let navScale: number;
 
         if (isMobile) {
-            this.panelWidth = width;
-            this.panelHeight = height;
+            this.panelWidth = width * (isPortrait ? 0.95 : 0.9);
+            this.panelHeight = height * (isPortrait ? 0.9 : 0.95);
             titleFontSize = 52;
+            sectionFontSzie = 28;
             closeScale = 0.75;
             navScale = 1;
         } else {
             this.panelWidth = 1400;
             this.panelHeight = 800;
             titleFontSize = 32;
+            sectionFontSzie = 20;
             closeScale = 0.5;
             navScale = 0.75;
         }
@@ -222,6 +231,9 @@ export class InfoPopup extends Container {
         this.leftButton.scale.set(navScale);
         this.leftButton.x = 40;
         this.leftButton.y = this.panelHeight * 0.5 - this.rightButton.height * 0.5;
+
+        this.sectionlabel.style.fontSize = sectionFontSzie;
+        this.sectionlabel.x = this.panelWidth * 0.5;
 
         /** Center panel */
         this.panel.x = width * 0.5;

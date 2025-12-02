@@ -21,6 +21,7 @@ export class SettingsPopup extends Container {
     private panelHeight: number = 0;
     /** Width of the panel */
     private panelWidth: number = 0;
+
     private betSettings: BetSettings;
     private audioSettings: AudioSettings;
     private onBetChanged?: () => void;
@@ -111,8 +112,8 @@ export class SettingsPopup extends Container {
         let audioY: number;
 
         if (isMobile && isPortrait) {
-            this.panelWidth = width;
-            this.panelHeight = height;
+            this.panelWidth = width * (isPortrait ? 0.9 : 0.85);
+            this.panelHeight = height * (isPortrait ? 0.85 : 0.9);
             titleFontSize = 52;
             closeButtonScale = 0.75;
             settingsScale = 1.5;
@@ -121,8 +122,8 @@ export class SettingsPopup extends Container {
             audioX = this.panelWidth * 0.5 - this.audioSettings.width * 0.5;
             audioY = this.panelHeight * 0.6;
         } else if (isMobile && !isPortrait) {
-            this.panelWidth = width;
-            this.panelHeight = height;
+            this.panelWidth = width * (isPortrait ? 0.9 : 0.85);
+            this.panelHeight = height * (isPortrait ? 0.85 : 0.9);
             titleFontSize = 52;
             closeButtonScale = 0.75;
             settingsScale = 1.5;
