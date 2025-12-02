@@ -1,5 +1,6 @@
 import { Container, Sprite, TextStyle, Text } from 'pixi.js';
 import gsap from 'gsap';
+import { formatCurrency } from '../utils/formatter';
 
 /**
  * Round Result Item - displays total count, symbol, and amount
@@ -88,7 +89,7 @@ export class RoundResultItem extends Container {
         this.symbol.texture = Sprite.from(symbolTexture).texture;
 
         // Set amount label
-        this.amountLabel.text = `${this.currency}${this.amount.toLocaleString()}`;
+        this.amountLabel.text = `${formatCurrency(this.amount, this.currency)}`;
 
         // Fit text to container if needed
         this.fitAmountText();

@@ -1,4 +1,4 @@
-import { Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
+import { Container, Sprite, Text, Texture } from 'pixi.js';
 import { List } from '@pixi/ui';
 import { navigation } from '../utils/navigation';
 import { CheckboxWithLabel } from '../ui/CheckboxWithLabel';
@@ -14,8 +14,10 @@ export type OnPressAutoplayData = {
 export class AutoplayPopup extends Container {
     /** The dark semi-transparent background covering current screen */
     private bg: Sprite;
-    /** Container for the popup UI components */
-    private panel: Graphics;
+    /** Panel background sprite */
+    private panelBg: Sprite;
+    /** Base container for all panel content */
+    private panelBase: Container;
     /** layout */
     private layout: List;
     /** Close button */
@@ -32,6 +34,9 @@ export class AutoplayPopup extends Container {
     private autoplaySlider: Slider;
     /** on autoplay press */
     private _onPressAutoplay?: (data: OnPressAutoplayData) => void;
+    /** Panel dimensions */
+    private panelWidth = 540;
+    private panelHeight = 570;
 
     constructor() {
         super();
@@ -42,25 +47,21 @@ export class AutoplayPopup extends Container {
         this.bg.tint = 0x000000;
         this.addChild(this.bg);
 
-        const width = 540;
-        const height = 570;
-        const radius = 10;
-        const border = 0;
-        const borderColor = '#3B3B3B';
-        const backgroundColor = '#3B3B3B';
+        // Create panel base container
+        this.panelBase = new Container();
+        this.addChild(this.panelBase);
 
-        this.panel = new Graphics()
-            .fill(borderColor)
-            .roundRect(0, 0, width, height, radius)
-            .fill(backgroundColor)
-            .roundRect(border, border, width - border * 2, height - border * 2, radius);
-        this.panel.pivot.set(width / 2, height / 2);
-        this.addChild(this.panel);
+        // Create panel background sprite
+        this.panelBg = Sprite.from(Texture.WHITE);
+        this.panelBg.tint = 0x3b3b3b;
+        this.panelBg.width = this.panelWidth;
+        this.panelBg.height = this.panelHeight;
+        this.panelBase.addChild(this.panelBg);
 
         this.layout = new List({ type: 'vertical', elementsMargin: 40 });
-        this.layout.x = width / 2;
+        this.layout.x = this.panelWidth / 2;
         this.layout.y = 100;
-        this.panel.addChild(this.layout);
+        this.panelBase.addChild(this.layout);
 
         this.closeButton = new IconButton({
             imageDefault: 'icon-button-default-close-view',
@@ -69,12 +70,12 @@ export class AutoplayPopup extends Container {
             imageDisabled: 'icon-button-default-close-view',
         });
         this.closeButton.scale.set(0.5);
-        this.closeButton.x = width - this.closeButton.width - 20;
+        this.closeButton.x = this.panelWidth - this.closeButton.width - 20;
         this.closeButton.y = this.closeButton.width + 20;
         this.closeButton.onPress.connect(() => {
             navigation.dismissPopup();
         });
-        this.panel.addChild(this.closeButton);
+        this.panelBase.addChild(this.closeButton);
 
         this.title = new Text({
             text: 'Autoplay Settings',
@@ -126,6 +127,9 @@ export class AutoplayPopup extends Container {
         });
         this.autoplayButton.anchor.set(0.5);
         this.layout.addChild(this.autoplayButton);
+
+        // Center panel base
+        this.panelBase.pivot.set(this.panelWidth / 2, this.panelHeight / 2);
     }
 
     /** Resize the popup, fired whenever window size changes */
@@ -133,14 +137,14 @@ export class AutoplayPopup extends Container {
         this.bg.width = width;
         this.bg.height = height;
 
-        this.panel.x = width * 0.5;
-        this.panel.y = height * 0.5;
+        this.panelBase.x = width * 0.5;
+        this.panelBase.y = height * 0.5;
 
         const isMobile = document.documentElement.id === 'isMobile';
         if (isMobile) {
-            this.panel.scale.set(1.5);
+            this.panelBase.scale.set(1.5);
         } else {
-            this.panel.scale.set(1);
+            this.panelBase.scale.set(1);
         }
     }
 

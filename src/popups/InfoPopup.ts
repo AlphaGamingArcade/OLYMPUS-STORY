@@ -1,4 +1,4 @@
-import { Container, Graphics, Sprite, Texture } from 'pixi.js';
+import { Container, Sprite, Texture } from 'pixi.js';
 import { Label } from '../ui/Label';
 import { IconButton } from '../ui/IconButton2';
 import { navigation } from '../utils/navigation';
@@ -50,8 +50,10 @@ export class InfoPopup extends Container {
     private title: Label;
     /** Close buttom */
     private closeButton: IconButton;
-    /** The board panel  */
-    private panel: Graphics;
+    /** The panel background sprite */
+    private panelBg: Sprite;
+    /** Base container for all panel content */
+    private panelBase: Container;
     /** Height of the panel */
     private panelHeight: number = 0;
     /** Width of the panel */
@@ -66,7 +68,7 @@ export class InfoPopup extends Container {
     public currentSection?: ModalSection;
     /** Left button */
     public leftButton: IconButton;
-    /** Left button */
+    /** Right button */
     public rightButton: IconButton;
     /** Sections */
     private sections: { title: string; section: SectionConstructor }[] = [
@@ -103,27 +105,24 @@ export class InfoPopup extends Container {
 
         this.panelWidth = 1400;
         this.panelHeight = 800;
-        const radius = 10;
-        const border = 0;
-        const borderColor = '#3B3B3B';
-        const backgroundColor = '#3B3B3B';
 
-        this.panel = new Graphics()
-            .fill(borderColor)
-            .roundRect(0, 0, this.panelWidth, this.panelHeight, radius)
-            .fill(backgroundColor)
-            .roundRect(border, border, this.panelWidth - border * 2, this.panelHeight - border * 2, radius);
-        this.panel.pivot.set(this.panelWidth / 2, this.panelHeight / 2);
-        this.addChild(this.panel);
+        // Create panel base container
+        this.panelBase = new Container();
+        this.addChild(this.panelBase);
+
+        // Create panel background sprite
+        this.panelBg = Sprite.from(Texture.WHITE);
+        this.panelBg.tint = 0x3b3b3b;
+        this.panelBg.width = this.panelWidth;
+        this.panelBg.height = this.panelHeight;
+        this.panelBase.addChild(this.panelBg);
 
         this.title = new Label('Information', {
             fill: '#FCC100',
         });
         this.title.anchor.set(0.5);
-        this.title.x = this.panel.width * 0.5;
-        this.title.y = 100;
         this.title.style.fontSize = 32;
-        this.panel.addChild(this.title);
+        this.panelBase.addChild(this.title);
 
         this.closeButton = new IconButton({
             imageDefault: 'icon-button-default-close-view',
@@ -132,17 +131,15 @@ export class InfoPopup extends Container {
             imageDisabled: 'icon-button-active-close-view',
         });
         this.closeButton.scale.set(0.5);
-        this.closeButton.x = this.panel.width - 60;
-        this.closeButton.y = 60;
         this.closeButton.onPress.connect(() => navigation.dismissPopup());
-        this.panel.addChild(this.closeButton);
+        this.panelBase.addChild(this.closeButton);
 
         this.sectionlabel = new Label('', { fill: '#ffffff', fontSize: 20 });
-        this.sectionlabel.anchor.set(0.5); // Add this
-        this.panel.addChild(this.sectionlabel);
+        this.sectionlabel.anchor.set(0.5);
+        this.panelBase.addChild(this.sectionlabel);
 
         this.container = new Container();
-        this.panel.addChild(this.container);
+        this.panelBase.addChild(this.container);
 
         this.leftButton = new IconButton({
             imageDefault: 'icon-button-left-arrow-default-view',
@@ -152,7 +149,7 @@ export class InfoPopup extends Container {
         });
         this.leftButton.anchor.set(0.5);
         this.leftButton.scale.set(0.75);
-        this.panel.addChild(this.leftButton);
+        this.panelBase.addChild(this.leftButton);
         this.leftButton.onPress.connect(() => this.back());
 
         this.rightButton = new IconButton({
@@ -163,8 +160,11 @@ export class InfoPopup extends Container {
         });
         this.rightButton.anchor.set(0.5);
         this.rightButton.scale.set(0.75);
-        this.panel.addChild(this.rightButton);
+        this.panelBase.addChild(this.rightButton);
         this.rightButton.onPress.connect(() => this.next());
+
+        // Center panel base
+        this.panelBase.pivot.set(this.panelWidth / 2, this.panelHeight / 2);
 
         this.init();
     }
@@ -178,7 +178,7 @@ export class InfoPopup extends Container {
         const isPortrait = width < height;
 
         let titleFontSize: number;
-        let sectionFontSzie: number;
+        let sectionFontSize: number;
         let closeScale: number;
         let navScale: number;
 
@@ -186,32 +186,31 @@ export class InfoPopup extends Container {
             this.panelWidth = width * (isPortrait ? 0.95 : 0.9);
             this.panelHeight = height * (isPortrait ? 0.9 : 0.95);
             titleFontSize = 52;
-            sectionFontSzie = 28;
+            sectionFontSize = 28;
             closeScale = 0.75;
             navScale = 1;
         } else {
             this.panelWidth = 1400;
             this.panelHeight = 800;
             titleFontSize = 32;
-            sectionFontSzie = 20;
+            sectionFontSize = 20;
             closeScale = 0.5;
             navScale = 0.75;
         }
 
-        /** Panel background */
-        this.panel.clear();
-        this.panel
-            .fill('#3B3B3B')
-            .roundRect(0, 0, this.panelWidth, this.panelHeight, 10)
-            .fill('#3B3B3B')
-            .roundRect(0, 0, this.panelWidth, this.panelHeight, 10);
+        /** Panel background sprite */
+        this.panelBg.width = this.panelWidth;
+        this.panelBg.height = this.panelHeight;
 
-        this.panel.pivot.set(this.panelWidth / 2, this.panelHeight / 2);
-        this.panel.scale.set(1);
+        /** Center panel base */
+        this.panelBase.pivot.set(this.panelWidth / 2, this.panelHeight / 2);
+        this.panelBase.x = width * 0.5;
+        this.panelBase.y = height * 0.5;
 
         /** Title */
         this.title.style.fontSize = titleFontSize;
         this.title.x = this.panelWidth * 0.5;
+        this.title.y = 100;
 
         /** Close button */
         this.closeButton.scale.set(closeScale);
@@ -221,23 +220,17 @@ export class InfoPopup extends Container {
         /** Right button */
         this.rightButton.scale.set(navScale);
         this.rightButton.x = this.panelWidth - this.rightButton.width * 0.5 - 40;
-        this.rightButton.y = this.panelHeight * 0.5 - this.leftButton.height * 0.5;
-
-        /** Section label */
-        this.sectionlabel.x = this.panelWidth * 0.5;
-        this.sectionlabel.y = this.panelHeight - this.sectionlabel.height - 30;
+        this.rightButton.y = this.panelHeight * 0.5;
 
         /** Left button */
         this.leftButton.scale.set(navScale);
-        this.leftButton.x = 40;
-        this.leftButton.y = this.panelHeight * 0.5 - this.rightButton.height * 0.5;
+        this.leftButton.x = this.leftButton.width * 0.5 + 40;
+        this.leftButton.y = this.panelHeight * 0.5;
 
-        this.sectionlabel.style.fontSize = sectionFontSzie;
+        /** Section label */
+        this.sectionlabel.style.fontSize = sectionFontSize;
         this.sectionlabel.x = this.panelWidth * 0.5;
-
-        /** Center panel */
-        this.panel.x = width * 0.5;
-        this.panel.y = height * 0.5;
+        this.sectionlabel.y = this.panelHeight - this.sectionlabel.height - 30;
 
         if (this.currentSection && this.currentSection.resize) {
             this.currentSection.resize(this.panelWidth - 200, this.panelHeight - 200);
@@ -265,62 +258,51 @@ export class InfoPopup extends Container {
     }
 
     public async next() {
-        // Increase the betIndex if it's not already at the maximum index
         if (this.sectionIndex < this.sections.length - 1) {
             this.sectionIndex++;
         } else {
             this.sectionIndex = 0;
         }
         await this.showSection(this.sections[this.sectionIndex].section);
-
         this.updateSectionInfo();
     }
 
     public async back() {
-        // Decrease the betIndex if it's not already at the minimum index
         if (this.sectionIndex > 0) {
             this.sectionIndex--;
         } else {
             this.sectionIndex = this.sections.length - 1;
         }
         await this.showSection(this.sections[this.sectionIndex].section);
-
         this.updateSectionInfo();
     }
 
     /** Show section */
     public async showSection(ctor: SectionConstructor) {
-        // Block interactivity in current screen
         if (this.currentSection) {
             this.currentSection.interactiveChildren = false;
         }
 
-        // If there is a screen already created, hide and destroy it
         if (this.currentSection) {
             await this.hideAndRemoveSection(this.currentSection);
         }
 
-        // Create the new screen and add that to the stage
         this.currentSection = pool.get(ctor);
         await this.addAndShowSection(this.currentSection);
     }
 
     /** Remove screen from the stage, unlink update & resize functions */
     private async hideAndRemoveSection(section: ModalSection) {
-        // Prevent interaction in the screen
         section.interactiveChildren = false;
 
-        // Hide screen if method is available
         if (section.hide) {
             await section.hide();
         }
 
-        // Remove screen from its parent (usually app.stage, if not changed)
         if (section.parent) {
             section.parent.removeChild(section);
         }
 
-        // Clean up the screen so that instance can be reused again later
         if (section.reset) {
             section.reset();
         }
@@ -328,28 +310,22 @@ export class InfoPopup extends Container {
 
     /** Add screen to the stage, link update & resize functions */
     private async addAndShowSection(section: ModalSection) {
-        // Add navigation container to stage if it does not have a parent yet
         if (!this.container.parent) {
-            this.panel.addChild(this.container);
+            this.panelBase.addChild(this.container);
         }
 
-        // Add screen to stage
         this.container.addChild(section);
 
-        // Setup things and pre-organise screen before showing
         if (section.prepare) {
             section.prepare();
         }
 
-        // Add screen's resize handler, if available
         if (section.resize) {
-            // Trigger a first resize
             section.resize(this.panelWidth - 200, this.panelHeight - 200);
             section.x = 100;
             section.y = 100;
         }
 
-        // Show the new screen
         if (section.show) {
             section.interactiveChildren = false;
             await section.show();

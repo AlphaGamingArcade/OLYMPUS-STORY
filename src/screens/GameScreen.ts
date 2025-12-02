@@ -22,6 +22,7 @@ import { BuyFreeSpinPopup, BuyFreeSpinPopupData } from '../popups/BuyFreeSpinPop
 import { AutoplayPopup } from '../popups/AutoplayPopup';
 import { SettingsPopup, SettingsPopupData } from '../popups/SettingsPopup';
 import { InfoPopup, InfoPopupData } from '../popups/InfoPopup';
+import { formatCurrency } from '../utils/formatter';
 
 /** The screen tha holds the Match3 game */
 export class GameScreen extends Container {
@@ -223,9 +224,8 @@ export class GameScreen extends Container {
     }
 
     private updateBuyFreeSpinAmount() {
-        const currency = userSettings.getCurrency();
         const amount = userSettings.getBet() * gameConfig.getBuyFreeSpinBetMultiplier();
-        this.buyFreeSpinButton.setAmount(`${currency}${amount.toLocaleString()}`);
+        this.buyFreeSpinButton.setAmount(formatCurrency(amount, this.currency));
     }
 
     private updateMultiplierAmounts() {

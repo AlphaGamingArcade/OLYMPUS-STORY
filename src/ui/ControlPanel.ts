@@ -1,4 +1,4 @@
-import { Container, Text, Graphics } from 'pixi.js';
+import { Container, Text, Sprite, Texture } from 'pixi.js';
 import { SoundButton } from './SoundButton';
 import { IconButton } from './IconButton2';
 import { userSettings } from '../utils/userSettings';
@@ -7,14 +7,13 @@ import { userSettings } from '../utils/userSettings';
  */
 
 export class ControlPanel extends Container {
-    private background: Graphics;
+    private background: Sprite;
     private contentContainer: Container;
     private creditLabel: Text;
     private creditValue: Text;
     private betLabel: Text;
     private betValue: Text;
     private messageText: Text;
-    // private stopIcon: Sprite;
 
     private soundButton: SoundButton;
     private infoButton: IconButton;
@@ -32,8 +31,10 @@ export class ControlPanel extends Container {
     constructor() {
         super();
 
-        // Create semi-transparent background
-        this.background = new Graphics();
+        // Create semi-transparent background using Sprite
+        this.background = Sprite.from(Texture.WHITE);
+        this.background.tint = 0x000000;
+        this.background.alpha = 0.7;
         this.addChild(this.background);
 
         // Create content container with max width
@@ -144,12 +145,6 @@ export class ControlPanel extends Container {
         this.contentContainer.addChild(this.spinButton);
         this.contentContainer.addChild(this.plusButton);
         this.contentContainer.addChild(this.autoplayButton);
-
-        // Spin and Stop Buttons
-        // this.stop = Sprite.from('control-panel-stop');
-        // this.stop.anchor.set(0.5);
-        // this.stop.scale.set(0.15);
-        // this.spinButton.addChild(this.stop);
     }
 
     /**
@@ -163,9 +158,8 @@ export class ControlPanel extends Container {
             const panelHeight = 400;
 
             // Background
-            this.background.clear();
-            this.background.rect(0, 0, width, panelHeight);
-            this.background.fill({ color: 0x000000, alpha: 0.7 });
+            this.background.width = width;
+            this.background.height = panelHeight;
             this.y = height - panelHeight;
 
             // Content container
@@ -222,25 +216,25 @@ export class ControlPanel extends Container {
             const bottomY = 340;
 
             this.creditLabel.x = creditStartX;
-            this.creditLabel.y = bottomY - 40; // Label above
+            this.creditLabel.y = bottomY - 40;
             this.creditLabel.style.fontSize = 32;
             this.creditLabel.anchor.set(0, 0);
 
             this.creditValue.x = creditStartX;
-            this.creditValue.y = bottomY; // Value below
+            this.creditValue.y = bottomY;
             this.creditValue.style.fontSize = 42;
             this.creditValue.anchor.set(0, 0);
 
             // Bottom right - Bet info (vertical stack, aligned to right edge)
             this.betLabel.x = creditEndX;
-            this.betLabel.y = bottomY - 40; // Label above
+            this.betLabel.y = bottomY - 40;
             this.betLabel.style.fontSize = 32;
-            this.betLabel.anchor.set(1, 0); // Right-align the text
+            this.betLabel.anchor.set(1, 0);
 
             this.betValue.x = creditEndX;
-            this.betValue.y = bottomY; // Value below
+            this.betValue.y = bottomY;
             this.betValue.style.fontSize = 42;
-            this.betValue.anchor.set(1, 0); // Right-align the text
+            this.betValue.anchor.set(1, 0);
 
             // Message (bottom center, small)
             this.messageText.x = contentWidth / 2;
@@ -252,9 +246,8 @@ export class ControlPanel extends Container {
             const panelHeight = 210;
 
             // Background
-            this.background.clear();
-            this.background.rect(0, 0, width, panelHeight);
-            this.background.fill({ color: 0x000000, alpha: 0.7 });
+            this.background.width = width;
+            this.background.height = panelHeight;
             this.y = height - panelHeight;
 
             // Content container
@@ -288,17 +281,17 @@ export class ControlPanel extends Container {
             this.creditLabel.x = creditStartX;
             this.creditLabel.y = bottomY;
             this.creditLabel.style.fontSize = 32;
-            this.creditLabel.anchor.set(0, 0); // Reset anchor to left-align
+            this.creditLabel.anchor.set(0, 0);
 
             this.creditValue.x = creditStartX + 160;
             this.creditValue.y = bottomY;
             this.creditValue.style.fontSize = 32;
-            this.creditValue.anchor.set(0, 0); // Reset anchor to left-align
+            this.creditValue.anchor.set(0, 0);
 
             this.betLabel.x = creditStartX + 380;
             this.betLabel.y = bottomY;
             this.betLabel.style.fontSize = 32;
-            this.betLabel.anchor.set(0, 0); // Reset anchor to left-align
+            this.betLabel.anchor.set(0, 0);
 
             this.betValue.x = creditStartX + 480;
             this.betValue.y = bottomY;
@@ -337,9 +330,8 @@ export class ControlPanel extends Container {
             const panelHeight = 160;
 
             // Background
-            this.background.clear();
-            this.background.rect(0, 0, width, panelHeight);
-            this.background.fill({ color: 0x000000, alpha: 0.7 });
+            this.background.width = width;
+            this.background.height = panelHeight;
             this.y = height - panelHeight;
 
             // Content container with max width

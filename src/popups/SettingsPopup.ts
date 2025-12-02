@@ -1,4 +1,4 @@
-import { Container, Graphics, Sprite, Texture } from 'pixi.js';
+import { Container, Sprite, Texture } from 'pixi.js';
 import { Label } from '../ui/Label';
 import { IconButton } from '../ui/IconButton2';
 import { navigation } from '../utils/navigation';
@@ -16,7 +16,10 @@ export class SettingsPopup extends Container {
     private bg: Sprite;
     private title: Label;
     private closeButton: IconButton;
-    private panel: Graphics;
+    /** The panel background sprite */
+    private panelBg: Sprite;
+    /** Base container for all panel content */
+    private panelBase: Container;
     /** Height of the panel */
     private panelHeight: number = 0;
     /** Width of the panel */
@@ -38,27 +41,23 @@ export class SettingsPopup extends Container {
         this.panelWidth = 1400;
         this.panelHeight = 800;
 
-        const radius = 10;
-        const border = 0;
-        const borderColor = '#3B3B3B';
-        const backgroundColor = '#3B3B3B';
+        // Create panel base container
+        this.panelBase = new Container();
+        this.addChild(this.panelBase);
 
-        this.panel = new Graphics()
-            .fill(borderColor)
-            .roundRect(0, 0, this.panelWidth, this.panelHeight, radius)
-            .fill(backgroundColor)
-            .roundRect(border, border, this.panelWidth - border * 2, this.panelHeight - border * 2, radius);
-        this.panel.pivot.set(this.panelWidth / 2, this.panelHeight / 2);
-        this.addChild(this.panel);
+        // Create panel background sprite
+        this.panelBg = Sprite.from(Texture.WHITE);
+        this.panelBg.tint = 0x3b3b3b;
+        this.panelBg.width = this.panelWidth;
+        this.panelBg.height = this.panelHeight;
+        this.panelBase.addChild(this.panelBg);
 
         this.title = new Label('System Settings', {
             fill: '#FCC100',
         });
         this.title.anchor.set(0.5);
-        this.title.x = this.panel.width * 0.5;
-        this.title.y = 100;
         this.title.style.fontSize = 32;
-        this.panel.addChild(this.title);
+        this.panelBase.addChild(this.title);
 
         this.closeButton = new IconButton({
             imageDefault: 'icon-button-default-close-view',
@@ -67,10 +66,8 @@ export class SettingsPopup extends Container {
             imageDisabled: 'icon-button-default-close-view',
         });
         this.closeButton.scale.set(0.5);
-        this.closeButton.x = this.panel.width - 60;
-        this.closeButton.y = 60;
         this.closeButton.onPress.connect(() => navigation.dismissPopup());
-        this.panel.addChild(this.closeButton);
+        this.panelBase.addChild(this.closeButton);
 
         /** Bet Selector */
         this.betSettings = new BetSettings();
@@ -85,14 +82,17 @@ export class SettingsPopup extends Container {
             this.onBetChanged?.();
         });
 
-        this.panel.addChild(this.betSettings);
+        this.panelBase.addChild(this.betSettings);
 
         /** Audio Settings */
         this.audioSettings = new AudioSettings({
             gap: 50,
             width: 400,
         });
-        this.panel.addChild(this.audioSettings);
+        this.panelBase.addChild(this.audioSettings);
+
+        // Center panel base
+        this.panelBase.pivot.set(this.panelWidth / 2, this.panelHeight / 2);
     }
 
     /** Resize the popup, fired whenever window size changes */
@@ -143,33 +143,31 @@ export class SettingsPopup extends Container {
             audioY = this.panelHeight * 0.5 - this.audioSettings.height * 0.5;
         }
 
-        // Update panel
-        this.panel.clear();
-        this.panel
-            .fill('#3B3B3B')
-            .roundRect(0, 0, this.panelWidth, this.panelHeight, 10)
-            .fill('#3B3B3B')
-            .roundRect(0, 0, this.panelWidth, this.panelHeight, 10);
-        this.panel.pivot.set(this.panelWidth / 2, this.panelHeight / 2);
-        this.panel.scale.set(1);
-        this.panel.x = width * 0.5;
-        this.panel.y = height * 0.5;
+        /** Panel background sprite */
+        this.panelBg.width = this.panelWidth;
+        this.panelBg.height = this.panelHeight;
 
-        // Update title
+        /** Center panel base */
+        this.panelBase.pivot.set(this.panelWidth / 2, this.panelHeight / 2);
+        this.panelBase.x = width * 0.5;
+        this.panelBase.y = height * 0.5;
+
+        /** Title */
         this.title.style.fontSize = titleFontSize;
         this.title.x = this.panelWidth * 0.5;
+        this.title.y = 100;
 
-        // Update close button
+        /** Close button */
         this.closeButton.scale.set(closeButtonScale);
         this.closeButton.x = this.panelWidth - 60;
         this.closeButton.y = 60;
 
-        // Update bet settings
+        /** Bet settings */
         this.betSettings.scale.set(settingsScale);
         this.betSettings.x = betX;
         this.betSettings.y = betY;
 
-        // Update audio settings
+        /** Audio settings */
         this.audioSettings.scale.set(settingsScale);
         this.audioSettings.x = audioX;
         this.audioSettings.y = audioY;

@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { throttle } from '../utils/throttle';
 import { sfx } from '../utils/audio';
 import { Label } from './Label';
+import { formatCurrency } from '../utils/formatter';
 
 const defaultJackpotTierOptions = {
     name: 'multiplier_label_grand',
@@ -44,7 +45,7 @@ export class JackpotTier extends Container {
     private totalOccurance: number;
     private totalDots: number;
     private activeDots: number;
-    private currency: String;
+    private currency: string;
     private points = -1;
     private showing = true;
     private intensity = 0;
@@ -384,7 +385,7 @@ export class JackpotTier extends Container {
 
     /** Update displayed points and play sound */
     private printPoints() {
-        const text = `${this.currency}${this.points.toLocaleString()}`;
+        const text = `${formatCurrency(this.points, this.currency)}`;
 
         if (this.messageLabel.text === text) return;
 

@@ -222,9 +222,9 @@ export class BuyFreeSpinButton extends FancyButton {
     }
 
     /** Update the amount displayed */
-    public setAmount(amount: string) {
-        if (this.amountLabel.text == amount) return;
-        this.amountLabel.text = amount;
+    public setAmount(amountString: string) {
+        if (this.amountLabel.text == amountString) return;
+        this.amountLabel.text = amountString;
         this.fitTextToContainer();
     }
 }

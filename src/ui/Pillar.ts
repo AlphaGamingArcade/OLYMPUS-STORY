@@ -1,4 +1,4 @@
-import { Container, Graphics } from 'pixi.js';
+import { Container, Sprite, Texture } from 'pixi.js';
 import { Spine } from '@esotericsoftware/spine-pixi-v8';
 
 /**
@@ -8,7 +8,10 @@ import { Spine } from '@esotericsoftware/spine-pixi-v8';
 export class Pillar extends Container {
     /** Inner container for shelf building blocks */
     private base: Container;
-    private panel: Graphics;
+    /** The panel background sprite */
+    private panelBg: Sprite;
+    /** Base container for all panel content */
+    private panelBase: Container;
     private spine: Spine;
 
     constructor() {
@@ -17,9 +20,14 @@ export class Pillar extends Container {
         this.base = new Container();
         this.addChild(this.base);
 
-        // Create white graphics panel
-        this.panel = new Graphics();
-        this.addChild(this.panel);
+        // Create panel base container
+        this.panelBase = new Container();
+        this.addChild(this.panelBase);
+
+        // Create panel background sprite
+        this.panelBg = Sprite.from(Texture.WHITE);
+        this.panelBg.tint = 0xffffff;
+        this.panelBase.addChild(this.panelBg);
 
         // Create new spine animation
         this.spine = Spine.from({
@@ -46,9 +54,15 @@ export class Pillar extends Container {
 
         // Draw white panel behind the grid with extra width on sides
         const extraWidth = 50; // Adjust this value for more/less extra space
-        this.panel.clear();
-        this.panel.rect(-panelWidth / 2 - extraWidth, -panelHeight / 2, panelWidth + extraWidth * 2, panelHeight);
-        this.panel.fill(0xffffff);
+
+        // Update panel background sprite dimensions
+        this.panelBg.width = panelWidth + extraWidth * 2;
+        this.panelBg.height = panelHeight;
+        this.panelBg.anchor.set(0.5, 0.5);
+
+        // Position panel base
+        this.panelBase.x = 0;
+        this.panelBase.y = 0;
 
         // Center the spine animation
         this.spine.x = 0;
