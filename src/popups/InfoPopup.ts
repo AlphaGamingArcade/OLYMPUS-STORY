@@ -3,7 +3,7 @@ import { Label } from '../ui/Label';
 import { IconButton } from '../ui/IconButton2';
 import { navigation } from '../utils/navigation';
 import { PayTableSection } from '../ui/PaytableSection';
-import { GameRulesSection } from '../ui/GameRules';
+import { FeatureSection } from '../ui/FeatureSection';
 import { HowToPlaySection } from '../ui/HowToPlaySection';
 import { SettingsMenuSection } from '../ui/SettingsMenuSection';
 import { pool } from '../utils/pool';
@@ -51,6 +51,10 @@ export class InfoPopup extends Container {
     private closeButton: IconButton;
     /** The board panel  */
     private panel: Graphics;
+    /** Height of the panel */
+    private panelHeight: number = 0;
+    /** Width of the panel */
+    private panelWidth: number = 0;
     /** Container for the popup UI components */
     private container: Container;
     /** Section current index */
@@ -70,8 +74,8 @@ export class InfoPopup extends Container {
             section: PayTableSection,
         },
         {
-            title: 'Game Rules',
-            section: GameRulesSection,
+            title: 'CASCADE FEATURE',
+            section: FeatureSection,
         },
         {
             title: 'How to play',
@@ -92,19 +96,19 @@ export class InfoPopup extends Container {
         this.bg.tint = 0x000000;
         this.addChild(this.bg);
 
-        const width = 1400;
-        const height = 800;
+        this.panelWidth = 1400;
+        this.panelHeight = 800;
         const radius = 10;
         const border = 0;
-        const borderColor = '#000000b3';
-        const backgroundColor = '#000000b3';
+        const borderColor = '#3B3B3B';
+        const backgroundColor = '#3B3B3B';
 
         this.panel = new Graphics()
             .fill(borderColor)
-            .roundRect(0, 0, width, height, radius)
+            .roundRect(0, 0, this.panelWidth, this.panelHeight, radius)
             .fill(backgroundColor)
-            .roundRect(border, border, width - border * 2, height - border * 2, radius);
-        this.panel.pivot.set(width / 2, height / 2);
+            .roundRect(border, border, this.panelWidth - border * 2, this.panelHeight - border * 2, radius);
+        this.panel.pivot.set(this.panelWidth / 2, this.panelHeight / 2);
         this.addChild(this.panel);
 
         this.title = new Label('Information', {
@@ -128,9 +132,11 @@ export class InfoPopup extends Container {
         this.closeButton.onPress.connect(() => navigation.dismissPopup());
         this.panel.addChild(this.closeButton);
 
+        this.sectionlabel = new Label('', { fill: '#ffffff', fontSize: 20 });
+        this.sectionlabel.anchor.set(0.5); // Add this
+        this.panel.addChild(this.sectionlabel);
+
         this.container = new Container();
-        this.container.x = this.panel.width * 0.5 - 130;
-        this.container.y = this.panel.height * 0.5 - 100;
         this.panel.addChild(this.container);
 
         this.leftButton = new IconButton({
@@ -155,10 +161,6 @@ export class InfoPopup extends Container {
         this.panel.addChild(this.rightButton);
         this.rightButton.onPress.connect(() => this.next());
 
-        this.sectionlabel = new Label('', { fill: '#ffffff', fontSize: 20 });
-        this.sectionlabel.anchor.set(0.5); // Add this
-        this.panel.addChild(this.sectionlabel);
-
         this.init();
     }
 
@@ -170,100 +172,67 @@ export class InfoPopup extends Container {
         const isMobile = document.documentElement.id === 'isMobile';
         const isPortrait = width < height;
 
-        if (isMobile && isPortrait) {
-            const panelWidth = width * 0.9;
-            const panelHeight = height * 0.85;
+        let titleFontSize: number;
+        let closeScale: number;
+        let navScale: number;
 
-            this.panel.clear();
-            this.panel
-                .fill('#000000b3')
-                .roundRect(0, 0, panelWidth, panelHeight, 10)
-                .fill('#000000b3')
-                .roundRect(0, 0, panelWidth, panelHeight, 10);
-
-            this.panel.pivot.set(panelWidth / 2, panelHeight / 2);
-            this.panel.scale.set(1);
-
-            this.title.style.fontSize = 52;
-            this.title.x = panelWidth * 0.5;
-
-            this.closeButton.scale.set(0.75);
-            this.closeButton.x = panelWidth - 60;
-            this.closeButton.y = 60;
-
-            /** Navigations */
-            this.rightButton.x = panelWidth - this.leftButton.width * 0.5 - 40;
-            this.leftButton.x = 40;
-
-            this.sectionlabel.x = panelWidth * 0.5;
-            this.sectionlabel.y = panelHeight - this.sectionlabel.height - 30;
-
-            this.rightButton.y = panelHeight * 0.5 - this.rightButton.height * 0.5;
-            this.leftButton.y = panelHeight * 0.5 - this.leftButton.height * 0.5;
-        } else if (isMobile && !isPortrait) {
-            const panelWidth = width * 0.85;
-            const panelHeight = height * 0.9;
-
-            this.panel.clear();
-            this.panel
-                .fill('#000000b3')
-                .roundRect(0, 0, panelWidth, panelHeight, 10)
-                .fill('#000000b3')
-                .roundRect(0, 0, panelWidth, panelHeight, 10);
-
-            this.panel.pivot.set(panelWidth / 2, panelHeight / 2);
-            this.panel.scale.set(1);
-
-            this.title.style.fontSize = 52;
-            this.title.x = panelWidth * 0.5;
-
-            this.closeButton.scale.set(0.75);
-            this.closeButton.x = panelWidth - 60;
-            this.closeButton.y = 60;
-
-            /** Navigations */
-            this.rightButton.x = panelWidth - this.leftButton.width * 0.5 - 40;
-            this.leftButton.x = 40;
-
-            this.sectionlabel.x = panelWidth * 0.5;
-            this.sectionlabel.y = panelHeight - this.sectionlabel.height - 30;
-
-            this.rightButton.y = panelHeight * 0.5 - this.rightButton.height * 0.5;
-            this.leftButton.y = panelHeight * 0.5 - this.leftButton.height * 0.5;
+        if (isMobile) {
+            this.panelWidth = width * (isPortrait ? 0.9 : 0.85);
+            this.panelHeight = height * (isPortrait ? 0.85 : 0.9);
+            titleFontSize = 52;
+            closeScale = 0.75;
+            navScale = 1;
         } else {
-            const panelWidth = 1400;
-            const panelHeight = 800;
-
-            this.panel.clear();
-            this.panel
-                .fill('#000000b3')
-                .roundRect(0, 0, panelWidth, panelHeight, 10)
-                .fill('#000000b3')
-                .roundRect(0, 0, panelWidth, panelHeight, 10);
-
-            this.panel.pivot.set(panelWidth / 2, panelHeight / 2);
-            this.panel.scale.set(1);
-
-            this.title.style.fontSize = 32;
-            this.title.x = panelWidth * 0.5;
-
-            this.closeButton.scale.set(0.5);
-            this.closeButton.x = panelWidth - 60;
-            this.closeButton.y = 60;
-
-            /** Navigations */
-            this.rightButton.x = panelWidth - this.leftButton.width * 0.5 - 40;
-            this.leftButton.x = 40;
-
-            this.sectionlabel.x = panelWidth * 0.5;
-            this.sectionlabel.y = panelHeight - this.sectionlabel.height - 30;
-
-            this.rightButton.y = panelHeight * 0.5 - this.rightButton.height * 0.5;
-            this.leftButton.y = panelHeight * 0.5 - this.leftButton.height * 0.5;
+            this.panelWidth = 1400;
+            this.panelHeight = 800;
+            titleFontSize = 32;
+            closeScale = 0.5;
+            navScale = 0.75;
         }
 
+        /** Panel background */
+        this.panel.clear();
+        this.panel
+            .fill('#3B3B3B')
+            .roundRect(0, 0, this.panelWidth, this.panelHeight, 10)
+            .fill('#3B3B3B')
+            .roundRect(0, 0, this.panelWidth, this.panelHeight, 10);
+
+        this.panel.pivot.set(this.panelWidth / 2, this.panelHeight / 2);
+        this.panel.scale.set(1);
+
+        /** Title */
+        this.title.style.fontSize = titleFontSize;
+        this.title.x = this.panelWidth * 0.5;
+
+        /** Close button */
+        this.closeButton.scale.set(closeScale);
+        this.closeButton.x = this.panelWidth - 60;
+        this.closeButton.y = 60;
+
+        /** Right button */
+        this.rightButton.scale.set(navScale);
+        this.rightButton.x = this.panelWidth - this.rightButton.width * 0.5 - 40;
+        this.rightButton.y = this.panelHeight * 0.5 - this.leftButton.height * 0.5;
+
+        /** Section label */
+        this.sectionlabel.x = this.panelWidth * 0.5;
+        this.sectionlabel.y = this.panelHeight - this.sectionlabel.height - 30;
+
+        /** Left button */
+        this.leftButton.scale.set(navScale);
+        this.leftButton.x = 40;
+        this.leftButton.y = this.panelHeight * 0.5 - this.rightButton.height * 0.5;
+
+        /** Center panel */
         this.panel.x = width * 0.5;
         this.panel.y = height * 0.5;
+
+        if (this.currentSection && this.currentSection.resize) {
+            this.currentSection.resize(this.panelWidth - 200, this.panelHeight - 200);
+            this.currentSection.x = 100;
+            this.currentSection.y = 100;
+        }
     }
 
     /** Set things up just before showing the popup */
@@ -364,7 +333,9 @@ export class InfoPopup extends Container {
         // Add screen's resize handler, if available
         if (section.resize) {
             // Trigger a first resize
-            section.resize(this.width, this.height);
+            section.resize(this.panelWidth - 200, this.panelHeight - 200);
+            section.x = 100;
+            section.y = 100;
         }
 
         // Show the new screen

@@ -12,7 +12,7 @@ const defaultJackpotTierOptions = {
     points: 0,
     totalDots: 0,
     totalOccurance: 0,
-    currency: '$',
+    currency: 'USD',
     activeDots: 0,
 };
 

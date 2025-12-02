@@ -44,7 +44,7 @@ export class ConfigAPI {
                         order: 5,
                     },
                 ],
-                paytable: [
+                paytables: [
                     {
                         type: 1,
                         patterns: [

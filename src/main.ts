@@ -12,7 +12,6 @@ import { ResultScreen } from './screens/ResultScreen';
 import { ConfigAPI } from './api/configApi';
 import { gameConfig } from './utils/gameConfig';
 import { InfoPopup } from './popups/InfoPopup';
-import { SettingsPopup } from './popups/SettingsPopup';
 
 /** The PixiJS app Application instance, shared across the project */
 export const app = new Application();
@@ -87,7 +86,7 @@ async function loadGameConfig() {
 
     // Game configuration from server
     gameConfig.setBlocks(result.blocks);
-    gameConfig.setPaytables(result.paytable);
+    gameConfig.setPaytables(result.paytables);
     gameConfig.setSpecialBlocks(result.specialBlocks);
     gameConfig.setScatterBlocks(result.scatterBlocks);
     gameConfig.setScatterBlocksTrigger(result.scatterBlocksTrigger);

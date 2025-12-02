@@ -46,8 +46,8 @@ export class AutoplayPopup extends Container {
         const height = 570;
         const radius = 10;
         const border = 0;
-        const borderColor = '#000000b3';
-        const backgroundColor = '#000000b3';
+        const borderColor = '#3B3B3B';
+        const backgroundColor = '#3B3B3B';
 
         this.panel = new Graphics()
             .fill(borderColor)

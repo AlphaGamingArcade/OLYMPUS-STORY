@@ -21,6 +21,7 @@ import { JackpotWinPopup, JackpotWinPopupData } from '../popups/JackpotWinPopup'
 import { BuyFreeSpinPopup, BuyFreeSpinPopupData } from '../popups/BuyFreeSpinPopup';
 import { AutoplayPopup } from '../popups/AutoplayPopup';
 import { SettingsPopup, SettingsPopupData } from '../popups/SettingsPopup';
+import { InfoPopup, InfoPopupData } from '../popups/InfoPopup';
 
 /** The screen tha holds the Match3 game */
 export class GameScreen extends Container {
@@ -67,7 +68,7 @@ export class GameScreen extends Container {
 
     constructor() {
         super();
-        this.currency = '$';
+        this.currency = 'USD';
         this.gameContainer = new Container();
         this.addChild(this.gameContainer);
 
@@ -176,6 +177,16 @@ export class GameScreen extends Container {
         });
         this.controlPanel.onSettings(() => {
             navigation.presentPopup<SettingsPopupData>(SettingsPopup, {
+                finished: this.finished,
+                onBetChanged: () => {
+                    this.controlPanel.setBet(userSettings.getBet());
+                    this.updateMultiplierAmounts();
+                    this.updateBuyFreeSpinAmount();
+                },
+            });
+        });
+        this.controlPanel.onInfo(() => {
+            navigation.presentPopup<InfoPopupData>(InfoPopup, {
                 finished: this.finished,
                 onBetChanged: () => {
                     this.controlPanel.setBet(userSettings.getBet());

@@ -1,207 +1,18 @@
-import { Container } from 'pixi.js';
-import { List } from '@pixi/ui';
+import { Container, Graphics } from 'pixi.js';
 import { Label } from './Label';
-import { PaytableCard } from './PaytableCard';
-import { PaytableSpecialCard } from './PaytableSpecialCard';
+import { userSettings } from '../utils/userSettings';
+import { Paytable } from '../slot/Match3Config';
+import { List } from '@pixi/ui';
+import { gameConfig } from '../utils/gameConfig';
 
 const defaultPayTableSectionOptions = {
-    paylines: [
+    paytables: [
         {
-            image: 'slot-letter-a',
-            description: '',
-            paylines: [
-                {
-                    match: 3,
-                    multiplier: 5,
-                },
-                {
-                    match: 4,
-                    multiplier: 10,
-                },
-                {
-                    match: 5,
-                    multiplier: 20,
-                },
-            ],
-        },
-        {
-            image: 'slot-letter-k',
-            description: '',
-            paylines: [
-                {
-                    match: 3,
-                    multiplier: 0.5,
-                },
-                {
-                    match: 4,
-                    multiplier: 1,
-                },
-                {
-                    match: 5,
-                    multiplier: 1.5,
-                },
-            ],
-        },
-        {
-            image: 'slot-letter-j',
-            description: '',
-            paylines: [
-                {
-                    match: 3,
-                    multiplier: 1,
-                },
-                {
-                    match: 4,
-                    multiplier: 2,
-                },
-                {
-                    match: 5,
-                    multiplier: 2.5,
-                },
-            ],
-        },
-        {
-            image: 'slot-shark',
-            description: '',
-            paylines: [
-                {
-                    match: 3,
-                    multiplier: 1,
-                },
-                {
-                    match: 4,
-                    multiplier: 1.5,
-                },
-                {
-                    match: 5,
-                    multiplier: 3,
-                },
-            ],
-        },
-        {
-            image: 'slot-turtle',
-            description: '',
-            paylines: [
-                {
-                    match: 3,
-                    multiplier: 1,
-                },
-                {
-                    match: 4,
-                    multiplier: 1.75,
-                },
-                {
-                    match: 5,
-                    multiplier: 2,
-                },
-            ],
-        },
-        {
-            image: 'slot-seal',
-            description: '',
-            paylines: [
-                {
-                    match: 3,
-                    multiplier: 1,
-                },
-                {
-                    match: 4,
-                    multiplier: 1.25,
-                },
-                {
-                    match: 5,
-                    multiplier: 1.5,
-                },
-            ],
-        },
-        {
-            image: 'slot-octopus',
-            description: '',
-            paylines: [
-                {
-                    match: 3,
-                    multiplier: 0.5,
-                },
-                {
-                    match: 4,
-                    multiplier: 1,
-                },
-                {
-                    match: 5,
-                    multiplier: 1.5,
-                },
-            ],
-        },
-        {
-            image: 'slot-penguin',
-            description: '',
-            paylines: [
-                {
-                    match: 3,
-                    multiplier: 0.5,
-                },
-                {
-                    match: 4,
-                    multiplier: 0.75,
-                },
-                {
-                    match: 5,
-                    multiplier: 1,
-                },
-            ],
-        },
-        {
-            image: 'slot-mega',
-            description: '',
-            paylines: [
-                {
-                    match: 3,
-                    multiplier: 1,
-                },
-                {
-                    match: 4,
-                    multiplier: 1.5,
-                },
-                {
-                    match: 5,
-                    multiplier: 2,
-                },
-            ],
-        },
-        {
-            image: 'slot-bonus',
-            description: 'Modal info slot bonus text',
-            paylines: [
-                {
-                    match: 3,
-                    multiplier: 0.25,
-                },
-                {
-                    match: 4,
-                    multiplier: 0.75,
-                },
-                {
-                    match: 5,
-                    multiplier: 1,
-                },
-            ],
-        },
-        {
-            image: 'slot-wild',
-            description: 'Modal info slot wild text',
-            paylines: [
-                {
-                    match: 3,
-                    multiplier: 15,
-                },
-                {
-                    match: 4,
-                    multiplier: 10,
-                },
-                {
-                    match: 5,
-                    multiplier: 20,
-                },
+            type: 0,
+            patterns: [
+                { min: 0, max: 0, multiplier: 0 },
+                { min: 0, max: 0, multiplier: 0 },
+                { min: 0, max: 0, multiplier: 0 },
             ],
         },
     ],
@@ -210,80 +21,76 @@ const defaultPayTableSectionOptions = {
 export type PayTableSectionOptions = typeof defaultPayTableSectionOptions;
 
 export class PayTableSection extends Container {
+    private panel: Graphics;
     private symbolsDescriptionLabel: Label;
-
-    private layout: List;
-
-    private symbolLayout1: List;
-
-    private symbolLayout2: List;
-
+    private mainLayout: List;
     private betAmount: number;
+    private currency: string;
+    private paytables: Paytable[];
 
     constructor(opts: Partial<PayTableSectionOptions> = {}) {
         super();
 
-        const options = { ...defaultPayTableSectionOptions, ...opts };
-
         this.betAmount = 0;
+        this.currency = 'USD';
+        this.paytables = opts.paytables ?? [];
 
-        this.layout = new List({ type: 'vertical', elementsMargin: 25 });
-        this.addChild(this.layout);
+        // Add background graphics
+        this.panel = new Graphics();
+        this.addChild(this.panel);
 
-        this.symbolsDescriptionLabel = new Label('Modal info paytable text', {
-            fill: '#ffffff',
-            fontSize: 18,
-            fontWeight: '200',
-        });
+        this.mainLayout = new List({ type: 'vertical', elementsMargin: 25 });
+        this.panel.addChild(this.mainLayout);
+
+        this.symbolsDescriptionLabel = new Label(
+            'Symbols pay regardless of their position. Your payout is based on how many identical symbols appear when the spin ends.',
+            {
+                fill: '#ffffff',
+                fontSize: 18,
+                fontWeight: '200',
+                wordWrap: true, // Enable word wrapping
+                wordWrapWidth: 800, // Set the maximum width for the text block
+                align: 'center', // Optional: alignment for the wrapped text
+            },
+        );
         this.symbolsDescriptionLabel.anchor.set(0.5);
-        this.layout.addChild(this.symbolsDescriptionLabel);
-
-        this.symbolLayout1 = new List({ type: 'horizontal', elementsMargin: 5 });
-        this.layout.addChild(this.symbolLayout1);
-
-        const paylines = (options?.paylines ?? []).slice(0, 9) ?? [];
-        for (let index = 0; index < paylines.length; index++) {
-            const newElement = {
-                image: paylines[index].image,
-                special: false,
-                description: paylines[index].description,
-                paylines: paylines[index].paylines.map((payline) => ({
-                    match: payline.match,
-                    amount: payline.multiplier * this.betAmount,
-                })),
-            };
-            const paylineCard = new PaytableCard(newElement);
-            this.symbolLayout1.addChild(paylineCard);
-        }
-
-        this.symbolLayout2 = new List({ type: 'horizontal' });
-        this.layout.addChild(this.symbolLayout2);
-
-        const bonusPaylines = (options?.paylines ?? []).slice(9, 12) ?? [];
-        for (let index = 0; index < bonusPaylines.length; index++) {
-            const newElement = {
-                image: bonusPaylines[index].image,
-                special: true,
-                description: bonusPaylines[index].description,
-                paylines: bonusPaylines[index].paylines.map((payline) => ({
-                    match: payline.match,
-                    amount: payline.multiplier * this.betAmount,
-                })),
-            };
-            const paylineCard = new PaytableSpecialCard(newElement);
-            this.symbolLayout2.addChild(paylineCard);
-        }
+        this.mainLayout.addChild(this.symbolsDescriptionLabel);
     }
 
-    public resize(_width: number, _height: number) {
-        this.layout.y = -150;
-        this.layout.x = 125;
+    public resize(width: number, height: number) {
+        // Redraw background with current dimensions
+        this.panel.clear();
+        this.panel.rect(0, 0, width, height).fill('transparent');
 
-        this.symbolLayout1.x = -(this.symbolLayout1.width / 2) + 75;
-        this.symbolLayout2.x = -(this.symbolLayout1.width / 2) + 165;
+        const isMobile = document.documentElement.id === 'isMobile';
+        const isPortrait = width < height;
+
+        if (isMobile && isPortrait) {
+            this.symbolsDescriptionLabel.y = 100;
+            this.symbolsDescriptionLabel.style.fontSize = 28;
+            this.symbolsDescriptionLabel.style.wordWrapWidth = 600;
+        } else if (isMobile && !isPortrait) {
+            this.symbolsDescriptionLabel.y = 100;
+            this.symbolsDescriptionLabel.style.fontSize = 28;
+            this.symbolsDescriptionLabel.style.wordWrapWidth = 1000;
+        } else {
+            this.symbolsDescriptionLabel.y = 60;
+            this.symbolsDescriptionLabel.style.fontSize = 18;
+            this.symbolsDescriptionLabel.style.wordWrapWidth = 800;
+        }
+
+        this.symbolsDescriptionLabel.x = width * 0.5;
     }
 
-    public setup(bet: number) {
-        this.betAmount = bet;
+    public prepare() {
+        this.setup();
+    }
+
+    public setup() {
+        this.betAmount = userSettings.getBet();
+        this.currency = userSettings.getCurrency();
+        this.paytables = gameConfig.getPaytables();
+
+        console.log('SETUP', this.paytables);
     }
 }

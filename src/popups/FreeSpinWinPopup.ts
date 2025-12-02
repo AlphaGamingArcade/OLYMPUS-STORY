@@ -54,7 +54,7 @@ export class FreeSpinWinPopup extends Container {
     /** Current win amount for counting animation */
     private spinsCount = 0;
     /** currency */
-    private currency = '$';
+    private currency = 'USD';
     /** Counting animation tween reference */
     private countTween?: gsap.core.Tween;
     /** Count animation duration */

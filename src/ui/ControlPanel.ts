@@ -1,6 +1,7 @@
 import { Container, Text, Graphics } from 'pixi.js';
 import { SoundButton } from './SoundButton';
 import { IconButton } from './IconButton2';
+import { userSettings } from '../utils/userSettings';
 /**
  * Control panel for the game, displaying credit, bet info, and action buttons
  */
@@ -50,8 +51,10 @@ export class ControlPanel extends Container {
         });
         this.contentContainer.addChild(this.creditLabel);
 
+        const currency = userSettings.getCurrency();
+
         this.creditValue = new Text({
-            text: '$100,000.00',
+            text: `${currency}100,000.00`,
             style: {
                 fontSize: 20,
                 fill: 0xffd700,
@@ -72,7 +75,7 @@ export class ControlPanel extends Container {
         this.contentContainer.addChild(this.betLabel);
 
         this.betValue = new Text({
-            text: '$2.00',
+            text: `${currency}.00`,
             style: {
                 fontSize: 20,
                 fill: 0xffd700,

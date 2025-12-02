@@ -63,14 +63,14 @@ export class RoundResultItem extends Container {
             },
         });
         this.amountLabel = new Text({
-            text: '$0.00',
+            text: '0.00',
             style: amountStyle,
         });
         this.amountLabel.x = this.background.width * 0.25;
         this.amountLabel.anchor.set(0.5, 0.5);
         this.container.addChild(this.amountLabel);
 
-        this.currency = '$';
+        this.currency = 'USD';
         this.total = 0;
         this.amount = 0;
     }
