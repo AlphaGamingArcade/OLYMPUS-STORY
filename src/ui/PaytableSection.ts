@@ -1,4 +1,4 @@
-import { Container, Graphics } from 'pixi.js';
+import { Container } from 'pixi.js';
 import { Label } from './Label';
 import { userSettings } from '../utils/userSettings';
 import { Paytable } from '../slot/Match3Config';
@@ -21,7 +21,6 @@ const defaultPayTableSectionOptions = {
 export type PayTableSectionOptions = typeof defaultPayTableSectionOptions;
 
 export class PayTableSection extends Container {
-    private panel: Graphics;
     private symbolsDescriptionLabel: Label;
     private mainLayout: List;
     private betAmount: number;
@@ -35,12 +34,8 @@ export class PayTableSection extends Container {
         this.currency = 'USD';
         this.paytables = opts.paytables ?? [];
 
-        // Add background graphics
-        this.panel = new Graphics();
-        this.addChild(this.panel);
-
         this.mainLayout = new List({ type: 'vertical', elementsMargin: 25 });
-        this.panel.addChild(this.mainLayout);
+        this.addChild(this.mainLayout);
 
         this.symbolsDescriptionLabel = new Label(
             'Symbols pay regardless of their position. Your payout is based on how many identical symbols appear when the spin ends.',
@@ -48,9 +43,9 @@ export class PayTableSection extends Container {
                 fill: '#ffffff',
                 fontSize: 18,
                 fontWeight: '200',
-                wordWrap: true, // Enable word wrapping
-                wordWrapWidth: 800, // Set the maximum width for the text block
-                align: 'center', // Optional: alignment for the wrapped text
+                wordWrap: true,
+                wordWrapWidth: 800,
+                align: 'center',
             },
         );
         this.symbolsDescriptionLabel.anchor.set(0.5);
@@ -58,10 +53,6 @@ export class PayTableSection extends Container {
     }
 
     public resize(width: number, height: number) {
-        // Redraw background with current dimensions
-        this.panel.clear();
-        this.panel.rect(0, 0, width, height).fill('transparent');
-
         const isMobile = document.documentElement.id === 'isMobile';
         const isPortrait = width < height;
 
