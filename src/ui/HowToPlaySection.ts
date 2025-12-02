@@ -50,9 +50,7 @@ export class HowToPlaySection extends Container {
 
         const options = { ...defaultHowToPlaySectionOptions, ...opts };
 
-        // Add background graphics
-
-        this.mainLayout = new List({ type: 'vertical', elementsMargin: 50 });
+        this.mainLayout = new List({ type: 'vertical', elementsMargin: 40 });
         this.addChild(this.mainLayout);
 
         this.topLayout = new List({ type: 'vertical', elementsMargin: 20 });
