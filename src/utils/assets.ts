@@ -92,9 +92,7 @@ export async function initAssets() {
     await Assets.init({ manifest: assetsManifest, basePath: 'assets' });
 
     // Load the fonts bundle BEFORE preload
-    const fonts = await Assets.loadBundle('fonts');
-
-    console.log(fonts);
+    await Assets.loadBundle('fonts');
 
     // Load assets for the load screen
     // await loadBundles('preload');

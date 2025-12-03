@@ -11,7 +11,6 @@ import { GameScreen } from './screens/GameScreen';
 import { ResultScreen } from './screens/ResultScreen';
 import { ConfigAPI } from './api/configApi';
 import { gameConfig } from './utils/gameConfig';
-import { InfoPopup } from './popups/InfoPopup';
 import { BigWinPopup, BigWinPopupData } from './popups/BigWinPopup';
 
 /** The PixiJS app Application instance, shared across the project */
