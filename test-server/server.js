@@ -52,6 +52,12 @@ app.get('/spin', async (req, res) => {
     });
 });
 
+app.get('/collect', async (req, res) => {
+    res.json({
+        balance: 1000,
+    });
+});
+
 app.listen(port, () => {
     console.log(`Express server listening at http://localhost:${port}`);
 });

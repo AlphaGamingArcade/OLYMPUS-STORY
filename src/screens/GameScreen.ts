@@ -85,7 +85,8 @@ export class GameScreen extends Container {
             if (this.finished) return;
             const amount = userSettings.getBet() * gameConfig.getBuyFreeSpinBetMultiplier();
             navigation.presentPopup<BuyFreeSpinPopupData>(BuyFreeSpinPopup, {
-                amount: `${this.currency}${amount.toLocaleString()}`,
+                currency: this.currency,
+                amount: amount,
                 callback: () => {
                     navigation.dismissPopup();
                 },
@@ -250,7 +251,9 @@ export class GameScreen extends Container {
         this.finished = true;
 
         this.roundResult.clearResults();
-        this.match3.spin();
+
+        const bet = userSettings.getBet();
+        this.match3.spin(bet);
     }
 
     /** Prepare the screen just before showing */
@@ -391,27 +394,26 @@ export class GameScreen extends Container {
 
     /** Fires when the match3 spins tart */
     private onMatch(data: SlotOnMatchData) {
-        if (data.types.length < 0) return;
-        for (const symbols of data.types) {
-            if (symbols.length > 0) {
-                const symbol = symbols[0];
-                const paytable = gameConfig.getPaytableByType(symbol);
-                if (paytable) {
-                    const patterns = paytable.patterns;
-                    const symbolCount = symbols.length;
-
-                    // Find the pattern that matches the symbol count
-                    const matchedPattern = patterns.find(
-                        (pattern) => symbolCount >= pattern.min && symbolCount <= pattern.max,
-                    );
-
-                    if (matchedPattern) {
-                        const winAmount = userSettings.getBet() * matchedPattern.multiplier;
-                        this.roundResult.addResult(symbolCount, `symbol-${symbol}`, winAmount, this.currency);
-                    }
-                }
-            }
-        }
+        console.log('DATA', data);
+        // if (data.types.length < 0) return;
+        // for (const symbols of data.types) {
+        //     if (symbols.length > 0) {
+        //         const symbol = symbols[0];
+        //         const paytable = gameConfig.getPaytableByType(symbol);
+        //         if (paytable) {
+        //             const patterns = paytable.patterns;
+        //             const symbolCount = symbols.length;
+        //             // Find the pattern that matches the symbol count
+        //             const matchedPattern = patterns.find(
+        //                 (pattern) => symbolCount >= pattern.min && symbolCount <= pattern.max,
+        //             );
+        //             if (matchedPattern) {
+        //                 const winAmount = userSettings.getBet() * matchedPattern.multiplier;
+        //                 this.roundResult.addResult(symbolCount, `symbol-${symbol}`, winAmount, this.currency);
+        //             }
+        //         }
+        //     }
+        // }
     }
 
     /** Fires when the match3 grid finishes auto-processing */
@@ -429,6 +431,7 @@ export class GameScreen extends Container {
                 amount: amount * data.times,
                 callback: async () => {
                     await navigation.dismissPopup();
+                    this.vfx?.playHideJackpotTimes(data.jackpot);
                     resolve();
                 },
             });
@@ -441,7 +444,8 @@ export class GameScreen extends Container {
             navigation.presentPopup(FreeSpinPopup, async () => {
                 await navigation.dismissPopup();
                 await waitFor(1);
-                this.match3.actions.actionFreeSpin();
+                const bet = userSettings.getBet();
+                this.match3.actions.actionFreeSpin(bet);
                 resolve();
             });
         });

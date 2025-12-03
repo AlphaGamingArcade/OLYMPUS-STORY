@@ -18,9 +18,14 @@ export enum SpinState {
 }
 
 /** Interface for onMatch event data */
+export interface WinMatch {
+    types: number[][];
+    amount: number;
+}
+
 export interface SlotOnMatchData {
     /** List of all matches detected in the grid */
-    types: number[][];
+    wins: WinMatch[];
 }
 
 /** Interface for onMatch event data */
@@ -127,18 +132,18 @@ export class Match3 extends Container {
     }
 
     /** Start the spin and disable interaction */
-    public async spin() {
+    public async spin(bet: number) {
         if (this.spinning) return;
         this.spinning = true;
-        await this.actions.actionSpin();
+        await this.actions.actionSpin(bet);
         this.spinning = false;
     }
 
     /** Start the spin and disable interaction */
-    public async freeSpin() {
+    public async freeSpin(bet: number) {
         if (this.spinning) return;
         this.spinning = true;
-        await this.actions.actionFreeSpin();
+        await this.actions.actionFreeSpin(bet);
         this.spinning = false;
     }
 

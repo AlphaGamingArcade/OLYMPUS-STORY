@@ -304,17 +304,20 @@ export class JackpotTier extends Container {
             });
 
             // Hide the label after delay
-            gsap.to(this.occuranceLabel, {
-                alpha: 0,
-                duration: 0.5,
-                delay: 4.3,
-                ease: 'power2.out',
-            });
         }
 
         // Update dots to show empty set (no animation needed)
         this.updateDots();
         this.animateDot(this.activeDots - 1);
+    }
+
+    public hideTimesText() {
+        gsap.to(this.occuranceLabel, {
+            alpha: 0,
+            duration: 0.5,
+            delay: 3,
+            ease: 'power2.out',
+        });
     }
 
     /** Get the current number of active dots */

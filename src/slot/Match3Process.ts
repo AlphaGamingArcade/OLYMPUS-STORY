@@ -38,6 +38,12 @@ export class Match3Process {
 
     /** Whether the current round produced at least one match */
     private hasRoundWin = false;
+    /** Bet */
+    private bet = 0;
+    /** Win amount */
+    private regularMatchesWin = 0;
+    /** Jackpot win */
+    private jackpotMatchesWin = 0;
 
     /** Internal async queue handling ordered flow of animation + logic steps */
     private queue: AsyncQueue;
@@ -75,9 +81,14 @@ export class Match3Process {
     }
 
     /** Begin resolving the board until no more actions remain */
-    public async start() {
+    public async start(bet: number) {
         if (this.processing) return;
         this.processing = true;
+
+        this.bet = bet;
+        this.regularMatchesWin = 0;
+        this.jackpotMatchesWin = 0;
+
         this.round = 0;
         this.match3.onProcessStart?.();
 
@@ -144,9 +155,15 @@ export class Match3Process {
             this.queue.add(async () => {
                 if (jackpotPromise) await jackpotPromise;
             });
+
+            // Step #7 – Big wins
+            this.queue.add(async () => {
+                this.processBigWins();
+                console.log('Check big wins');
+            });
         }
 
-        // Step #7 – Finalize round and decide if another is needed
+        // Step #8 – Finalize round and decide if another is needed
         this.queue.add(async () => {
             console.log(`[Match3] -- SEQUENCE ROUND #${this.round} FINISH`);
             this.processCheckpoint();
@@ -164,7 +181,6 @@ export class Match3Process {
     /** Resolve and clear all standard pattern matches */
     private async processRegularMatches() {
         console.log('[Match3] Process regular matches');
-
         const matches = slotGetMatches(this.match3.board.grid);
         if (matches.length > 0) this.hasRoundWin = true;
 
@@ -178,7 +194,14 @@ export class Match3Process {
 
         await Promise.all(animePlayPieces);
 
-        this.match3.onMatch?.({ types });
+        this.match3.onMatch?.({
+            wins: [
+                {
+                    amount: 0,
+                    types,
+                },
+            ],
+        });
 
         const animPopPromises = [];
 
@@ -187,6 +210,10 @@ export class Match3Process {
         }
 
         await Promise.all(animPopPromises);
+    }
+
+    private async processBigWins() {
+        console.log('Process big wins...');
     }
 
     /** Handle jackpot-related matches (e.g., special symbols) */

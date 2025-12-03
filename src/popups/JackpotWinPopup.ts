@@ -4,6 +4,7 @@ import { navigation } from '../utils/navigation';
 import { ShadowLabel } from '../ui/ShadowLabel';
 import { registerCustomEase, resolveAndKillTweens } from '../utils/animation';
 import { waitFor } from '../utils/asyncUtils';
+import { formatCurrency } from '../utils/formatter';
 
 /** Custom ease curve for y animation of falling pieces - minimal bounce */
 const easeSingleBounce = registerCustomEase(
@@ -39,8 +40,6 @@ export class JackpotWinPopup extends Container {
     private winAmount: ShadowLabel;
     /** Bottom text (IN X FREE SPINS) */
     private topText: ShadowLabel;
-    /** click anywhere text */
-    private clickAnywhere: ShadowLabel;
     /** click anywhere state */
     private canClickAnywhere = false;
     /** on click continue */
@@ -104,18 +103,6 @@ export class JackpotWinPopup extends Container {
         this.panelArc.anchor.set(0.5);
         this.panel.addChild(this.panelArc);
 
-        // TEXT GRADIENTS
-        const verticalGradient1 = new FillGradient({
-            type: 'linear',
-            start: { x: 0, y: 0 },
-            end: { x: 0, y: 1 },
-            colorStops: [
-                { offset: 0, color: '#F2EDE8' },
-                { offset: 1, color: '#D5CCC6' },
-            ],
-            textureSpace: 'local',
-        });
-
         const verticalGradient2 = new FillGradient({
             type: 'linear',
             start: { x: 0, y: 0 },
@@ -166,7 +153,7 @@ export class JackpotWinPopup extends Container {
 
         // WIN AMOUNT
         this.winAmount = new ShadowLabel({
-            text: `${this.currency}0.00`,
+            text: formatCurrency(0, this.currency),
             style: {
                 fill: verticalGradient2,
                 fontFamily: 'Spartanmb Extra Bold',
@@ -204,25 +191,6 @@ export class JackpotWinPopup extends Container {
         this.topText.y = -180;
         this.panel.addChild(this.topText);
 
-        // CLICK ANYWHERE
-        this.clickAnywhere = new ShadowLabel({
-            text: 'Click anywhere to continue.',
-            style: {
-                fill: verticalGradient1,
-                fontFamily: 'Spartanmb Extra Bold',
-                align: 'center',
-                fontSize: 24,
-                stroke: {
-                    width: 2,
-                    color: '#000000',
-                },
-            },
-            shadowOffsetY: 4,
-            shadowColor: '#000000',
-            shadowAlpha: 1,
-        });
-        this.addChild(this.clickAnywhere);
-
         // Add pointer event listeners
         this.bg.eventMode = 'static';
         this.eventMode = 'static';
@@ -250,8 +218,8 @@ export class JackpotWinPopup extends Container {
             duration: this.countAnimationDuration,
             ease: 'power2.out',
             onUpdate: () => {
-                const formatted = `${this.currency}${this.currentWinAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-                this.winAmount.text = formatted;
+                // const formatted = `${this.currency}${this.currentWinAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+                this.winAmount.text = formatCurrency(this.currentWinAmount, this.currency);
             },
             onComplete: () => {
                 gsap.killTweensOf(this.winAmount.scale);
@@ -268,11 +236,6 @@ export class JackpotWinPopup extends Container {
                         duration: 0.6,
                         ease: 'elastic.out(1, 0.6)',
                         onComplete: () => {
-                            gsap.to(this.clickAnywhere, {
-                                alpha: 1,
-                                duration: 0.3,
-                                ease: 'power2.out',
-                            });
                             this.canClickAnywhere = true;
                             this.isSkippable = false;
 
@@ -298,8 +261,8 @@ export class JackpotWinPopup extends Container {
 
         // Set final amount
         this.currentWinAmount = this.targetWinAmount;
-        const formatted = `${this.currency}${this.currentWinAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-        this.winAmount.text = formatted;
+        // const formatted = `${this.currency}${this.currentWinAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+        this.winAmount.text = formatCurrency(this.currentWinAmount, this.currency);
 
         // Do the final bounce
         gsap.killTweensOf(this.winAmount.scale);
@@ -324,13 +287,6 @@ export class JackpotWinPopup extends Container {
                         y: 1,
                         duration: 0.22,
                         ease: 'back.out(2)',
-                    });
-
-                    gsap.to(this.clickAnywhere, {
-                        alpha: 1,
-                        delay: 0.25,
-                        duration: 0.3,
-                        ease: 'power2.out',
                     });
 
                     this.canClickAnywhere = true;
@@ -418,9 +374,6 @@ export class JackpotWinPopup extends Container {
         this.panel.x = width * 0.5;
         this.panel.y = height * 0.5;
 
-        this.clickAnywhere.x = width * 0.5;
-        this.clickAnywhere.y = height - 64;
-
         this.screenHeight = height;
     }
 
@@ -456,12 +409,10 @@ export class JackpotWinPopup extends Container {
         resolveAndKillTweens(this.winAmount);
         resolveAndKillTweens(this.winAmount.scale);
         resolveAndKillTweens(this.topText);
-        resolveAndKillTweens(this.clickAnywhere);
         resolveAndKillTweens(this);
         this.coinContainer.removeChildren();
 
         this.panel.alpha = 1;
-        this.clickAnywhere.alpha = 0;
 
         const offScreenY = -(this.screenHeight / 2 + this.panelArc.height);
 
@@ -479,7 +430,7 @@ export class JackpotWinPopup extends Container {
         this.textbox.scale.set(0.5);
         this.winAmount.alpha = 0;
         this.winAmount.scale.set(0.5);
-        this.winAmount.text = `${this.currency}0.00`;
+        this.winAmount.text = formatCurrency(0, this.currency);
         this.currentWinAmount = 0;
 
         this.topText.alpha = 0;
@@ -589,7 +540,6 @@ export class JackpotWinPopup extends Container {
         exitTl.to(this.bg, { alpha: 0, duration: 0.2, ease: 'power2.in' }, 0);
         exitTl.to(this.panel, { alpha: 0, duration: 0.2, ease: 'power2.in' }, 0);
         exitTl.to(this.panel.scale, { x: 0.5, y: 0.5, duration: 0.3, ease: 'back.in(1.7)' }, 0);
-        exitTl.to(this.clickAnywhere, { alpha: 0, duration: 0.2, ease: 'power2.in' }, 0);
 
         await exitTl;
 

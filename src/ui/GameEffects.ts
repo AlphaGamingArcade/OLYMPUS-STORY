@@ -10,6 +10,7 @@ import { PopExplosion } from './PopExplosion';
 import { waitFor } from '../utils/asyncUtils';
 import { SlotSymbol } from '../slot/SlotSymbol';
 import { SlotOnJackpotMatchData } from '../slot/Match3';
+import { Jackpot } from '../slot/Match3Config';
 
 /**
  * All gameplay special effects, isolated on its own class in a way that can be changed freely, without affecting gameplay.
@@ -147,6 +148,18 @@ export class GameEffects extends Container {
         }
 
         sfx.play('common/sfx-bubble.wav');
+    }
+
+    public async playHideJackpotTimes(jackpot: Jackpot) {
+        if (jackpot.type == 9) {
+            this.game.grandJackpotTier.hideTimesText();
+        } else if (jackpot.type == 10) {
+            this.game.angelicJackpotTier.hideTimesText();
+        } else if (jackpot.type == 11) {
+            this.game.blessedJackpotTier.hideTimesText();
+        } else if (jackpot.type == 12) {
+            this.game.divineJackpotTier.hideTimesText();
+        }
     }
 
     /** Play a short explosion effect in given position */

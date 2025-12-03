@@ -47,7 +47,7 @@ export class RoundResultItem extends Container {
         this.container.addChild(this.totalLabel);
 
         // Symbol (middle - crown icon)
-        this.symbol = Sprite.from('symbol-ring');
+        this.symbol = Sprite.from('symbol-0');
         this.symbol.anchor.set(0.5);
         this.symbol.scale.set(0.35);
         this.symbol.x = -100;

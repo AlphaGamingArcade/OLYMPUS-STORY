@@ -4,6 +4,7 @@ import { navigation } from '../utils/navigation';
 import { ShadowLabel } from '../ui/ShadowLabel';
 import { registerCustomEase, resolveAndKillTweens } from '../utils/animation';
 import { IconButton } from '../ui/IconButton';
+import { formatCurrency } from '../utils/formatter';
 
 /** Custom ease curve for y animation of falling pieces - minimal bounce */
 const easeSingleBounce = registerCustomEase(
@@ -11,7 +12,8 @@ const easeSingleBounce = registerCustomEase(
 );
 
 export type BuyFreeSpinPopupData = {
-    amount: string;
+    currency: string;
+    amount: number;
     callback: () => void;
 };
 
@@ -35,8 +37,12 @@ export class BuyFreeSpinPopup extends Container {
     private textbox: Sprite;
     /** You have won text */
     private moreJackpotLabel: ShadowLabel;
+    /** amount */
+    private amount: number;
+    /** Currency */
+    private currency: string;
     /** Win amount text */
-    private amount: ShadowLabel;
+    private amountLabel: ShadowLabel;
     /** Confirm button */
     private confirmButton: IconButton;
     /** Close button */
@@ -54,6 +60,9 @@ export class BuyFreeSpinPopup extends Container {
 
     constructor() {
         super();
+
+        this.amount = 0;
+        this.currency = 'usd';
 
         this.bg = new Sprite(Texture.WHITE);
         this.bg.tint = 0x000000;
@@ -141,7 +150,7 @@ export class BuyFreeSpinPopup extends Container {
             shadowColor: '#000000',
             shadowAlpha: 1,
         });
-        this.moreJackpotLabel.y = -80;
+        this.moreJackpotLabel.y = -75;
         this.panel.addChild(this.moreJackpotLabel);
 
         // TEXTBOX
@@ -151,8 +160,8 @@ export class BuyFreeSpinPopup extends Container {
         this.panel.addChild(this.textbox);
 
         // AMOUNT
-        this.amount = new ShadowLabel({
-            text: `$0.00`,
+        this.amountLabel = new ShadowLabel({
+            text: formatCurrency(this.amount, this.currency),
             style: {
                 fill: verticalGradient2,
                 fontFamily: 'Spartanmb Extra Bold',
@@ -167,8 +176,8 @@ export class BuyFreeSpinPopup extends Container {
             shadowColor: '#000000',
             shadowAlpha: 1,
         });
-        this.amount.y = this.textbox.y - 4;
-        this.panel.addChild(this.amount);
+        this.amountLabel.y = this.textbox.y - 4;
+        this.panel.addChild(this.amountLabel);
 
         // BOTTOM TEXT (IN X FREE SPINS)
         this.topText = new ShadowLabel({
@@ -328,7 +337,10 @@ export class BuyFreeSpinPopup extends Container {
     /** Set things up just before showing the popup */
     public prepare(data: BuyFreeSpinPopupData) {
         if (data) {
-            this.amount.text = `${data.amount}`;
+            this.amount = data.amount;
+            this.currency = data.currency;
+
+            this.amountLabel.text = formatCurrency(this.amount, this.currency);
             this.onPressConfirm = data.callback;
             this.topText.text = `BUY FREE SPINS`;
         }
@@ -369,8 +381,8 @@ export class BuyFreeSpinPopup extends Container {
         this.textbox.alpha = 0;
         this.textbox.scale.set(0.5);
 
-        this.amount.alpha = 0;
-        this.amount.scale.set(0.8);
+        this.amountLabel.alpha = 0;
+        this.amountLabel.scale.set(0.8);
 
         this.topText.alpha = 0;
         this.topText.y = -130;
@@ -445,9 +457,9 @@ export class BuyFreeSpinPopup extends Container {
             0.85,
         );
 
-        entranceTl.to(this.amount, { alpha: 1, duration: 0.1, ease: 'power2.out' }, 0.85);
+        entranceTl.to(this.amountLabel, { alpha: 1, duration: 0.1, ease: 'power2.out' }, 0.85);
         entranceTl.to(
-            this.amount.scale,
+            this.amountLabel.scale,
             {
                 x: 1,
                 y: 1,

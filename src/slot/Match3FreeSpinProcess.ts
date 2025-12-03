@@ -98,7 +98,7 @@ export class Match3FreeSpinProcess {
     }
 
     /** Begin the free-spin sequence with a specific number of spins */
-    public async start(freeSpinCount: number) {
+    public async start(bet: number, freeSpinCount: number) {
         if (this.processing) return;
         this.processing = true;
 

@@ -20,7 +20,7 @@ export class Match3Actions {
         this.match3 = match3;
     }
 
-    public async actionSpin() {
+    public async actionSpin(bet: number) {
         this.match3.onSpinStart?.();
 
         await this.match3.board.fallToBottomGrid();
@@ -29,11 +29,11 @@ export class Match3Actions {
         await this.match3.board.fillGrid();
 
         this.match3.jackpot.reset();
-        this.match3.process.start();
+        this.match3.process.start(bet);
     }
 
-    public async actionFreeSpin() {
-        this.match3.freeSpinProcess.start(5);
+    public async actionFreeSpin(bet: number) {
+        this.match3.freeSpinProcess.start(bet, 5);
     }
 
     /**

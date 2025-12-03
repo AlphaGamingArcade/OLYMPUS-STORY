@@ -5,6 +5,7 @@ import { ShadowLabel } from '../ui/ShadowLabel';
 import { registerCustomEase, resolveAndKillTweens } from '../utils/animation';
 import { randomRange } from '../utils/random';
 import { waitFor } from '../utils/asyncUtils';
+import { formatCurrency } from '../utils/formatter';
 
 /** Custom ease curve for y animation of falling pieces - minimal bounce */
 const easeSingleBounce = registerCustomEase(
@@ -184,7 +185,7 @@ export class FreeSpinWinPopup extends Container {
 
         // WIN AMOUNT
         this.winAmount = new ShadowLabel({
-            text: `${this.currency}0.00`,
+            text: formatCurrency(0, this.currency),
             style: {
                 fill: verticalGradient2,
                 fontFamily: 'Spartanmb Extra Bold',
@@ -379,8 +380,8 @@ export class FreeSpinWinPopup extends Container {
             duration: this.coutnAnimationDuration,
             ease: 'power2.out',
             onUpdate: () => {
-                const formatted = `${this.currency}${this.currentWinAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-                this.winAmount.text = formatted;
+                // const formatted = `${this.currency}${this.currentWinAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+                this.winAmount.text = formatCurrency(this.currentWinAmount, this.currency);
             },
             onComplete: () => {
                 gsap.killTweensOf(this.winAmount.scale);
@@ -424,8 +425,7 @@ export class FreeSpinWinPopup extends Container {
 
         // Set final amount
         this.currentWinAmount = this.targetWinAmount;
-        const formatted = `${this.currency}${this.currentWinAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-        this.winAmount.text = formatted;
+        this.winAmount.text = formatCurrency(this.currentWinAmount, this.currency);
 
         // Do the final bounce
         gsap.killTweensOf(this.winAmount.scale);
@@ -608,7 +608,7 @@ export class FreeSpinWinPopup extends Container {
         this.textbox.scale.set(0.5);
         this.winAmount.alpha = 0;
         this.winAmount.scale.set(0.5);
-        this.winAmount.text = `${this.currency}0.00`;
+        this.winAmount.text = formatCurrency(0, this.currency);
         this.currentWinAmount = 0;
 
         this.bottomText.alpha = 0;
