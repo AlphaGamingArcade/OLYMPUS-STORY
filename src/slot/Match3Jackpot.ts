@@ -13,6 +13,8 @@ export class Match3Jackpot {
     public processing: boolean = false;
     /** The Match3 instance */
     public match3: Match3;
+    /** Bet amount */
+    public betAmount = 0;
     /** Jackpot record */
     public jackpots: Record<string, { type: number; active: number }> = {};
     /** Jackpot record */
@@ -31,11 +33,14 @@ export class Match3Jackpot {
 
     /** Remove all specials handlers */
     public reset() {
+        this.betAmount = 0;
         this.jackpots = {};
         this.processing = false;
     }
 
-    public async process() {
+    public async process(bet: number) {
+        this.betAmount = bet;
+
         const matches = slotGetJackpotMatches(this.match3.board.grid);
         const piecesByType: Record<number, SlotSymbol[]> = {};
 
@@ -111,11 +116,16 @@ export class Match3Jackpot {
         }
 
         // Display modals for each winning jackpot
-        for (const [_, jackpotWin] of Object.entries(jackpotWinsByType)) {
+        for (const [_, jackpotWinData] of Object.entries(jackpotWinsByType)) {
             await waitFor(0.5);
+
+            const amount = jackpotWinData.times * (this.betAmount * jackpotWinData.jackpot.multiplier);
+            this.match3.process.addWinAmount(amount);
+
             await this.match3.onJackpotTrigger?.({
-                jackpot: jackpotWin.jackpot,
-                times: jackpotWin.times,
+                jackpot: jackpotWinData.jackpot,
+                times: jackpotWinData.times,
+                amount: amount,
             });
             await waitFor(0.5);
         }

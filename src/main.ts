@@ -12,6 +12,7 @@ import { ResultScreen } from './screens/ResultScreen';
 import { ConfigAPI } from './api/configApi';
 import { gameConfig } from './utils/gameConfig';
 import { InfoPopup } from './popups/InfoPopup';
+import { BigWinPopup, BigWinPopupData } from './popups/BigWinPopup';
 
 /** The PixiJS app Application instance, shared across the project */
 export const app = new Application();
@@ -144,7 +145,13 @@ async function init() {
     } else if (getUrlParam('result') !== null) {
         await navigation.showScreen(ResultScreen);
     } else if (getUrlParam('modal') !== null) {
-        navigation.presentPopup(InfoPopup);
+        navigation.presentPopup<BigWinPopupData>(BigWinPopup, {
+            category: 'astounding',
+            amount: 1000,
+            callback: async () => {
+                await navigation.dismissPopup();
+            },
+        });
     } else {
         await navigation.showScreen(LoadScreen);
     }

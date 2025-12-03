@@ -3,23 +3,24 @@ import gsap from 'gsap';
 import { navigation } from '../utils/navigation';
 import { ShadowLabel } from '../ui/ShadowLabel';
 import { registerCustomEase, resolveAndKillTweens } from '../utils/animation';
-import { waitFor } from '../utils/asyncUtils';
 import { formatCurrency } from '../utils/formatter';
+import { SlotBigWinCategory } from '../slot/SlotUtility';
+import { Label } from '../ui/Label';
+import { waitFor } from '../utils/asyncUtils';
 
 /** Custom ease curve for y animation of falling pieces - minimal bounce */
 const easeSingleBounce = registerCustomEase(
     'M0,0,C0.14,0,0.27,0.191,0.352,0.33,0.43,0.462,0.53,0.963,0.538,1,0.546,0.997,0.672,0.97,0.778,0.97,0.888,0.97,0.993,0.997,1,1',
 );
 
-export type JackpotWinPopupData = {
-    name: string;
-    times: number;
+export type BigWinPopupData = {
+    category: SlotBigWinCategory;
     amount: number;
     callback: () => void;
 };
 
 /** Popup displaying win amount with coin effects */
-export class JackpotWinPopup extends Container {
+export class BigWinPopup extends Container {
     /** The dark semi-transparent background covering current screen */
     private bg: Sprite;
     /** Container for the popup UI components */
@@ -34,24 +35,24 @@ export class JackpotWinPopup extends Container {
     private panelArc: Sprite;
     /** The modal text box */
     private textbox: Sprite;
-    /** You have won text */
-    private jackpotWon: ShadowLabel;
     /** Win amount text */
     private winAmount: ShadowLabel;
     /** Bottom text (IN X FREE SPINS) */
-    private topText: ShadowLabel;
+    private topText: Label;
     /** click anywhere state */
     private canClickAnywhere = false;
     /** on click continue */
     private onPressConfirm?: () => void;
     /** Single combined glow and bounce animation timeline */
     private animationTimeline?: gsap.core.Timeline;
+    /** Top idle animation */
+    private topTextIdleTimeline?: gsap.core.Timeline;
+    /** Category of big win */
+    private category: SlotBigWinCategory = 'elegant';
     /** Target win amount for counting animation */
     private targetWinAmount = 0;
     /** Current win amount for counting animation */
     private currentWinAmount = 0;
-    /** Current win amount for counting animation */
-    private times = 0;
     /** currency */
     private currency = 'USD';
     /** Counting animation tween reference */
@@ -119,36 +120,16 @@ export class JackpotWinPopup extends Container {
             start: { x: 0, y: 0 },
             end: { x: 0, y: 1 },
             colorStops: [
-                { offset: 0, color: '#FDD44F' },
-                { offset: 1, color: '#FF7700' },
+                { offset: 0, color: '#FFFFFF' },
+                { offset: 1, color: '#FFE9DF' },
             ],
             textureSpace: 'local',
         });
 
-        // YOU HAVE WON
-        this.jackpotWon = new ShadowLabel({
-            text: 'JACKPOT WON',
-            style: {
-                fill: verticalGradient3,
-                fontFamily: 'Spartanmb Extra Bold',
-                align: 'center',
-                fontSize: 52,
-                stroke: {
-                    width: 4,
-                    color: '#000000',
-                },
-            },
-            shadowOffsetY: 0,
-            shadowColor: '#000000',
-            shadowAlpha: 1,
-        });
-        this.jackpotWon.y = -60;
-        this.panel.addChild(this.jackpotWon);
-
         // TEXTBOX
         this.textbox = Sprite.from('modal-textbox');
         this.textbox.anchor.set(0.5);
-        this.textbox.y = 50;
+        this.textbox.y = 0;
         this.panel.addChild(this.textbox);
 
         // WIN AMOUNT
@@ -171,22 +152,15 @@ export class JackpotWinPopup extends Container {
         this.winAmount.y = this.textbox.y - 4;
         this.panel.addChild(this.winAmount);
 
-        // BOTTOM TEXT (IN X FREE SPINS)
-        this.topText = new ShadowLabel({
-            text: '',
-            style: {
-                fill: verticalGradient3,
-                fontFamily: 'Spartanmb Extra Bold',
-                align: 'center',
-                fontSize: 40,
-                stroke: {
-                    width: 4,
-                    color: '#000000',
-                },
+        this.topText = new Label('', {
+            fill: verticalGradient3,
+            fontFamily: 'Spartanmb Extra Bold',
+            align: 'center',
+            fontSize: 100,
+            stroke: {
+                width: 10,
+                color: '#000000',
             },
-            shadowOffsetY: 0,
-            shadowColor: '#000000',
-            shadowAlpha: 1,
         });
         this.topText.y = -180;
         this.panel.addChild(this.topText);
@@ -378,18 +352,67 @@ export class JackpotWinPopup extends Container {
     }
 
     /** Set things up just before showing the popup */
-    public prepare(data: JackpotWinPopupData) {
+    public prepare(data: BigWinPopupData) {
         if (data) {
-            this.times = data.times;
             this.targetWinAmount = data.amount;
+            this.category = data.category;
             this.onPressConfirm = data.callback;
 
-            this.panelArc.texture = Texture.from(`modal-${data.name}-jackpot`);
-            this.topText.text = `${this.times > 1 ? `${this.times}X ` : ''} ${data.name.toUpperCase()}`;
+            this.panelArc.texture = Texture.from(`modal-${data.category}-bigwin`);
+            this.topText.text = `${this.category.toUpperCase()}!`;
+
+            if (data.category == 'remarkable') {
+                const color = '#368DFF';
+                this.glow1.tint = color;
+                this.glow2.tint = color;
+                this.topText.style.stroke = {
+                    width: 6,
+                    color: color,
+                };
+            } else if (data.category == 'elegant') {
+                const color = '#00BC38';
+                this.glow1.tint = color;
+                this.glow2.tint = color;
+                this.topText.style.stroke = {
+                    width: 6,
+                    color: color,
+                };
+            } else {
+                const color = '#FF0000';
+                this.glow1.tint = color;
+                this.glow2.tint = color;
+                this.topText.style.stroke = {
+                    width: 6,
+                    color: color,
+                };
+            }
         }
 
         // Mark this popup as active when prepared
         this.isActive = true;
+    }
+
+    /** Start idle animation for top text */
+    private startTopTextIdleAnimation() {
+        if (this.topTextIdleTimeline) this.topTextIdleTimeline.kill();
+
+        this.topTextIdleTimeline = gsap.timeline({
+            repeat: -1,
+        });
+
+        // Gentle breathing scale
+        this.topTextIdleTimeline.to(
+            this.topText.scale,
+            {
+                x: 1.1,
+                y: 1.1,
+                duration: 1.5,
+                ease: 'sine.inOut',
+                yoyo: true,
+                repeat: 1,
+            },
+            0,
+        );
     }
 
     /** Present the popup with improved entrance animation */
@@ -402,8 +425,6 @@ export class JackpotWinPopup extends Container {
         resolveAndKillTweens(this.panelArc.scale);
         resolveAndKillTweens(this.glow1);
         resolveAndKillTweens(this.glow2);
-        resolveAndKillTweens(this.jackpotWon);
-        resolveAndKillTweens(this.jackpotWon.scale);
         resolveAndKillTweens(this.textbox);
         resolveAndKillTweens(this.textbox.scale);
         resolveAndKillTweens(this.winAmount);
@@ -412,19 +433,17 @@ export class JackpotWinPopup extends Container {
         resolveAndKillTweens(this);
         this.coinContainer.removeChildren();
 
+        this.startContinuousAnimations();
+
         this.panel.alpha = 1;
 
         const offScreenY = -(this.screenHeight / 2 + this.panelArc.height);
 
         this.panelArc.alpha = 0;
-        this.panelArc.scale.set(0.5);
         this.panelArc.y = offScreenY;
 
         this.glow1.alpha = 0;
         this.glow2.alpha = 0;
-
-        this.jackpotWon.alpha = 0;
-        this.jackpotWon.scale.set(0.8);
 
         this.textbox.alpha = 0;
         this.textbox.scale.set(0.5);
@@ -433,9 +452,7 @@ export class JackpotWinPopup extends Container {
         this.winAmount.text = formatCurrency(0, this.currency);
         this.currentWinAmount = 0;
         this.topText.alpha = 0;
-        this.topText.y = -130;
-
-        this.startContinuousAnimations();
+        this.topText.y = offScreenY;
 
         const entranceTl = gsap.timeline();
 
@@ -464,19 +481,19 @@ export class JackpotWinPopup extends Container {
 
         entranceTl.to([this.glow1, this.glow2], { alpha: 1, duration: 0.3, ease: 'power2.out' }, 0.7);
 
-        entranceTl.to(this.jackpotWon, { alpha: 1, duration: 0.15, ease: 'power2.out' }, 0.85);
+        entranceTl.to(this.topText, { alpha: 1, duration: 0.15, ease: 'power2.out' }, 1.05);
         entranceTl.to(
-            this.jackpotWon.scale,
+            this.topText,
             {
-                x: 1,
-                y: 1,
-                duration: 0.35,
-                ease: 'elastic.out(1, 0.6)',
+                y: -130,
+                duration: 0.4,
+                ease: easeSingleBounce,
+                onComplete: () => this.startTopTextIdleAnimation(),
             },
-            0.85,
+            1.05,
         );
 
-        entranceTl.to(this.textbox, { alpha: 1, duration: 0.15, ease: 'power2.out' }, 1.05);
+        entranceTl.to(this.textbox, { alpha: 1, duration: 0.15, ease: 'power2.out' }, 1.2);
         entranceTl.to(
             this.textbox.scale,
             {
@@ -485,10 +502,10 @@ export class JackpotWinPopup extends Container {
                 duration: 0.4,
                 ease: 'back.out(2)',
             },
-            1.05,
+            1.2,
         );
 
-        entranceTl.to(this.winAmount, { alpha: 1, duration: 0.1, ease: 'power2.out' }, 1.2);
+        entranceTl.to(this.winAmount, { alpha: 1, duration: 0.1, ease: 'power2.out' }, 1.3);
         entranceTl.to(
             this.winAmount.scale,
             {
@@ -497,7 +514,7 @@ export class JackpotWinPopup extends Container {
                 duration: 0.5,
                 ease: 'elastic.out(1, 0.5)',
             },
-            1.2,
+            1.3,
         );
 
         entranceTl.call(
@@ -506,17 +523,6 @@ export class JackpotWinPopup extends Container {
                 this.animateWinAmount();
             },
             undefined,
-            1.3,
-        );
-
-        entranceTl.to(this.topText, { alpha: 1, duration: 0.15, ease: 'power2.out' }, 1.35);
-        entranceTl.to(
-            this.topText,
-            {
-                y: -130,
-                duration: 0.4,
-                ease: 'back.out(1.5)',
-            },
             1.35,
         );
 
@@ -542,6 +548,9 @@ export class JackpotWinPopup extends Container {
 
         await exitTl;
 
+        if (this.animationTimeline) this.animationTimeline.kill();
+        if (this.topTextIdleTimeline) this.topTextIdleTimeline.kill();
+
         this.coinContainer.removeChildren();
     }
 
@@ -549,9 +558,10 @@ export class JackpotWinPopup extends Container {
     public destroy() {
         this.isActive = false;
 
-        if (this.animationTimeline) {
-            this.animationTimeline.kill();
-        }
+        if (this.animationTimeline) this.animationTimeline.kill();
+
+        if (this.topTextIdleTimeline) this.topTextIdleTimeline.kill();
+
         this.coinContainer.removeChildren();
         super.destroy();
     }

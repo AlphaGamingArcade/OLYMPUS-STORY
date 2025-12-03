@@ -10,6 +10,8 @@ import {
     match3GridToString,
     slotGetMatches,
     slotGetScatterMatches,
+    slotGetRegularMatchesWinAmount,
+    slotGetBigWinCategory,
 } from './SlotUtility';
 
 /**
@@ -39,11 +41,9 @@ export class Match3Process {
     /** Whether the current round produced at least one match */
     private hasRoundWin = false;
     /** Bet */
-    private bet = 0;
+    private betAmount = 0;
     /** Win amount */
-    private regularMatchesWin = 0;
-    /** Jackpot win */
-    private jackpotMatchesWin = 0;
+    private winAmount = 0;
 
     /** Internal async queue handling ordered flow of animation + logic steps */
     private queue: AsyncQueue;
@@ -61,6 +61,18 @@ export class Match3Process {
     /** Current round index */
     public getProcessRound() {
         return this.round;
+    }
+
+    // In Match3Process class
+    public addWinAmount(amount: number): void {
+        this.winAmount += amount;
+        this.match3.onWin?.(this.winAmount);
+    }
+
+    // Or if you need to set it directly
+    public setWinAmount(amount: number): void {
+        this.winAmount = amount;
+        this.match3.onWin?.(this.winAmount);
     }
 
     /** Immediately stop processing and clear pending tasks */
@@ -85,9 +97,8 @@ export class Match3Process {
         if (this.processing) return;
         this.processing = true;
 
-        this.bet = bet;
-        this.regularMatchesWin = 0;
-        this.jackpotMatchesWin = 0;
+        this.betAmount = bet;
+        this.winAmount = 0;
 
         this.round = 0;
         this.match3.onProcessStart?.();
@@ -141,8 +152,6 @@ export class Match3Process {
 
         // If this round had at least one match, do jackpot + refill
         if (this.hasRoundWin) {
-            this.hasRoundWin = false;
-
             let jackpotPromise: Promise<void> | null = null;
 
             // Step #4 & #5 – Jackpot processing + refill simultaneously
@@ -156,14 +165,10 @@ export class Match3Process {
                 if (jackpotPromise) await jackpotPromise;
             });
 
-            // Step #7 – Big wins
-            this.queue.add(async () => {
-                this.processBigWins();
-                console.log('Check big wins');
-            });
+            this.hasRoundWin = false;
         }
 
-        // Step #8 – Finalize round and decide if another is needed
+        // Step #7 – Finalize round and decide if another is needed
         this.queue.add(async () => {
             console.log(`[Match3] -- SEQUENCE ROUND #${this.round} FINISH`);
             this.processCheckpoint();
@@ -185,23 +190,26 @@ export class Match3Process {
         if (matches.length > 0) this.hasRoundWin = true;
 
         const animePlayPieces = [];
-        const types = [];
+        const winMatches = [];
 
         for (const match of matches) {
             animePlayPieces.push(this.match3.board.playPieces(match));
-            types.push(this.match3.board.getTypesByPositions(match));
+
+            const types = this.match3.board.getTypesByPositions(match);
+            const paytable = gameConfig.getPaytableByType(types[0]);
+            const winAmount = slotGetRegularMatchesWinAmount(this.betAmount, types, paytable);
+            winMatches.push({ amount: winAmount, types });
         }
 
         await Promise.all(animePlayPieces);
 
         this.match3.onMatch?.({
-            wins: [
-                {
-                    amount: 0,
-                    types,
-                },
-            ],
+            wins: winMatches,
         });
+
+        const winTotal = winMatches.reduce((acc, value) => (acc = acc + value.amount), 0);
+        this.winAmount = this.winAmount + winTotal;
+        this.match3.onWin?.(this.winAmount);
 
         const animPopPromises = [];
 
@@ -212,13 +220,21 @@ export class Match3Process {
         await Promise.all(animPopPromises);
     }
 
-    private async processBigWins() {
-        console.log('Process big wins...');
+    private async displayBigWins() {
+        const bigWinCatergory = slotGetBigWinCategory(this.winAmount, this.betAmount);
+        if (bigWinCatergory) {
+            await waitFor(0.5);
+            await this.match3.onBigWinTrigger?.({
+                amount: this.winAmount,
+                category: bigWinCatergory,
+            });
+            await waitFor(0.5);
+        }
     }
 
-    /** Handle jackpot-related matches (e.g., special symbols) */
+    /** Handle jackpot-related matches (grand, angelic, blessed, divine) */
     private async processJackpotMatches() {
-        await this.match3.jackpot.process();
+        await this.match3.jackpot.process(this.betAmount);
     }
 
     /** Move all existing pieces downward to fill empty cells */
@@ -311,6 +327,7 @@ export class Match3Process {
         } else {
             console.log('[Match3] Checkpoint - Check for jackpot wins then check free spin wins');
             await this.match3.jackpot.displayJackpotWins();
+            await this.displayBigWins();
             await this.processFreeSpinCheckpoint();
         }
     }

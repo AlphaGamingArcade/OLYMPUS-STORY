@@ -9,6 +9,7 @@ import { SlotSymbol } from './SlotSymbol';
 import { Match3RoundResults } from './Match3RounResults';
 import { Match3Jackpot } from './Match3Jackpot';
 import { gameConfig } from '../utils/gameConfig';
+import { SlotBigWinCategory } from './SlotUtility';
 
 // Match3.ts - Holds the state
 export enum SpinState {
@@ -19,7 +20,7 @@ export enum SpinState {
 
 /** Interface for onMatch event data */
 export interface WinMatch {
-    types: number[][];
+    types: number[];
     amount: number;
 }
 
@@ -35,11 +36,19 @@ export interface SlotOnJackpotMatchData {
 }
 
 /** Interface for onMatch event data */
+export interface SlotOnBigWinTriggerData {
+    amount: number;
+    category: SlotBigWinCategory;
+}
+
+/** Interface for onMatch event data */
 export interface SlotOnJackpotTriggerData {
     /** List of all jackpot matches detected in the grid */
     jackpot: Jackpot;
     /** Occurance */
     times: number;
+    /** Occurance */
+    amount: number;
 }
 
 /**
@@ -49,7 +58,6 @@ export interface SlotOnJackpotTriggerData {
 export class Match3 extends Container {
     /** State if spinning */
     public spinning: boolean;
-
     /** Match3 game basic configuration */
     public config: Match3Config;
     /** Compute score, grade, number of matches */
@@ -69,6 +77,10 @@ export class Match3 extends Container {
 
     /** Fires when matches */
     public onMatch?: (data: SlotOnMatchData) => void;
+    /** Fires when win */
+    public onWin?: (win: number) => void;
+    /** Fire when big win */
+    public onBigWinTrigger?: (data: SlotOnBigWinTriggerData) => Promise<void>;
 
     /** Firew when a spin started, regardless of the spin type */
     public onSpinStart?: () => void;

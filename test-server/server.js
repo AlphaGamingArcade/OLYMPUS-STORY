@@ -42,8 +42,11 @@ let grandReels = [
 app.get('/spin', async (req, res) => {
     await utils.waitFor(delay); // 1 sec
 
-    // Generate 5 reels, each with 5 random symbols (1-12)
-    const reels = Array.from({ length: 5 }, () => Array.from({ length: 5 }, () => getRandomInt(1, 12)));
+    // Generate 5 reels, each with 5 random symbols from the symbols array
+    let symbols = [1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12];
+    const reels = Array.from({ length: 5 }, () =>
+        Array.from({ length: 5 }, () => symbols[Math.floor(Math.random() * symbols.length)]),
+    );
 
     console.log('Reels', reels);
 

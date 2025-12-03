@@ -1,5 +1,5 @@
 import { gameConfig } from '../utils/gameConfig';
-import { Pattern } from './Match3Config';
+import { Pattern, Paytable } from './Match3Config';
 
 /** Piece type on each position in the grid */
 export type Match3Type = number;
@@ -18,6 +18,9 @@ export type Match3GlobalPosition = { x: number; y: number };
 
 /** Orientation for match checks */
 export type Match3Orientation = 'horizontal' | 'vertical';
+
+/** Orientation for match checks */
+export type SlotBigWinCategory = 'astounding' | 'remarkable' | 'elegant';
 
 /**
  * Create a 2D grid matrix filled up with given types
@@ -481,4 +484,35 @@ export function match3PositionToString(position: Match3Position) {
 export function match3StringToPosition(str: string) {
     const split = str.split(':');
     return { row: Number(split[0]), column: Number(split[1]) };
+}
+
+/** Regular matches win Amount */
+export function slotGetRegularMatchesWinAmount(bet: number, types: number[], paytable: Paytable | undefined): number {
+    if (types.length === 0 || !paytable) return 0;
+
+    const matchedPattern = paytable.patterns.find(
+        (pattern) => types.length >= pattern.min && types.length <= pattern.max,
+    );
+
+    return matchedPattern ? bet * matchedPattern.multiplier : 0;
+}
+
+/** Get  */
+export function getRangeIndex(value: number, thresholds: number[]): number {
+    const index = thresholds.findIndex((threshold) => value < threshold);
+    return index === -1 ? thresholds.length : index;
+}
+
+export function slotGetBigWinCategory(amount: number, bet: number): undefined | SlotBigWinCategory {
+    const bigWinMultipliers = [20, 40, 60];
+    const bigWinCategory: SlotBigWinCategory[] = ['remarkable', 'elegant', 'astounding'];
+
+    for (let i = 0; i < bigWinMultipliers.length; i++) {
+        if (amount < bigWinMultipliers[i] * bet) {
+            return i === 0 ? undefined : bigWinCategory[i - 1];
+        }
+    }
+
+    // Amount >= highest threshold
+    return bigWinCategory[bigWinCategory.length - 1];
 }

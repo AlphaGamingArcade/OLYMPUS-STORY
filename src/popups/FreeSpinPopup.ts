@@ -293,19 +293,6 @@ export class FreeSpinPopup extends Container {
             },
             0,
         );
-
-        // // Optional: Add subtle float motion
-        // this.animationTimeline.to(
-        //     this.congratulations,
-        //     {
-        //         y: -345,
-        //         duration: 2,
-        //         ease: 'sine.inOut',
-        //         yoyo: true,
-        //         repeat: 1,
-        //     },
-        //     0,
-        // );
     }
 
     /** Resize the popup, fired whenever window size changes */

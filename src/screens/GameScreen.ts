@@ -1,5 +1,11 @@
 import { Container, Ticker } from 'pixi.js';
-import { Match3, SlotOnJackpotMatchData, SlotOnJackpotTriggerData, SlotOnMatchData } from '../slot/Match3';
+import {
+    Match3,
+    SlotOnBigWinTriggerData,
+    SlotOnJackpotMatchData,
+    SlotOnJackpotTriggerData,
+    SlotOnMatchData,
+} from '../slot/Match3';
 import { Pillar } from '../ui/Pillar';
 import { navigation } from '../utils/navigation';
 import { GameEffects } from '../ui/GameEffects';
@@ -23,6 +29,7 @@ import { AutoplayPopup } from '../popups/AutoplayPopup';
 import { SettingsPopup, SettingsPopupData } from '../popups/SettingsPopup';
 import { InfoPopup, InfoPopupData } from '../popups/InfoPopup';
 import { formatCurrency } from '../utils/formatter';
+import { BigWinPopup, BigWinPopupData } from '../popups/BigWinPopup';
 
 /** The screen tha holds the Match3 game */
 export class GameScreen extends Container {
@@ -146,6 +153,8 @@ export class GameScreen extends Container {
 
         this.match3 = new Match3();
         this.match3.onMatch = this.onMatch.bind(this);
+        this.match3.onWin = this.onWin.bind(this);
+        this.match3.onBigWinTrigger = this.onBigWinTrigger.bind(this);
         this.match3.onSpinStart = this.onSpinStart.bind(this);
         this.match3.onJackpotMatch = this.onJackpotMatch.bind(this);
         this.match3.onJackpotTrigger = this.onJackpotTrigger.bind(this);
@@ -250,6 +259,7 @@ export class GameScreen extends Container {
         if (this.finished) return;
         this.finished = true;
 
+        this.controlPanel.setMessage('HOLD SPACE FOR TURBO SPIN');
         this.roundResult.clearResults();
 
         const bet = userSettings.getBet();
@@ -392,28 +402,36 @@ export class GameScreen extends Container {
         await waitFor(0.3);
     }
 
-    /** Fires when the match3 spins tart */
+    /** Fires when there are match */
     private onMatch(data: SlotOnMatchData) {
-        console.log('DATA', data);
-        // if (data.types.length < 0) return;
-        // for (const symbols of data.types) {
-        //     if (symbols.length > 0) {
-        //         const symbol = symbols[0];
-        //         const paytable = gameConfig.getPaytableByType(symbol);
-        //         if (paytable) {
-        //             const patterns = paytable.patterns;
-        //             const symbolCount = symbols.length;
-        //             // Find the pattern that matches the symbol count
-        //             const matchedPattern = patterns.find(
-        //                 (pattern) => symbolCount >= pattern.min && symbolCount <= pattern.max,
-        //             );
-        //             if (matchedPattern) {
-        //                 const winAmount = userSettings.getBet() * matchedPattern.multiplier;
-        //                 this.roundResult.addResult(symbolCount, `symbol-${symbol}`, winAmount, this.currency);
-        //             }
-        //         }
-        //     }
-        // }
+        if (data.wins.length > 0) {
+            for (const win of data.wins) {
+                this.roundResult.addResult(win.types.length, `symbol-${win.types[0]}`, win.amount, this.currency);
+            }
+        }
+    }
+
+    /** Fires if player wins */
+    private onWin(amount: number) {
+        if (amount > 0) {
+            this.controlPanel.setMessage(`WIN ${formatCurrency(amount, this.currency)}`);
+        } else {
+            this.controlPanel.setMessage('HOLD SPACE FOR TURBO SPIN');
+        }
+    }
+
+    /** Fires if player big win */
+    private async onBigWinTrigger(data: SlotOnBigWinTriggerData): Promise<void> {
+        return new Promise((resolve) => {
+            navigation.presentPopup<BigWinPopupData>(BigWinPopup, {
+                category: data.category,
+                amount: data.amount,
+                callback: async () => {
+                    await navigation.dismissPopup();
+                    resolve();
+                },
+            });
+        });
     }
 
     /** Fires when the match3 grid finishes auto-processing */
@@ -424,11 +442,10 @@ export class GameScreen extends Container {
     /** Fires when the match3 grid finishes auto-processing */
     private async onJackpotTrigger(data: SlotOnJackpotTriggerData): Promise<void> {
         return new Promise((resolve) => {
-            const amount = data.jackpot.multiplier * userSettings.getBet();
             navigation.presentPopup<JackpotWinPopupData>(JackpotWinPopup, {
                 name: data.jackpot.id,
                 times: data.times,
-                amount: amount * data.times,
+                amount: data.amount,
                 callback: async () => {
                     await navigation.dismissPopup();
                     this.vfx?.playHideJackpotTimes(data.jackpot);
