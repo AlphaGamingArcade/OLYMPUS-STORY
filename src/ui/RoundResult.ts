@@ -1,6 +1,5 @@
-import { Container, FillGradient, Sprite, TextStyle, Texture } from 'pixi.js';
+import { Container, Sprite, Texture } from 'pixi.js';
 import gsap from 'gsap';
-import { Label } from './Label';
 import { RoundResultItem } from './RoundResultItem';
 import { IconButton } from './IconButton';
 
@@ -11,8 +10,6 @@ export class RoundResult extends Container {
     /** Inner container */
     private container: Container;
     private frame: Sprite;
-    private messageLabel1: Label;
-    private messageLabel2: Label;
     private messageContainer: Container;
     private resultItemsContainer: Container;
     private resultItems: RoundResultItem[] = [];
@@ -39,36 +36,6 @@ export class RoundResult extends Container {
         this.messageContainer = new Container();
         this.container.addChild(this.messageContainer);
 
-        const verticalGradient1 = new FillGradient({
-            type: 'linear',
-            start: { x: 0, y: 0 },
-            end: { x: 0, y: 1 },
-            colorStops: [
-                { offset: 0, color: '#fff3ce' },
-                { offset: 1, color: '#e0a114' },
-            ],
-            textureSpace: 'local',
-        });
-
-        const style1 = new TextStyle({
-            fontFamily: 'Spartanmb Extra Bold',
-            fontSize: 30,
-            stroke: {
-                width: 6,
-                color: '#9E7617',
-            },
-        });
-        this.messageLabel1 = new Label(`ROUND`, style1);
-        this.messageLabel1.style.fill = verticalGradient1;
-        this.messageLabel1.y = -this.messageLabel1.height - 10;
-        this.messageContainer.addChild(this.messageLabel1);
-
-        this.messageLabel2 = new Label(`RESULT`, style1);
-        this.messageLabel2.style.fontSize = 60;
-        this.messageLabel2.y = -10;
-        this.messageLabel2.style.fill = verticalGradient1;
-        this.messageContainer.addChild(this.messageLabel2);
-
         this.messageContainer.y = -100;
 
         // Container for result items
@@ -93,7 +60,7 @@ export class RoundResult extends Container {
             hoverColor: 0x5aa3f5,
             pressColor: 0x3a7bc8,
         });
-        this.arrowUpButton.y = -70;
+        this.arrowUpButton.y = -90;
         this.arrowUpButton.enabled = false;
         this.arrowUpButton.onPress.connect(() => this.scrollUp());
         this.container.addChild(this.arrowUpButton);
@@ -106,7 +73,7 @@ export class RoundResult extends Container {
             hoverColor: 0x5aa3f5,
             pressColor: 0x3a7bc8,
         });
-        this.arrowDownButton.y = 270;
+        this.arrowDownButton.y = 290;
         this.arrowDownButton.enabled = false;
         this.arrowDownButton.onPress.connect(() => this.scrollDown());
         this.container.addChild(this.arrowDownButton);

@@ -258,6 +258,9 @@ export class GameScreen extends Container {
     public startSpinning() {
         if (this.finished) return;
         this.finished = true;
+        this.controlPanel.disableBetting();
+
+        this.buyFreeSpinButton.enabled = false;
 
         this.controlPanel.setMessage('HOLD SPACE FOR TURBO SPIN');
         this.roundResult.clearResults();
@@ -333,11 +336,11 @@ export class GameScreen extends Container {
 
             this.buyFreeSpinButton.scale.set(1);
             this.buyFreeSpinButton.x = 220;
-            this.buyFreeSpinButton.y = 200;
+            this.buyFreeSpinButton.y = 260;
 
             this.roundResult.scale.set(1);
             this.roundResult.x = 220;
-            this.roundResult.y = height - this.roundResult.height - 20;
+            this.roundResult.y = height - this.roundResult.height - 80;
 
             this.babyZeus.x = 500;
             this.babyZeus.y = height - this.babyZeus.height * 0.5 - 100;
@@ -414,7 +417,7 @@ export class GameScreen extends Container {
     /** Fires if player wins */
     private onWin(amount: number) {
         if (amount > 0) {
-            this.controlPanel.setMessage(`WIN ${formatCurrency(amount, this.currency)}`);
+            this.controlPanel.setWinMessage(`WIN ${formatCurrency(amount, this.currency)}`);
         } else {
             this.controlPanel.setMessage('HOLD SPACE FOR TURBO SPIN');
         }
@@ -521,6 +524,9 @@ export class GameScreen extends Container {
     private async finish() {
         if (!this.finished) return;
         this.finished = false;
+        this.controlPanel.enableBetting();
+
+        this.buyFreeSpinButton.enabled = true;
 
         // Notify all listeners
         this.finishedCallbacks.forEach((cb) => cb(this.finished));

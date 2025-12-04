@@ -418,6 +418,31 @@ export class ControlPanel extends Container {
      */
     public setMessage(message: string) {
         this.messageText.text = message;
+        this.messageText.style.fontSize = 28;
+        this.messageText.anchor.set(0.5);
+    }
+
+    /**
+     * Update center message
+     */
+    public setWinMessage(message: string) {
+        this.messageText.text = message;
+        this.messageText.style.fontSize = 52;
+        this.messageText.anchor.set(0.5, 1);
+    }
+
+    /** Disabled betting */
+    public disableBetting() {
+        this.autoplayButton.enabled = false;
+        this.plusButton.enabled = false;
+        this.minusButton.enabled = false;
+    }
+
+    /** Disabled betting */
+    public enableBetting() {
+        this.autoplayButton.enabled = true;
+        this.plusButton.enabled = true;
+        this.minusButton.enabled = true;
     }
 
     /**
