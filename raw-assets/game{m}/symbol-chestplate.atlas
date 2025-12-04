@@ -1,0 +1,12 @@
+symbol-chestplate.png
+size:456,269
+filter:Linear,Linear
+bg
+bounds:2,2,265,265
+offsets:1,1,267,267
+shine
+bounds:269,2,69,265
+offsets:3,1,75,267
+trident
+bounds:340,107,114,160
+offsets:23,5,173,173

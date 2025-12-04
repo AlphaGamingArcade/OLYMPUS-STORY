@@ -14,7 +14,7 @@ export class ConfigAPI {
                     {
                         id: 'divine',
                         name: 'DIVINE',
-                        type: 12,
+                        type: 14,
                         multiplier: 100,
                         requiredSymbols: 5,
                         order: 2,
@@ -22,7 +22,7 @@ export class ConfigAPI {
                     {
                         id: 'blessed',
                         name: 'BLESSED',
-                        type: 11,
+                        type: 13,
                         multiplier: 50,
                         requiredSymbols: 4,
                         order: 3,
@@ -30,7 +30,7 @@ export class ConfigAPI {
                     {
                         id: 'angelic',
                         name: 'ANGELIC',
-                        type: 10,
+                        type: 12,
                         multiplier: 20.0,
                         requiredSymbols: 3,
                         order: 4,
@@ -38,7 +38,7 @@ export class ConfigAPI {
                     {
                         id: 'grand',
                         name: 'GRAND',
-                        type: 9,
+                        type: 11,
                         multiplier: 10.0,
                         requiredSymbols: 2,
                         order: 5,
@@ -48,66 +48,74 @@ export class ConfigAPI {
                     {
                         type: 1,
                         patterns: [
-                            { min: 5, max: 6, multiplier: 20.0 },
-                            { min: 7, max: 8, multiplier: 50.0 },
-                            { min: 10, max: 25, multiplier: 100.0 },
+                            { min: 8, max: 9, multiplier: 20.0 },
+                            { min: 10, max: 11, multiplier: 50.0 },
+                            { min: 12, max: 30, multiplier: 100.0 },
                         ],
                     },
                     {
                         type: 2,
                         patterns: [
-                            { min: 5, max: 6, multiplier: 5.0 },
-                            { min: 7, max: 8, multiplier: 20.0 },
-                            { min: 10, max: 25, multiplier: 50.0 },
+                            { min: 8, max: 9, multiplier: 5.0 },
+                            { min: 10, max: 11, multiplier: 20.0 },
+                            { min: 12, max: 30, multiplier: 50.0 },
                         ],
                     },
                     {
                         type: 3,
                         patterns: [
-                            { min: 5, max: 6, multiplier: 4.0 },
-                            { min: 7, max: 8, multiplier: 10.0 },
-                            { min: 9, max: 25, multiplier: 30.0 },
+                            { min: 8, max: 9, multiplier: 4.0 },
+                            { min: 10, max: 11, multiplier: 10.0 },
+                            { min: 12, max: 30, multiplier: 30.0 },
                         ],
                     },
                     {
                         type: 4,
                         patterns: [
-                            { min: 5, max: 6, multiplier: 3.0 },
-                            { min: 7, max: 8, multiplier: 4.0 },
-                            { min: 9, max: 25, multiplier: 24.0 },
+                            { min: 8, max: 9, multiplier: 3.0 },
+                            { min: 10, max: 11, multiplier: 4.0 },
+                            { min: 12, max: 30, multiplier: 24.0 },
                         ],
                     },
                     {
                         type: 5,
                         patterns: [
-                            { min: 5, max: 6, multiplier: 2.0 },
-                            { min: 7, max: 8, multiplier: 3.0 },
-                            { min: 9, max: 25, multiplier: 20.0 },
+                            { min: 8, max: 9, multiplier: 2.0 },
+                            { min: 10, max: 11, multiplier: 3.0 },
+                            { min: 12, max: 30, multiplier: 20.0 },
                         ],
                     },
                     {
                         type: 6,
                         patterns: [
-                            { min: 5, max: 6, multiplier: 1.6 },
-                            { min: 7, max: 8, multiplier: 2.4 },
-                            { min: 9, max: 25, multiplier: 16.0 },
+                            { min: 8, max: 9, multiplier: 1.6 },
+                            { min: 10, max: 11, multiplier: 2.4 },
+                            { min: 12, max: 30, multiplier: 16.0 },
                         ],
                     },
                     {
                         type: 7,
                         patterns: [
-                            { min: 5, max: 6, multiplier: 1.0 },
-                            { min: 7, max: 8, multiplier: 2.0 },
-                            { min: 10, max: 25, multiplier: 10.0 },
+                            { min: 8, max: 9, multiplier: 1.0 },
+                            { min: 10, max: 11, multiplier: 2.0 },
+                            { min: 12, max: 30, multiplier: 10.0 },
                         ],
                     },
                     {
                         type: 8,
-                        patterns: [],
+                        patterns: [
+                            { min: 8, max: 9, multiplier: 1.0 },
+                            { min: 10, max: 11, multiplier: 2.0 },
+                            { min: 12, max: 30, multiplier: 10.0 },
+                        ],
                     },
                     {
                         type: 9,
-                        patterns: [],
+                        patterns: [
+                            { min: 8, max: 9, multiplier: 1.0 },
+                            { min: 10, max: 11, multiplier: 2.0 },
+                            { min: 12, max: 30, multiplier: 10.0 },
+                        ],
                     },
                     {
                         type: 10,
@@ -119,6 +127,14 @@ export class ConfigAPI {
                     },
                     {
                         type: 12,
+                        patterns: [],
+                    },
+                    {
+                        type: 13,
+                        patterns: [],
+                    },
+                    {
+                        type: 14,
                         patterns: [],
                     },
                 ],
@@ -160,26 +176,36 @@ export class ConfigAPI {
                     },
                     {
                         type: 8,
+                        symbol: 'symbol-chestplate',
+                        name: 'Chestplate',
+                    },
+                    {
+                        type: 9,
+                        symbol: 'symbol-helmet',
+                        name: 'Helmet',
+                    },
+                    {
+                        type: 10,
                         symbol: 'symbol-scatter',
                         name: 'Scatter',
                     },
                     {
-                        type: 9,
+                        type: 11,
                         symbol: 'symbol-grand',
                         name: 'Grand',
                     },
                     {
-                        type: 10,
+                        type: 12,
                         symbol: 'symbol-angelic',
                         name: 'Angelic',
                     },
                     {
-                        type: 11,
+                        type: 13,
                         symbol: 'symbol-blessed',
                         name: 'Blessed',
                     },
                     {
-                        type: 12,
+                        type: 14,
                         symbol: 'symbol-divine',
                         name: 'Divine',
                     },
@@ -188,29 +214,29 @@ export class ConfigAPI {
                 buyFreeSpinBetMultiplier: 100,
                 scatterBlocks: [
                     {
-                        type: 8,
+                        type: 10,
                         symbol: 'symbol-scatter',
                         name: 'Scatter',
                     },
                 ],
                 specialBlocks: [
                     {
-                        type: 9,
+                        type: 11,
                         symbol: 'symbol-grand',
                         name: 'Grand',
                     },
                     {
-                        type: 10,
+                        type: 12,
                         symbol: 'symbol-angelic',
                         name: 'Angelic',
                     },
                     {
-                        type: 11,
+                        type: 13,
                         symbol: 'symbol-blessed',
                         name: 'Blessed',
                     },
                     {
-                        type: 12,
+                        type: 14,
                         symbol: 'symbol-divine',
                         name: 'Divine',
                     },

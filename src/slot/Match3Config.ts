@@ -3,7 +3,7 @@ import { gameConfig } from '../utils/gameConfig';
 /** Default match3 configuration */
 const defaultConfig = {
     rows: 5,
-    columns: 5,
+    columns: 6,
     tileSize: 130,
 };
 

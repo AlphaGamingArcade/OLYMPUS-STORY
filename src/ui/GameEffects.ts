@@ -66,16 +66,16 @@ export class GameEffects extends Container {
             let y = 0;
 
             // IDENTIFY PIECE WHERE THEY FLY TO
-            if (piece.type == 9 && this.game.grandJackpotTier) {
+            if (piece.type == 11 && this.game.grandJackpotTier) {
                 x = this.game.grandJackpotTier.x + randomRange(-20, 20);
                 y = this.game.grandJackpotTier.y;
-            } else if (piece.type == 10 && this.game.angelicJackpotTier) {
+            } else if (piece.type == 12 && this.game.angelicJackpotTier) {
                 x = this.game.angelicJackpotTier.x + randomRange(-20, 20);
                 y = this.game.angelicJackpotTier.y;
-            } else if (piece.type == 11 && this.game.blessedJackpotTier) {
+            } else if (piece.type == 13 && this.game.blessedJackpotTier) {
                 x = this.game.blessedJackpotTier.x + randomRange(-20, 20);
                 y = this.game.blessedJackpotTier.y;
-            } else if (piece.type == 12 && this.game.divineJackpotTier) {
+            } else if (piece.type == 14 && this.game.divineJackpotTier) {
                 x = this.game.divineJackpotTier.x + randomRange(-20, 20);
                 y = this.game.divineJackpotTier.y;
             }
@@ -137,13 +137,13 @@ export class GameEffects extends Container {
 
         await tl;
 
-        if (piece.type == 9) {
+        if (piece.type == 11) {
             this.game.grandJackpotTier.addActiveDot();
-        } else if (piece.type == 10) {
-            this.game.angelicJackpotTier.addActiveDot();
-        } else if (piece.type == 11) {
-            this.game.blessedJackpotTier.addActiveDot();
         } else if (piece.type == 12) {
+            this.game.angelicJackpotTier.addActiveDot();
+        } else if (piece.type == 13) {
+            this.game.blessedJackpotTier.addActiveDot();
+        } else if (piece.type == 14) {
             this.game.divineJackpotTier.addActiveDot();
         }
 
@@ -151,13 +151,13 @@ export class GameEffects extends Container {
     }
 
     public async playHideJackpotTimes(jackpot: Jackpot) {
-        if (jackpot.type == 9) {
+        if (jackpot.type == 11) {
             this.game.grandJackpotTier.hideTimesText();
-        } else if (jackpot.type == 10) {
-            this.game.angelicJackpotTier.hideTimesText();
-        } else if (jackpot.type == 11) {
-            this.game.blessedJackpotTier.hideTimesText();
         } else if (jackpot.type == 12) {
+            this.game.angelicJackpotTier.hideTimesText();
+        } else if (jackpot.type == 13) {
+            this.game.blessedJackpotTier.hideTimesText();
+        } else if (jackpot.type == 14) {
             this.game.divineJackpotTier.hideTimesText();
         }
     }

@@ -8,6 +8,7 @@ import { HowToPlaySection } from '../ui/HowToPlaySection';
 import { SettingsMenuSection } from '../ui/SettingsMenuSection';
 import { pool } from '../utils/pool';
 import { FreeSpinSection } from '../ui/FreeSpinSection';
+import { ScatterSection } from '../ui/ScatterSection';
 
 interface ModalSection extends Container {
     /** Show the screen */
@@ -75,6 +76,10 @@ export class InfoPopup extends Container {
         {
             title: 'Paytable',
             section: PayTableSection,
+        },
+        {
+            title: 'Scatter',
+            section: ScatterSection,
         },
         {
             title: 'CASCADE FEATURE',

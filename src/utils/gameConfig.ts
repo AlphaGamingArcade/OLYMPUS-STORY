@@ -39,38 +39,47 @@ const defaultBlocks: Block[] = [
     },
     {
         type: 8,
+        symbol: 'symbol-chestplate',
+        name: 'Chestplate',
+    },
+    {
+        type: 9,
+        symbol: 'symbol-helmet',
+        name: 'Helmet',
+    },
+    {
+        type: 10,
         symbol: 'symbol-scatter',
         name: 'Scatter',
     },
     {
-        type: 9,
+        type: 11,
         symbol: 'symbol-grand',
         name: 'Grand',
     },
     {
-        type: 10,
+        type: 12,
         symbol: 'symbol-angelic',
         name: 'Angelic',
     },
     {
-        type: 11,
+        type: 13,
         symbol: 'symbol-blessed',
         name: 'Blessed',
     },
     {
-        type: 12,
+        type: 14,
         symbol: 'symbol-divine',
         name: 'Divine',
     },
 ];
-
 const defaultScatterBlocksTrigger: number = 4;
 
 const defaultBuyFreeSpinBetMultiplier: number = 100;
 
 const defaultScatterBlocks: Block[] = [
     {
-        type: 8,
+        type: 10,
         symbol: 'symbol-scatter',
         name: 'Scatter',
     },
@@ -78,22 +87,22 @@ const defaultScatterBlocks: Block[] = [
 
 const defaultSpecialBlocks: Block[] = [
     {
-        type: 9,
+        type: 11,
         symbol: 'symbol-grand',
         name: 'Grand',
     },
     {
-        type: 10,
+        type: 12,
         symbol: 'symbol-angelic',
         name: 'Angelic',
     },
     {
-        type: 11,
+        type: 13,
         symbol: 'symbol-blessed',
         name: 'Blessed',
     },
     {
-        type: 12,
+        type: 14,
         symbol: 'symbol-divine',
         name: 'Divine',
     },
@@ -103,7 +112,7 @@ const defaultJackpot: Jackpot[] = [
     {
         id: 'divine',
         name: 'DIVINE',
-        type: 12,
+        type: 14,
         multiplier: 100,
         requiredSymbols: 5,
         order: 2,
@@ -111,7 +120,7 @@ const defaultJackpot: Jackpot[] = [
     {
         id: 'blessed',
         name: 'BLESSED',
-        type: 11,
+        type: 13,
         multiplier: 50,
         requiredSymbols: 4,
         order: 3,
@@ -119,7 +128,7 @@ const defaultJackpot: Jackpot[] = [
     {
         id: 'angelic',
         name: 'ANGELIC',
-        type: 10,
+        type: 12,
         multiplier: 20.0,
         requiredSymbols: 3,
         order: 4,
@@ -127,7 +136,7 @@ const defaultJackpot: Jackpot[] = [
     {
         id: 'grand',
         name: 'GRAND',
-        type: 9,
+        type: 11,
         multiplier: 10.0,
         requiredSymbols: 2,
         order: 5,
@@ -193,11 +202,19 @@ const defaultPaytables: Paytable[] = [
     },
     {
         type: 8,
-        patterns: [],
+        patterns: [
+            { min: 8, max: 9, multiplier: 1.0 },
+            { min: 10, max: 11, multiplier: 2.0 },
+            { min: 12, max: 30, multiplier: 10.0 },
+        ],
     },
     {
         type: 9,
-        patterns: [],
+        patterns: [
+            { min: 8, max: 9, multiplier: 1.0 },
+            { min: 10, max: 11, multiplier: 2.0 },
+            { min: 12, max: 30, multiplier: 10.0 },
+        ],
     },
     {
         type: 10,
@@ -209,6 +226,14 @@ const defaultPaytables: Paytable[] = [
     },
     {
         type: 12,
+        patterns: [],
+    },
+    {
+        type: 13,
+        patterns: [],
+    },
+    {
+        type: 14,
         patterns: [],
     },
 ];

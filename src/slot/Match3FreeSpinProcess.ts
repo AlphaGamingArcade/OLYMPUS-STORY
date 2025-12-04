@@ -40,6 +40,8 @@ export class Match3FreeSpinProcess {
 
     /** Current internal resolution round index */
     private round = 0;
+    /** Bet amount */
+    private betAmount = 0;
 
     /** Whether the current round produced at least one match */
     private hasRoundWin = false;
@@ -106,8 +108,9 @@ export class Match3FreeSpinProcess {
         this.match3.process.stop();
 
         this.round = 0;
-        this.remainingFreeSpins = freeSpinCount;
         this.currentFreeSpin = 0;
+        this.betAmount = bet;
+        this.remainingFreeSpins = freeSpinCount;
 
         this.match3.onFreeSpinStart?.(freeSpinCount);
 
@@ -171,7 +174,7 @@ export class Match3FreeSpinProcess {
         const positions: Match3Position[] = [];
         for (let col = 0; col < this.match3.board.columns; col++) {
             for (let row = 0; row < this.match3.board.rows; row++) {
-                if (this.match3.board.grid[col][row] !== 0) {
+                if (this.match3.board.grid[row][col] !== 0) {
                     positions.push({ row, column: col });
                 }
             }

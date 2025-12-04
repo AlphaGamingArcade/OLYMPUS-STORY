@@ -311,12 +311,12 @@ export class GameScreen extends Container {
             this.gameContainer.y = this.gameContainer.height * 0.5;
 
             this.gameLogo.scale.set(1);
-            this.gameLogo.x = width - this.gameLogo.width + 50;
+            this.gameLogo.x = width - this.gameLogo.width + 60;
             this.gameLogo.y = this.gameLogo.height * 0.5;
 
-            const multiplierX = width;
-            const multiplierTierY = 340;
-            const multiplierScale = 1;
+            const multiplierX = width + 10;
+            const multiplierTierY = 360;
+            const multiplierScale = 0.85;
 
             this.divineJackpotTier.scale.set(multiplierScale);
             this.divineJackpotTier.x = multiplierX - this.divineJackpotTier.width * 0.65;
@@ -334,15 +334,15 @@ export class GameScreen extends Container {
             this.grandJackpotTier.x = multiplierX - this.grandJackpotTier.width * 0.65;
             this.grandJackpotTier.y = multiplierTierY + 430;
 
-            this.buyFreeSpinButton.scale.set(1);
-            this.buyFreeSpinButton.x = 220;
+            this.buyFreeSpinButton.scale.set(0.85);
+            this.buyFreeSpinButton.x = 160;
             this.buyFreeSpinButton.y = 260;
 
-            this.roundResult.scale.set(1);
-            this.roundResult.x = 220;
-            this.roundResult.y = height - this.roundResult.height - 80;
+            this.roundResult.scale.set(0.85);
+            this.roundResult.x = 160;
+            this.roundResult.y = height - this.roundResult.height - 160;
 
-            this.babyZeus.x = 500;
+            this.babyZeus.x = 450;
             this.babyZeus.y = height - this.babyZeus.height * 0.5 - 100;
 
             this.overtime.x = this.gameContainer.x;

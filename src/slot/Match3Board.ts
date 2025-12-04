@@ -132,7 +132,7 @@ export class Match3Board {
         const positions: Match3Position[] = [];
         for (let col = 0; col < this.match3.board.columns; col++) {
             for (let row = 0; row < this.match3.board.rows; row++) {
-                if (this.match3.board.grid[col][row] !== 0) {
+                if (this.match3.board.grid[row][col] !== 0) {
                     positions.push({ row, column: col });
                 }
             }

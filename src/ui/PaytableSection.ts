@@ -5,7 +5,6 @@ import { Paytable } from '../slot/Match3Config';
 import { List } from '@pixi/ui';
 import { gameConfig } from '../utils/gameConfig';
 import { PaytableCard } from './PaytableCard';
-import { PaytableSpecialCard } from './PaytableSpecialCard';
 
 export class PayTableSection extends Container {
     private symbolsDescriptionLabel: Label;
@@ -15,8 +14,6 @@ export class PayTableSection extends Container {
     private paytables: Paytable[];
     private paytableCardsContainer: Container;
     private paytableCards: PaytableCard[] = [];
-    private wildCardContainer: Container;
-    private wildCard: PaytableSpecialCard;
     private cardsPerRow = 3;
     private cardSpacing = 20;
 
@@ -27,7 +24,7 @@ export class PayTableSection extends Container {
         this.currency = userSettings.getCurrency();
         this.paytables = gameConfig.getPaytables();
 
-        this.mainLayout = new List({ type: 'vertical', elementsMargin: 25 });
+        this.mainLayout = new List({ type: 'vertical', elementsMargin: 20 });
         this.addChild(this.mainLayout);
 
         this.symbolsDescriptionLabel = new Label(
@@ -46,7 +43,7 @@ export class PayTableSection extends Container {
 
         this.paytableCardsContainer = new Container();
 
-        for (const paytable of this.paytables.slice(0, 7)) {
+        for (const paytable of this.paytables.slice(0, 9)) {
             const card = new PaytableCard({
                 image: `symbol-${paytable.type}`,
                 betAmount: this.betAmount,
@@ -58,14 +55,6 @@ export class PayTableSection extends Container {
         }
         this.layoutCards();
         this.mainLayout.addChild(this.paytableCardsContainer);
-
-        this.wildCardContainer = new Container();
-        this.wildCard = new PaytableSpecialCard({
-            image: 'symbol-8',
-            description: 'This is SCATTER symbol. \nSCATTER symbol is present on all reels',
-        });
-        this.wildCardContainer.addChild(this.wildCard);
-        this.mainLayout.addChild(this.wildCardContainer);
     }
 
     private layoutCards(): void {
@@ -106,33 +95,27 @@ export class PayTableSection extends Container {
                 card.fontSize = 28;
             }
 
-            this.wildCard.fontSize = 28;
-
             this.mainLayout.y = 100;
         } else if (isMobile && !isPortrait) {
             this.symbolsDescriptionLabel.y = 100;
             this.symbolsDescriptionLabel.style.fontSize = 28;
             this.symbolsDescriptionLabel.style.wordWrapWidth = 1000;
-            this.cardsPerRow = 8;
+            this.cardsPerRow = 6;
 
             for (const card of this.paytableCards) {
                 card.fontSize = 28;
             }
-
-            this.wildCard.fontSize = 28;
 
             this.mainLayout.y = 80;
         } else {
             this.symbolsDescriptionLabel.y = 60;
             this.symbolsDescriptionLabel.style.fontSize = 18;
             this.symbolsDescriptionLabel.style.wordWrapWidth = 800;
-            this.cardsPerRow = 8;
+            this.cardsPerRow = 6;
 
             for (const card of this.paytableCards) {
                 card.fontSize = 18;
             }
-
-            this.wildCard.fontSize = 18;
 
             this.mainLayout.y = 60;
         }
@@ -141,6 +124,6 @@ export class PayTableSection extends Container {
 
         this.symbolsDescriptionLabel.x = width * 0.5;
         this.mainLayout.x = width * 0.5;
-        this.mainLayout.elementsMargin = 50;
+        this.mainLayout.elementsMargin = 20;
     }
 }

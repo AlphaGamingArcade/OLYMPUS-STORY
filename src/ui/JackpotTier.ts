@@ -112,7 +112,7 @@ export class JackpotTier extends Container {
 
         this.occuranceLabel = new Label(`x10`, style);
         this.occuranceLabel.style.fill = verticalGradient;
-        this.occuranceLabel.x = 220;
+        this.occuranceLabel.x = 200;
         this.occuranceLabel.alpha = 0;
         this.container.addChild(this.occuranceLabel);
 
