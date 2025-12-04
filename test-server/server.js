@@ -27,8 +27,8 @@ let winReels = [
     [1, 4, 2, 2, 5, 2],
     [8, 1, 3, 2, 1, 4],
     [2, 9, 6, 7, 2, 5],
-    [1, 1, 6, 2, 2, 6],
-    [1, 1, 8, 1, 1, 8],
+    [12, 2, 2, 2, 2, 11],
+    [12, 12, 11, 12, 2, 2],
 ];
 
 let grandReels = [
@@ -43,7 +43,7 @@ app.get('/spin', async (req, res) => {
     await utils.waitFor(delay); // 1 sec
 
     // Generate 5 reels, each with 5 random symbols from the symbols array
-    let symbols = [1, 2, 3, 4, 5, 10, 11];
+    let symbols = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14];
     const reels = Array.from({ length: 5 }, () =>
         Array.from({ length: 6 }, () => symbols[Math.floor(Math.random() * symbols.length)]),
     );
@@ -51,7 +51,7 @@ app.get('/spin', async (req, res) => {
     console.log('Reels', reels);
 
     res.json({
-        reels: reels,
+        reels: winReels,
     });
 });
 

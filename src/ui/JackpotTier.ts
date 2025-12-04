@@ -4,6 +4,7 @@ import { throttle } from '../utils/throttle';
 import { sfx } from '../utils/audio';
 import { Label } from './Label';
 import { formatCurrency } from '../utils/formatter';
+import { ShadowLabel } from './ShadowLabel';
 
 const defaultJackpotTierOptions = {
     name: 'multiplier_label_grand',
@@ -30,7 +31,7 @@ export class JackpotTier extends Container {
     /** The label sprite at the top */
     private frameLabel: Sprite;
     /** The multiplier value text */
-    private messageLabel: Label;
+    private messageLabel: ShadowLabel;
     /** Container for dot indicators */
     private dotsContainer: Container;
     /** Array of dot sprites */
@@ -96,17 +97,26 @@ export class JackpotTier extends Container {
                 width: 3,
                 color: '#000000',
             },
-            dropShadow: {
-                alpha: 1,
-                angle: Math.PI / 2,
-                blur: 0,
-                color: '#000000',
-                distance: 4,
-            },
         });
 
-        this.messageLabel = new Label(`${this.currency}${this.config.points}`, style);
-        this.messageLabel.style.fill = verticalGradient;
+        // this.messageLabel = new Label(formatCurrency(this.config.points, this.currency), style);
+        this.messageLabel = new ShadowLabel({
+            text: formatCurrency(0, this.currency),
+            style: {
+                fill: verticalGradient,
+                fontFamily: 'Spartanmb Bold',
+                align: 'center',
+                fontSize: 50,
+                stroke: {
+                    width: 2,
+                    color: '#000000',
+                },
+            },
+            shadowOffsetY: 6,
+            shadowColor: '#000000',
+            shadowAlpha: 1,
+        });
+        this.messageLabel.y = -4;
         this.container.addChild(this.messageLabel);
         this.fitTextToContainer();
 
