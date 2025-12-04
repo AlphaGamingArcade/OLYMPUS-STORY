@@ -57,7 +57,7 @@ app.get('/spin', async (req, res) => {
 
 app.get('/collect', async (req, res) => {
     res.json({
-        balance: 1000,
+        balance: 100000,
     });
 });
 

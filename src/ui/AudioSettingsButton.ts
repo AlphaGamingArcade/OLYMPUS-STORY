@@ -1,10 +1,10 @@
 import { ToggleIconButton } from './ToggleIconButton';
-import { sfx } from '../utils/audio';
+import { bgm, sfx } from '../utils/audio';
 
 /**
  * A button that toggles sound on/off
  */
-export class SoundButton extends ToggleIconButton {
+export class AudioSettingsButton extends ToggleIconButton {
     constructor() {
         super({
             imageDefaultOn: 'icon-button-sound-on-default-view',
@@ -20,9 +20,12 @@ export class SoundButton extends ToggleIconButton {
         this.onPress.connect(() => {
             this.toggle();
             sfx.setVolume(this.isOn ? 1 : 0);
+            bgm.setVolume(this.isOn ? 1 : 0);
         });
 
         // Initialize with current sound state
-        this.setToggleState(sfx.getVolume() > 0);
+
+        const isOnState = sfx.getVolume() > 0 || bgm.getVolume() > 0;
+        this.setToggleState(isOnState);
     }
 }

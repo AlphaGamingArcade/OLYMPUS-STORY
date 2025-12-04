@@ -192,10 +192,13 @@ export class GameScreen extends Container {
         this.controlPanel.onSettings(() => {
             navigation.presentPopup<SettingsPopupData>(SettingsPopup, {
                 finished: this.finished,
-                onBetChanged: () => {
+                onBetSettingChanged: () => {
                     this.controlPanel.setBet(userSettings.getBet());
                     this.updateMultiplierAmounts();
                     this.updateBuyFreeSpinAmount();
+                },
+                onAudioSettingChanged: (isOn: boolean) => {
+                    this.controlPanel.audioSettingsButton.setToggleState(isOn);
                 },
             });
         });

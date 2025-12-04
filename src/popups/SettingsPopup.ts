@@ -5,10 +5,12 @@ import { navigation } from '../utils/navigation';
 import { AudioSettings } from '../ui/AudioSettings';
 import { BetSettings } from '../ui/BetSettings';
 import { BetAction, userSettings } from '../utils/userSettings';
+import { bgm, sfx } from '../utils/audio';
 
 export type SettingsPopupData = {
     finished: boolean;
-    onBetChanged: () => void;
+    onBetSettingChanged: () => void;
+    onAudioSettingChanged: (isOn: boolean) => void;
 };
 
 /** Popup for volume and game mode settings */
@@ -27,7 +29,9 @@ export class SettingsPopup extends Container {
 
     private betSettings: BetSettings;
     private audioSettings: AudioSettings;
-    private onBetChanged?: () => void;
+
+    private onBetSettingChanged?: () => void;
+    private onAudioSettingChanged?: (isOn: boolean) => void;
 
     constructor() {
         super();
@@ -74,12 +78,12 @@ export class SettingsPopup extends Container {
         this.betSettings.onIncreaseBet(() => {
             userSettings.setBet(BetAction.INCREASE);
             this.betSettings.text = userSettings.getBet();
-            this.onBetChanged?.();
+            this.onBetSettingChanged?.();
         });
         this.betSettings.onDecreaseBet(() => {
             userSettings.setBet(BetAction.DECREASE);
             this.betSettings.text = userSettings.getBet();
-            this.onBetChanged?.();
+            this.onBetSettingChanged?.();
         });
 
         this.panelBase.addChild(this.betSettings);
@@ -88,6 +92,26 @@ export class SettingsPopup extends Container {
         this.audioSettings = new AudioSettings({
             gap: 50,
             width: 400,
+        });
+        this.audioSettings.onAmbientMusicToggle(() => {
+            const bgmVolume = bgm.getVolume();
+            const newState = bgmVolume <= 0;
+            bgm.setVolume(newState ? 1 : 0);
+            this.audioSettings.ambientMusicSwitcher.forceSwitch(!newState);
+
+            const sfxVolume = sfx.getVolume();
+            const isAudioOn = newState || sfxVolume > 0;
+            this.onAudioSettingChanged?.(isAudioOn);
+        });
+        this.audioSettings.onSoundFXToggle(() => {
+            const sfxVolume = sfx.getVolume();
+            const newState = sfxVolume <= 0;
+            sfx.setVolume(newState ? 1 : 0);
+            this.audioSettings.soundFXSwitcher.forceSwitch(!newState);
+
+            const bgmVolume = bgm.getVolume();
+            const isAudioOn = newState || bgmVolume > 0;
+            this.onAudioSettingChanged?.(isAudioOn);
         });
         this.panelBase.addChild(this.audioSettings);
 
@@ -176,13 +200,17 @@ export class SettingsPopup extends Container {
     /** Set things up just before showing the popup */
     public prepare(data: SettingsPopupData) {
         this.betSettings.text = `${userSettings.getBet()}`;
-
-        this.audioSettings.setup();
+        const bgmVolume = bgm.getVolume();
+        const sfxVolume = sfx.getVolume();
+        this.audioSettings.setup(bgmVolume > 0, sfxVolume > 0);
 
         if (data) {
             this.betSettings.setup(!data.finished);
-            if (data.onBetChanged) {
-                this.onBetChanged = data.onBetChanged;
+            if (data.onBetSettingChanged) {
+                this.onBetSettingChanged = data.onBetSettingChanged;
+            }
+            if (data.onAudioSettingChanged) {
+                this.onAudioSettingChanged = data.onAudioSettingChanged;
             }
         }
     }

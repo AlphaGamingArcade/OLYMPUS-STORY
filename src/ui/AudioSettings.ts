@@ -1,6 +1,5 @@
 import { Container } from 'pixi.js';
 import { AudioSwitcher } from './AudioSwitcher';
-import { bgm, sfx } from '../utils/audio';
 
 export interface AudioSettingsOptions {
     gap?: number;
@@ -12,13 +11,15 @@ export interface AudioSettingsOptions {
  */
 export class AudioSettings extends Container {
     /** Sound FX Switch */
-    private soundFXSwitcher: AudioSwitcher;
+    public soundFXSwitcher: AudioSwitcher;
     /** Ambient Music Switch */
-    private ambientMusicSwitcher: AudioSwitcher;
+    public ambientMusicSwitcher: AudioSwitcher;
     /** Gap between switchers */
     private gap: number;
-    /** Update callback */
-    private onUpdate?: () => void;
+    /** Ambient music toggle callback */
+    private onAmbientMusicToggleCallback?: () => void;
+    /** Sound FX toggle callback */
+    private onSoundFXToggleCallback?: () => void;
 
     constructor(options: AudioSettingsOptions = {}) {
         super();
@@ -32,17 +33,22 @@ export class AudioSettings extends Container {
             description: 'Ambient music sub text',
             width,
         });
-        this.ambientMusicSwitcher.onPress(() => {
-            const bgmVolume = bgm.getVolume();
-            const newState = bgmVolume <= 0; // If currently off, turn on
+        this.ambientMusicSwitcher.onPress(() => this.onAmbientMusicToggleCallback?.());
+        // this.ambientMusicSwitcher.onPress(() => {
+        //     const bgmVolume = bgm.getVolume();
+        //     const newState = bgmVolume <= 0; // If currently off, turn on
 
-            bgm.setVolume(newState ? 1 : 0);
-            this.ambientMusicSwitcher.forceSwitch(!newState);
+        //     bgm.setVolume(newState ? 1 : 0);
+        //     this.ambientMusicSwitcher.forceSwitch(!newState);
 
-            if (this.onUpdate) {
-                this.onUpdate();
-            }
-        });
+        //     if (this.onAmbientMusicToggleCallback) {
+        //         this.onAmbientMusicToggleCallback(newState);
+        //     }
+
+        //     if (this.onUpdate) {
+        //         this.onUpdate();
+        //     }
+        // });
         this.addChild(this.ambientMusicSwitcher);
 
         /** Sound FX */
@@ -51,39 +57,46 @@ export class AudioSettings extends Container {
             description: 'Sound FX Description',
             width,
         });
-        this.soundFXSwitcher.onPress(() => {
-            const sfxVolume = sfx.getVolume();
-            const newState = sfxVolume <= 0; // If currently off, turn on
+        this.soundFXSwitcher.onPress(() => this.onSoundFXToggleCallback?.());
 
-            sfx.setVolume(newState ? 1 : 0);
-            this.soundFXSwitcher.forceSwitch(!newState);
+        // this.soundFXSwitcher.onPress(() => {
+        //     const sfxVolume = sfx.getVolume();
+        //     const newState = sfxVolume <= 0; // If currently off, turn on
 
-            if (this.onUpdate) {
-                this.onUpdate();
-            }
-        });
+        //     sfx.setVolume(newState ? 1 : 0);
+        //     this.soundFXSwitcher.forceSwitch(!newState);
+
+        //     if (this.onSoundFXToggleCallback) {
+        //         this.onSoundFXToggleCallback(newState);
+        //     }
+
+        //     if (this.onUpdate) {
+        //         this.onUpdate();
+        //     }
+        // });
         this.soundFXSwitcher.y = this.ambientMusicSwitcher.height + this.gap;
         this.addChild(this.soundFXSwitcher);
+    }
 
-        // Initialize switchers with current audio state immediately
-        this.setup();
+    /**
+     * Set ambient music toggle callback
+     */
+    public onAmbientMusicToggle(callback: () => void): void {
+        this.onAmbientMusicToggleCallback = callback;
+    }
+
+    /**
+     * Set sound FX toggle callback
+     */
+    public onSoundFXToggle(callback: () => void): void {
+        this.onSoundFXToggleCallback = callback;
     }
 
     /**
      * Initialize the switchers with current audio state
      */
-    public setup(): void {
-        const bgmVolume = bgm.getVolume();
-        this.ambientMusicSwitcher.forceSwitch(bgmVolume > 0);
-
-        const sfxVolume = sfx.getVolume();
-        this.soundFXSwitcher.forceSwitch(sfxVolume > 0);
-    }
-
-    /**
-     * Set update callback
-     */
-    public setUpdateCallback(callback: () => void): void {
-        this.onUpdate = callback;
+    public setup(isAmbientMusicOn: boolean, isSoundFXOn: boolean): void {
+        this.ambientMusicSwitcher.forceSwitch(isAmbientMusicOn);
+        this.soundFXSwitcher.forceSwitch(isSoundFXOn);
     }
 }

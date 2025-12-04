@@ -1,8 +1,10 @@
 import { Container, Text, Sprite, Texture } from 'pixi.js';
-import { SoundButton } from './SoundButton';
 import { IconButton } from './IconButton2';
 import { userSettings } from '../utils/userSettings';
 import { MatchPattern } from './MatchPattern';
+import { AudioSettingsButton } from './AudioSettingsButton';
+import { formatCurrency } from '../utils/formatter';
+import { SpinButton, SpinButtonState } from './SpinButton';
 
 export interface WinMatchPattern {
     times: number;
@@ -26,16 +28,18 @@ export class ControlPanel extends Container {
     private matchPattern: MatchPattern;
     private winMatchPatterns: WinMatchPattern[] = [];
 
-    private soundButton: SoundButton;
+    public audioSettingsButton: AudioSettingsButton;
     private infoButton: IconButton;
     private settingsButton: IconButton;
     private minusButton: IconButton;
-    private spinButton: IconButton;
+    private spinButton: SpinButton;
     private plusButton: IconButton;
     private autoplayButton: IconButton;
 
     private panelHeight = 160;
     private contentWidth = 1920;
+
+    private currency = 'usd';
 
     private spacebarHandler?: (e: KeyboardEvent) => void;
 
@@ -44,6 +48,8 @@ export class ControlPanel extends Container {
 
     constructor() {
         super();
+
+        this.currency = userSettings.getCurrency();
 
         // Create semi-transparent background using Sprite
         this.background = Sprite.from(Texture.WHITE);
@@ -66,10 +72,8 @@ export class ControlPanel extends Container {
         });
         this.contentContainer.addChild(this.creditLabel);
 
-        const currency = userSettings.getCurrency();
-
         this.creditValue = new Text({
-            text: `${currency}100,000.00`,
+            text: formatCurrency(userSettings.getBalance(), this.currency),
             style: {
                 fontSize: 20,
                 fill: 0xffd700,
@@ -82,7 +86,7 @@ export class ControlPanel extends Container {
         this.betLabel = new Text({
             text: 'BET',
             style: {
-                fontSize: 18,
+                fontSize: 22,
                 fill: 0xffffff,
                 fontWeight: 'bold',
             },
@@ -90,9 +94,9 @@ export class ControlPanel extends Container {
         this.contentContainer.addChild(this.betLabel);
 
         this.betValue = new Text({
-            text: `${currency}.00`,
+            text: formatCurrency(userSettings.getBet(), userSettings.getCurrency()),
             style: {
-                fontSize: 20,
+                fontSize: 22,
                 fill: 0xffd700,
                 fontWeight: 'bold',
             },
@@ -115,7 +119,7 @@ export class ControlPanel extends Container {
         this.contentContainer.addChild(this.matchPattern);
 
         // Create buttons
-        this.soundButton = new SoundButton();
+        this.audioSettingsButton = new AudioSettingsButton();
         this.settingsButton = new IconButton({
             imageDefault: 'icon-button-settings-default-view',
             imageHover: 'icon-button-settings-hover-view',
@@ -132,30 +136,25 @@ export class ControlPanel extends Container {
             imageDefault: 'icon-button-minus-default-view',
             imageHover: 'icon-button-minus-hover-view',
             imagePressed: 'icon-button-minus-active-view',
-            imageDisabled: 'icon-button-minus-active-view',
+            imageDisabled: 'icon-button-minus-disabled-view',
         });
 
-        this.spinButton = new IconButton({
-            imageDefault: 'icon-button-spin-default-view',
-            imageHover: 'icon-button-spin-hover-view',
-            imagePressed: 'icon-button-spin-active-view',
-            imageDisabled: 'icon-button-spin-active-view',
-        });
+        this.spinButton = new SpinButton();
 
         this.plusButton = new IconButton({
             imageDefault: 'icon-button-add-default-view',
             imageHover: 'icon-button-add-hover-view',
             imagePressed: 'icon-button-add-active-view',
-            imageDisabled: 'icon-button-add-active-view',
+            imageDisabled: 'icon-button-add-disabled-view',
         });
         this.autoplayButton = new IconButton({
             imageDefault: 'icon-button-autoplay-default-view',
             imageHover: 'icon-button-autoplay-hover-view',
             imagePressed: 'icon-button-autoplay-active-view',
-            imageDisabled: 'icon-button-autoplay-active-view',
+            imageDisabled: 'icon-button-autoplay-disabled-view',
         });
 
-        this.contentContainer.addChild(this.soundButton);
+        this.contentContainer.addChild(this.audioSettingsButton);
         this.contentContainer.addChild(this.infoButton);
         this.contentContainer.addChild(this.settingsButton);
         this.contentContainer.addChild(this.minusButton);
@@ -187,7 +186,7 @@ export class ControlPanel extends Container {
             const buttonScale = 2;
             const spinButtonScale = 2;
 
-            this.soundButton.scale.set(buttonScale);
+            this.audioSettingsButton.scale.set(buttonScale);
             this.infoButton.scale.set(buttonScale);
             this.settingsButton.scale.set(buttonScale);
             this.minusButton.scale.set(buttonScale);
@@ -202,8 +201,8 @@ export class ControlPanel extends Container {
             this.infoButton.x = leftBtnStartX;
             this.infoButton.y = leftBtnY;
 
-            this.soundButton.x = leftBtnStartX;
-            this.soundButton.y = leftBtnY + 130;
+            this.audioSettingsButton.x = leftBtnStartX;
+            this.audioSettingsButton.y = leftBtnY + 130;
 
             // Center - Large spin button
             this.spinButton.x = this.contentWidth / 2;
@@ -275,7 +274,7 @@ export class ControlPanel extends Container {
             const buttonScale = 1.5;
             const spinButtonScale = 1.5;
 
-            this.soundButton.scale.set(buttonScale);
+            this.audioSettingsButton.scale.set(buttonScale);
             this.infoButton.scale.set(buttonScale);
             this.settingsButton.scale.set(buttonScale);
             this.minusButton.scale.set(buttonScale);
@@ -284,8 +283,8 @@ export class ControlPanel extends Container {
             this.autoplayButton.scale.set(buttonScale);
 
             // Left side buttons (vertical stack, more compact)
-            this.soundButton.x = 120;
-            this.soundButton.y = 50;
+            this.audioSettingsButton.x = 120;
+            this.audioSettingsButton.y = 50;
             this.settingsButton.x = 120;
             this.settingsButton.y = 150;
             this.infoButton.x = 210;
@@ -360,7 +359,7 @@ export class ControlPanel extends Container {
             const buttonScale = 1;
             const spinButtonScale = 1;
 
-            this.soundButton.scale.set(buttonScale);
+            this.audioSettingsButton.scale.set(buttonScale);
             this.infoButton.scale.set(buttonScale);
             this.settingsButton.scale.set(buttonScale);
             this.minusButton.scale.set(buttonScale);
@@ -369,8 +368,8 @@ export class ControlPanel extends Container {
             this.autoplayButton.scale.set(buttonScale);
 
             // Left side buttons (stacked vertically)
-            this.soundButton.x = 50;
-            this.soundButton.y = 40;
+            this.audioSettingsButton.x = 50;
+            this.audioSettingsButton.y = 40;
             this.settingsButton.x = 50;
             this.settingsButton.y = 100;
             this.infoButton.x = 120;
@@ -387,7 +386,7 @@ export class ControlPanel extends Container {
 
             this.betLabel.x = creditStartX + 250;
             this.betLabel.y = bottomY;
-            this.betValue.x = creditStartX + 290;
+            this.betValue.x = creditStartX + 300;
             this.betValue.y = bottomY;
 
             // Center message (relative to content container)
@@ -494,6 +493,8 @@ export class ControlPanel extends Container {
         this.autoplayButton.enabled = false;
         this.plusButton.enabled = false;
         this.minusButton.enabled = false;
+
+        this.spinButton.setState(SpinButtonState.STOP);
     }
 
     /** Disabled betting */
@@ -501,6 +502,8 @@ export class ControlPanel extends Container {
         this.autoplayButton.enabled = true;
         this.plusButton.enabled = true;
         this.minusButton.enabled = true;
+
+        this.spinButton.setState(SpinButtonState.PLAY);
     }
 
     /**
