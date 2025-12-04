@@ -27,8 +27,8 @@ let winReels = [
     [1, 4, 2, 2, 5, 2],
     [8, 1, 3, 2, 1, 4],
     [2, 9, 6, 7, 2, 5],
-    [12, 2, 2, 2, 2, 11],
-    [12, 12, 11, 12, 2, 2],
+    [1, 2, 2, 2, 2, 11],
+    [1, 1, 1, 1, 2, 2],
 ];
 
 let grandReels = [
@@ -51,7 +51,7 @@ app.get('/spin', async (req, res) => {
     console.log('Reels', reels);
 
     res.json({
-        reels: winReels,
+        reels: reels,
     });
 });
 

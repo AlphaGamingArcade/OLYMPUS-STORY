@@ -73,6 +73,9 @@ export class GameScreen extends Container {
     private finishedCallbacks: ((finished: boolean) => void)[] = [];
     /** Currency */
     public currency: string;
+    /** Greetings */
+    public preBetGreetings = ['HOLD SPACE FOR TURBO SPIN', 'PLACE YOUR BETS'];
+    public betGreetings = ['HOLD SPACE FOR TURBO SPIN', 'GOOD LUCK!'];
 
     constructor() {
         super();
@@ -178,7 +181,7 @@ export class GameScreen extends Container {
         this.addChild(this.controlPanel);
         this.controlPanel.setCredit(100000);
         this.controlPanel.setBet(2.0);
-        this.controlPanel.setMessage('HOLD SPACE FOR TURBO SPIN');
+        this.controlPanel.setMessage(this.preBetGreetings[Math.floor(Math.random() * this.preBetGreetings.length)]);
 
         this.controlPanel.onSpin(() => this.startSpinning());
         this.controlPanel.onSpacebar(() => this.startSpinning());
@@ -262,7 +265,7 @@ export class GameScreen extends Container {
 
         this.buyFreeSpinButton.enabled = false;
 
-        this.controlPanel.setMessage('HOLD SPACE FOR TURBO SPIN');
+        this.controlPanel.setMessage(this.betGreetings[Math.floor(Math.random() * this.betGreetings.length)]);
         this.roundResult.clearResults();
 
         const bet = userSettings.getBet();
@@ -335,11 +338,11 @@ export class GameScreen extends Container {
             this.grandJackpotTier.y = multiplierTierY + 430;
 
             this.buyFreeSpinButton.scale.set(0.85);
-            this.buyFreeSpinButton.x = 160;
+            this.buyFreeSpinButton.x = 180;
             this.buyFreeSpinButton.y = 260;
 
             this.roundResult.scale.set(0.85);
-            this.roundResult.x = 160;
+            this.roundResult.x = 180;
             this.roundResult.y = height - this.roundResult.height - 160;
 
             this.babyZeus.x = 450;
@@ -406,11 +409,17 @@ export class GameScreen extends Container {
     }
 
     /** Fires when there are match */
-    private onMatch(data: SlotOnMatchData) {
+    private async onMatch(data: SlotOnMatchData) {
         if (data.wins.length > 0) {
+            // stop control panel matches animation
+            this.controlPanel.stopMatchMessages();
+
             for (const win of data.wins) {
                 this.roundResult.addResult(win.types.length, `symbol-${win.types[0]}`, win.amount, this.currency);
+                this.controlPanel.addMatchMessage(win.types.length, win.types[0], win.amount, this.currency);
             }
+
+            this.controlPanel.playMatchMessages();
         }
     }
 
@@ -419,7 +428,7 @@ export class GameScreen extends Container {
         if (amount > 0) {
             this.controlPanel.setWinMessage(`WIN ${formatCurrency(amount, this.currency)}`);
         } else {
-            this.controlPanel.setMessage('HOLD SPACE FOR TURBO SPIN');
+            this.controlPanel.setMessage(this.preBetGreetings[Math.floor(Math.random() * this.preBetGreetings.length)]);
         }
     }
 

@@ -2,6 +2,15 @@ import { Container, Text, Sprite, Texture } from 'pixi.js';
 import { SoundButton } from './SoundButton';
 import { IconButton } from './IconButton2';
 import { userSettings } from '../utils/userSettings';
+import { MatchPattern } from './MatchPattern';
+
+export interface WinMatchPattern {
+    times: number;
+    type: number;
+    amount: number;
+    currency: string;
+}
+
 /**
  * Control panel for the game, displaying credit, bet info, and action buttons
  */
@@ -14,6 +23,8 @@ export class ControlPanel extends Container {
     private betLabel: Text;
     private betValue: Text;
     private messageText: Text;
+    private matchPattern: MatchPattern;
+    private winMatchPatterns: WinMatchPattern[] = [];
 
     private soundButton: SoundButton;
     private infoButton: IconButton;
@@ -22,6 +33,9 @@ export class ControlPanel extends Container {
     private spinButton: IconButton;
     private plusButton: IconButton;
     private autoplayButton: IconButton;
+
+    private panelHeight = 160;
+    private contentWidth = 1920;
 
     private spacebarHandler?: (e: KeyboardEvent) => void;
 
@@ -97,6 +111,9 @@ export class ControlPanel extends Container {
         this.messageText.anchor.set(0.5);
         this.contentContainer.addChild(this.messageText);
 
+        this.matchPattern = new MatchPattern();
+        this.contentContainer.addChild(this.matchPattern);
+
         // Create buttons
         this.soundButton = new SoundButton();
         this.settingsButton = new IconButton({
@@ -155,15 +172,15 @@ export class ControlPanel extends Container {
 
         // === MOBILE PORTRAIT ===
         if (isMobile && isPortrait) {
-            const panelHeight = 400;
+            this.panelHeight = 400;
 
             // Background
             this.background.width = width;
-            this.background.height = panelHeight;
-            this.y = height - panelHeight;
+            this.background.height = this.panelHeight;
+            this.y = height - this.panelHeight;
 
             // Content container
-            const contentWidth = width;
+            this.contentWidth = width;
             this.contentContainer.x = 0;
 
             // Adjust button sizes for mobile
@@ -189,16 +206,16 @@ export class ControlPanel extends Container {
             this.soundButton.y = leftBtnY + 130;
 
             // Center - Large spin button
-            this.spinButton.x = contentWidth / 2;
-            this.spinButton.y = panelHeight * 0.5;
+            this.spinButton.x = this.contentWidth / 2;
+            this.spinButton.y = this.panelHeight * 0.5;
 
             const betBtnX = 220;
 
             this.minusButton.x = width / 2 - betBtnX;
-            this.minusButton.y = panelHeight * 0.5;
+            this.minusButton.y = this.panelHeight * 0.5;
 
             this.plusButton.x = width / 2 + betBtnX;
-            this.plusButton.y = panelHeight * 0.5;
+            this.plusButton.y = this.panelHeight * 0.5;
 
             // Right side buttons (vertical stack on far right)
             const rightBtnEndX = width - 130;
@@ -237,21 +254,21 @@ export class ControlPanel extends Container {
             this.betValue.anchor.set(1, 0);
 
             // Message (bottom center, small)
-            this.messageText.x = contentWidth / 2;
+            this.messageText.x = this.contentWidth / 2;
             this.messageText.y = height / 2;
             this.messageText.style.fontSize = 42;
         }
         // === MOBILE LANDSCAPE ===
         else if (isMobile && !isPortrait) {
-            const panelHeight = 210;
+            this.panelHeight = 210;
 
             // Background
             this.background.width = width;
-            this.background.height = panelHeight;
-            this.y = height - panelHeight;
+            this.background.height = this.panelHeight;
+            this.y = height - this.panelHeight;
 
             // Content container
-            const contentWidth = width;
+            this.contentWidth = width;
             this.contentContainer.x = 0;
 
             // Adjust button sizes for mobile
@@ -299,12 +316,12 @@ export class ControlPanel extends Container {
             this.betValue.anchor.set(0, 0);
 
             // Center message (smaller font)
-            this.messageText.x = contentWidth / 2;
+            this.messageText.x = this.contentWidth / 2;
             this.messageText.y = 70;
             this.messageText.style.fontSize = 22;
 
             // Right side buttons (horizontal, compact)
-            const rightCenterX = contentWidth - 310;
+            const rightCenterX = this.contentWidth - 310;
             const buttonY = 60;
 
             this.minusButton.x = rightCenterX - 170;
@@ -317,27 +334,27 @@ export class ControlPanel extends Container {
             this.plusButton.y = buttonY;
 
             // Autoplay button (bottom right, compact)
-            this.autoplayButton.x = contentWidth - 180;
+            this.autoplayButton.x = this.contentWidth - 180;
             this.autoplayButton.y = 160;
 
             // Message (bottom center, small)
-            this.messageText.x = contentWidth / 2;
+            this.messageText.x = this.contentWidth / 2;
             this.messageText.y = 60;
             this.messageText.style.fontSize = 42;
         }
         // === DESKTOP ===
         else {
-            const panelHeight = 160;
+            this.panelHeight = 160;
 
             // Background
             this.background.width = width;
-            this.background.height = panelHeight;
-            this.y = height - panelHeight;
+            this.background.height = this.panelHeight;
+            this.y = height - this.panelHeight;
 
             // Content container with max width
             const maxWidth = 1600;
-            const contentWidth = Math.min(width, maxWidth);
-            this.contentContainer.x = (width - contentWidth) / 2;
+            this.contentWidth = Math.min(width, maxWidth);
+            this.contentContainer.x = (width - this.contentWidth) / 2;
 
             // Desktop button sizes (normal)
             const buttonScale = 1;
@@ -374,12 +391,12 @@ export class ControlPanel extends Container {
             this.betValue.y = bottomY;
 
             // Center message (relative to content container)
-            this.messageText.x = contentWidth / 2;
+            this.messageText.x = this.contentWidth / 2;
             this.messageText.y = 80;
             this.messageText.style.fontSize = 28;
 
             // Right side buttons (horizontal layout centered around spin button)
-            const rightCenterX = contentWidth - 200;
+            const rightCenterX = this.contentWidth - 200;
             const buttonY = 40;
 
             const betBtnX = 125;
@@ -394,9 +411,12 @@ export class ControlPanel extends Container {
             this.plusButton.y = buttonY;
 
             // Autoplay button (bottom right)
-            this.autoplayButton.x = contentWidth - 100;
+            this.autoplayButton.x = this.contentWidth - 100;
             this.autoplayButton.y = 120;
         }
+
+        this.matchPattern.x = this.contentWidth * 0.5 - this.matchPattern.width * 0.5;
+        this.matchPattern.y = this.panelHeight - this.matchPattern.height - 20;
     }
 
     /**
@@ -429,6 +449,44 @@ export class ControlPanel extends Container {
         this.messageText.text = message;
         this.messageText.style.fontSize = 52;
         this.messageText.anchor.set(0.5, 1);
+    }
+
+    private shouldStopMatches = false;
+
+    /** Play all queued match patterns sequentially */
+    public async playMatchMessages() {
+        this.shouldStopMatches = false;
+        for (const pattern of this.winMatchPatterns) {
+            if (this.shouldStopMatches) {
+                break;
+            }
+            this.matchPattern.setup(pattern.times, `symbol-${pattern.type}`, pattern.amount, pattern.currency);
+            this.matchPattern.x = this.contentWidth * 0.5 - this.matchPattern.width * 0.5;
+            this.matchPattern.y = this.panelHeight - this.matchPattern.height - 20;
+            await this.matchPattern.show();
+        }
+
+        // Clear the queue after playing all
+        this.winMatchPatterns = [];
+        this.shouldStopMatches = false;
+    }
+
+    public stopMatchMessages() {
+        this.shouldStopMatches = true;
+        // Kill any ongoing animations
+        this.matchPattern.hide();
+        // Clear the queue immediately
+        this.winMatchPatterns = [];
+    }
+
+    /** Set match pattern result */
+    public async addMatchMessage(times: number, type: number, amount: number, currency: string) {
+        this.winMatchPatterns.push({
+            times,
+            type,
+            amount,
+            currency,
+        });
     }
 
     /** Disabled betting */
