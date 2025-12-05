@@ -2,7 +2,7 @@ import { Container, Text, Sprite, Texture } from 'pixi.js';
 import { IconButton } from './IconButton2';
 import { userSettings } from '../utils/userSettings';
 import { MatchPattern } from './MatchPattern';
-import { AudioSettingsButton } from './AudioSettingsButton';
+import { AudioButton } from './AudioButton';
 import { formatCurrency } from '../utils/formatter';
 import { SpinButton, SpinButtonState } from './SpinButton';
 
@@ -28,7 +28,7 @@ export class ControlPanel extends Container {
     private matchPattern: MatchPattern;
     private winMatchPatterns: WinMatchPattern[] = [];
 
-    public audioSettingsButton: AudioSettingsButton;
+    public audioButton: AudioButton;
     private infoButton: IconButton;
     private settingsButton: IconButton;
     private minusButton: IconButton;
@@ -119,7 +119,7 @@ export class ControlPanel extends Container {
         this.contentContainer.addChild(this.matchPattern);
 
         // Create buttons
-        this.audioSettingsButton = new AudioSettingsButton();
+        this.audioButton = new AudioButton();
         this.settingsButton = new IconButton({
             imageDefault: 'icon-button-settings-default-view',
             imageHover: 'icon-button-settings-hover-view',
@@ -154,7 +154,7 @@ export class ControlPanel extends Container {
             imageDisabled: 'icon-button-autoplay-disabled-view',
         });
 
-        this.contentContainer.addChild(this.audioSettingsButton);
+        this.contentContainer.addChild(this.audioButton);
         this.contentContainer.addChild(this.infoButton);
         this.contentContainer.addChild(this.settingsButton);
         this.contentContainer.addChild(this.minusButton);
@@ -186,7 +186,7 @@ export class ControlPanel extends Container {
             const buttonScale = 2;
             const spinButtonScale = 2;
 
-            this.audioSettingsButton.scale.set(buttonScale);
+            this.audioButton.scale.set(buttonScale);
             this.infoButton.scale.set(buttonScale);
             this.settingsButton.scale.set(buttonScale);
             this.minusButton.scale.set(buttonScale);
@@ -201,8 +201,8 @@ export class ControlPanel extends Container {
             this.infoButton.x = leftBtnStartX;
             this.infoButton.y = leftBtnY;
 
-            this.audioSettingsButton.x = leftBtnStartX;
-            this.audioSettingsButton.y = leftBtnY + 130;
+            this.audioButton.x = leftBtnStartX;
+            this.audioButton.y = leftBtnY + 130;
 
             // Center - Large spin button
             this.spinButton.x = this.contentWidth / 2;
@@ -274,7 +274,7 @@ export class ControlPanel extends Container {
             const buttonScale = 1.5;
             const spinButtonScale = 1.5;
 
-            this.audioSettingsButton.scale.set(buttonScale);
+            this.audioButton.scale.set(buttonScale);
             this.infoButton.scale.set(buttonScale);
             this.settingsButton.scale.set(buttonScale);
             this.minusButton.scale.set(buttonScale);
@@ -283,8 +283,8 @@ export class ControlPanel extends Container {
             this.autoplayButton.scale.set(buttonScale);
 
             // Left side buttons (vertical stack, more compact)
-            this.audioSettingsButton.x = 120;
-            this.audioSettingsButton.y = 50;
+            this.audioButton.x = 120;
+            this.audioButton.y = 50;
             this.settingsButton.x = 120;
             this.settingsButton.y = 150;
             this.infoButton.x = 210;
@@ -359,7 +359,7 @@ export class ControlPanel extends Container {
             const buttonScale = 1;
             const spinButtonScale = 1;
 
-            this.audioSettingsButton.scale.set(buttonScale);
+            this.audioButton.scale.set(buttonScale);
             this.infoButton.scale.set(buttonScale);
             this.settingsButton.scale.set(buttonScale);
             this.minusButton.scale.set(buttonScale);
@@ -368,8 +368,8 @@ export class ControlPanel extends Container {
             this.autoplayButton.scale.set(buttonScale);
 
             // Left side buttons (stacked vertically)
-            this.audioSettingsButton.x = 50;
-            this.audioSettingsButton.y = 40;
+            this.audioButton.x = 50;
+            this.audioButton.y = 40;
             this.settingsButton.x = 50;
             this.settingsButton.y = 100;
             this.infoButton.x = 120;

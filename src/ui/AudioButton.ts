@@ -4,7 +4,7 @@ import { bgm, sfx } from '../utils/audio';
 /**
  * A button that toggles sound on/off
  */
-export class AudioSettingsButton extends ToggleIconButton {
+export class AudioButton extends ToggleIconButton {
     constructor() {
         super({
             imageDefaultOn: 'icon-button-sound-on-default-view',

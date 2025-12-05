@@ -124,8 +124,16 @@ export class Match3Board {
         await Promise.all(animPromises);
     }
 
-    public async fillGrid() {
-        const result = await BetAPI.spin('n');
+    /**
+     *
+     * @param bet - {number} bet amount
+     * @param feature - {number | undefined} 0 for normal spin, 1 for buy feature
+     */
+    public async fillGrid(bet: number, feature?: number) {
+        const result = await BetAPI.spin({
+            bet,
+            feature,
+        });
         this.match3.board.grid = result.reels;
 
         // Get all positions from the grid

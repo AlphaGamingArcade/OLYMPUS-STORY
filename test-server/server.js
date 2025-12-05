@@ -39,16 +39,32 @@ let grandReels = [
     [11, 11, 12, 2, 12, 8],
 ];
 
-app.get('/spin', async (req, res) => {
+/**
+ * feature
+ * 0 - normal
+ * 1 - buy feature (if available)
+ * 2 - buy feature v2 (if available)
+ * 3 - buy feature v3 (if available)
+ *
+ * bet - amount user bet for spin
+ *
+ * */
+
+app.post('/spin', async (req, res) => {
     await utils.waitFor(delay); // 1 sec
+
+    // buy feature
+    if (req.body && req.body.feature && req.body.feature == 1) {
+        return {
+            reels: scatterReels,
+        };
+    }
 
     // Generate 5 reels, each with 5 random symbols from the symbols array
     let symbols = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14];
     const reels = Array.from({ length: 5 }, () =>
         Array.from({ length: 6 }, () => symbols[Math.floor(Math.random() * symbols.length)]),
     );
-
-    console.log('Reels', reels);
 
     res.json({
         reels: reels,

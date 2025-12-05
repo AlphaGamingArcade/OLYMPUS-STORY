@@ -98,6 +98,7 @@ export class GameScreen extends Container {
                 currency: this.currency,
                 amount: amount,
                 callback: () => {
+                    console.log('CALL BACK FOR DISMISSS');
                     navigation.dismissPopup();
                 },
             });
@@ -198,7 +199,7 @@ export class GameScreen extends Container {
                     this.updateBuyFreeSpinAmount();
                 },
                 onAudioSettingChanged: (isOn: boolean) => {
-                    this.controlPanel.audioSettingsButton.setToggleState(isOn);
+                    this.controlPanel.audioButton.setToggleState(isOn);
                 },
             });
         });

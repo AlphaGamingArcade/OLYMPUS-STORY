@@ -6,7 +6,6 @@ import { Match3Process } from './Match3Process';
 import { Match3Stats } from './Match3Stats';
 import { Match3FreeSpinProcess } from './Match3FreeSpinProcess';
 import { SlotSymbol } from './SlotSymbol';
-import { Match3RoundResults } from './Match3RounResults';
 import { Match3Jackpot } from './Match3Jackpot';
 import { gameConfig } from '../utils/gameConfig';
 import { SlotBigWinCategory } from './SlotUtility';
@@ -62,8 +61,6 @@ export class Match3 extends Container {
     public config: Match3Config;
     /** Compute score, grade, number of matches */
     public stats: Match3Stats;
-    /** Display number of matches */
-    public roundResults: Match3RoundResults;
     /** Holds the grid state and display */
     public board: Match3Board;
     /** Sort out actions that the player can take */
@@ -112,7 +109,6 @@ export class Match3 extends Container {
         // Game sub-systems
         this.config = slotGetConfig();
         this.stats = new Match3Stats(this);
-        this.roundResults = new Match3RoundResults(this);
         this.board = new Match3Board(this);
         this.actions = new Match3Actions(this);
         this.process = new Match3Process(this);

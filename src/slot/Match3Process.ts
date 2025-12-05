@@ -262,7 +262,9 @@ export class Match3Process {
 
     /** Create brand-new symbols in empty spaces and animate them falling in */
     private async refillGrid() {
-        const result = await BetAPI.spin('r');
+        const result = await BetAPI.spin({
+            bet: this.betAmount,
+        });
         const newPieces = match3FillUp(this.match3.board.grid, this.match3.board.commonTypes, result.reels);
 
         console.log('[Match3] Refill grid - new pieces:', newPieces.length);

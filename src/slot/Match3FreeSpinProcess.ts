@@ -167,7 +167,9 @@ export class Match3FreeSpinProcess {
 
     /** Generate the board for a free-spin round using backend reel data */
     public async fillFreeSpinGrid() {
-        const result = await BetAPI.spin('n');
+        const result = await BetAPI.spin({
+            bet: this.betAmount,
+        });
         this.match3.board.grid = result.reels;
 
         // Collect all grid positions that contain pieces
@@ -335,7 +337,9 @@ export class Match3FreeSpinProcess {
 
     /** Refill all empty cells with brand-new pieces falling from above */
     private async refillGrid() {
-        const result = await BetAPI.spin('r');
+        const result = await BetAPI.spin({
+            bet: this.betAmount,
+        });
 
         const newPieces = match3FillUp(this.match3.board.grid, this.match3.board.commonTypes, result.reels);
 
