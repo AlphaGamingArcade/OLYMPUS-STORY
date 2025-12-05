@@ -9,7 +9,7 @@ import { sfx } from '../utils/audio';
 import { PopExplosion } from './PopExplosion';
 import { waitFor } from '../utils/asyncUtils';
 import { SlotSymbol } from '../slot/SlotSymbol';
-import { SlotOnJackpotMatchData } from '../slot/Match3';
+import { SlotOnJackpotMatchData, SlotOnNextFreeSpinData } from '../slot/Match3';
 import { Jackpot } from '../slot/Match3Config';
 
 /**
@@ -159,6 +159,21 @@ export class GameEffects extends Container {
             this.game.blessedJackpotTier.hideTimesText();
         } else if (jackpot.type == 14) {
             this.game.divineJackpotTier.hideTimesText();
+        }
+    }
+
+    public async playSetActiveJackpots(data: SlotOnNextFreeSpinData) {
+        for (const jackpot of Object.values(data.jackpots)) {
+            const { type, active } = jackpot;
+            if (type == 11) {
+                this.game.grandJackpotTier.setActiveDots(active);
+            } else if (type == 12) {
+                this.game.angelicJackpotTier.setActiveDots(active);
+            } else if (type == 13) {
+                this.game.blessedJackpotTier.setActiveDots(active);
+            } else if (type == 14) {
+                this.game.divineJackpotTier.setActiveDots(active);
+            }
         }
     }
 

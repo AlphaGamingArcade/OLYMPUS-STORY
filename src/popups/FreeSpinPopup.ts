@@ -9,6 +9,11 @@ const easeSingleBounce = registerCustomEase(
     'M0,0,C0.14,0,0.27,0.191,0.352,0.33,0.43,0.462,0.53,0.963,0.538,1,0.546,0.997,0.672,0.97,0.778,0.97,0.888,0.97,0.993,0.997,1,1',
 );
 
+export interface FreeSpinPopupData {
+    totalFreeSpins: number;
+    callback: () => void;
+}
+
 /** Popup with some info about the project */
 export class FreeSpinPopup extends Container {
     /** The dark semi-transparent background covering current screen */
@@ -313,9 +318,10 @@ export class FreeSpinPopup extends Container {
     private screenHeight = 0;
 
     /** Set things up just before showing the popup */
-    public prepare(data: any) {
+    public prepare(data: FreeSpinPopupData) {
         if (data) {
-            this.onPressConfirm = data;
+            this.spins.text = `${data.totalFreeSpins}`;
+            this.onPressConfirm = data.callback;
         }
     }
 

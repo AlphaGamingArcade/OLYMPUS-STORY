@@ -1,5 +1,5 @@
 import { gameConfig } from '../utils/gameConfig';
-import { Pattern, Paytable } from './Match3Config';
+import { Jackpot, Pattern, Paytable } from './Match3Config';
 
 /** Piece type on each position in the grid */
 export type Match3Type = number;
@@ -270,9 +270,8 @@ export function slotGetMatches(grid: Match3Grid) {
  * @param grid The grid to be analysed
  * @returns An array of position groups, where each group contains positions of the same special type
  */
-export function slotGetJackpotMatches(grid: Match3Grid): Match3Position[][] {
-    const jackpotBlocks = gameConfig.getJackpots();
-    const jackpotTypes = jackpotBlocks.map((block) => block.type);
+export function slotGetJackpotMatches(grid: Match3Grid, configJackpots: Jackpot[]): Match3Position[][] {
+    const jackpotTypes = configJackpots.map((block) => block.type);
 
     // Use Map to efficiently group by type
     const matchesByType = new Map<number, Match3Position[]>();
@@ -515,4 +514,42 @@ export function slotGetBigWinCategory(amount: number, bet: number): undefined | 
 
     // Amount >= highest threshold
     return bigWinCategory[bigWinCategory.length - 1];
+}
+
+export function slotGetJackpotWinsByType(
+    jackpots: Record<string, { type: number; active: number }>,
+    configJackpots: Jackpot[],
+) {
+    const jackpotWinsByType: Record<string, { times: number; jackpot: Jackpot }> = {};
+    for (const [type, jackpotData] of Object.entries(jackpots)) {
+        const configJackpot = configJackpots.find((config) => config.type === Number(type));
+
+        if (configJackpot && jackpotData.active >= configJackpot.requiredSymbols) {
+            const times = Math.floor(jackpotData.active / configJackpot.requiredSymbols);
+
+            if (times > 0) {
+                jackpotWinsByType[type] = {
+                    times,
+                    jackpot: configJackpot,
+                };
+            }
+        }
+    }
+    return jackpotWinsByType;
+}
+
+/**
+ * Carry over remaining jackpot symbols that did not win to the next free spin
+ * @param jackpots - Record of jackpot data by type
+ * @returns Updated jackpots with carryover values
+ */
+export function slotGetNextFreeSpinJackpots(
+    jackpots: Record<string, { type: number; active: number; required: number }>,
+): Record<string, { type: number; active: number; required: number }> {
+    for (const [_, jackpot] of Object.entries(jackpots)) {
+        const remainder = jackpot.active % jackpot.required;
+        jackpot.active = remainder;
+    }
+
+    return jackpots;
 }

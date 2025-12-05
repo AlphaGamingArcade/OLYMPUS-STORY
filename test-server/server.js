@@ -3,6 +3,10 @@ const cors = require('cors');
 const utils = require('./utils');
 const app = express();
 
+// Body parser middleware - ADD THESE LINES
+app.use(express.json()); // Parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+
 app.use(cors('*'));
 
 const port = 3000;
@@ -19,8 +23,8 @@ let scatterReels = [
     [1, 2, 3, 4, 5, 1],
     [6, 7, 8, 9, 10, 2],
     [11, 12, 1, 8, 3, 4],
-    [4, 5, 8, 7, 8, 6],
-    [4, 7, 9, 8, 8, 2],
+    [4, 5, 10, 7, 10, 6],
+    [4, 7, 9, 10, 10, 2],
 ];
 
 let winReels = [
@@ -39,6 +43,23 @@ let grandReels = [
     [11, 11, 12, 2, 12, 8],
 ];
 
+function hasAtLeastNSymbols(reels, symbol, minCount) {
+    let count = 0;
+
+    for (const reel of reels) {
+        for (const sym of reel) {
+            if (sym === symbol) {
+                count++;
+                if (count >= minCount) {
+                    return true; // Early exit optimization
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
 /**
  * feature
  * 0 - normal
@@ -55,19 +76,31 @@ app.post('/spin', async (req, res) => {
 
     // buy feature
     if (req.body && req.body.feature && req.body.feature == 1) {
-        return {
+        return res.json({
             reels: scatterReels,
-        };
+            freeSpins: 25,
+        });
     }
 
     // Generate 5 reels, each with 5 random symbols from the symbols array
-    let symbols = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14];
-    const reels = Array.from({ length: 5 }, () =>
-        Array.from({ length: 6 }, () => symbols[Math.floor(Math.random() * symbols.length)]),
+    let symbolsByReel = [
+        [1, 2, 9, 9, 4, 9, 9, 2, 4, 3, 4, 5, 6, 7, 8, 9], // Reel 0 symbols
+        [1, 2, 2, 9, 4, 8, 9, 2, 3, 9, 9, 2, 5, 6, 7, 8, 9, 10, 11, 13, 14], // Reel 1 symbols
+        [1, 2, 8, 8, 4, 8, 8, 3, 4, 2, 5, 6, 7, 8, 9, 10, 11, 13, 14], // Reel 2 symbols
+        [2, 3, 4, 5, 2, 2, 8, 8, 9, 9, 4, 6, 7, 8, 9, 10, 11], // Reel 3 symbols
+        [3, 4, 5, 2, 6, 7, 8, 9, 10, 11, 12], // Reel 4 symbols
+    ];
+
+    const reels = Array.from({ length: 5 }, (_, reelIndex) =>
+        Array.from({ length: 6 }, () => {
+            const availableSymbols = symbolsByReel[reelIndex];
+            return availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
+        }),
     );
 
     res.json({
         reels: reels,
+        freeSpins: hasAtLeastNSymbols(reels, 10, 4) ? 12 : undefined,
     });
 });
 

@@ -3,12 +3,12 @@ import { Match3Actions } from './Match3Actions';
 import { Match3Board } from './Match3Board';
 import { Jackpot, Match3Config, slotGetConfig } from './Match3Config';
 import { Match3Process } from './Match3Process';
-import { Match3Stats } from './Match3Stats';
-import { Match3FreeSpinProcess } from './Match3FreeSpinProcess';
 import { SlotSymbol } from './SlotSymbol';
 import { Match3Jackpot } from './Match3Jackpot';
 import { gameConfig } from '../utils/gameConfig';
 import { SlotBigWinCategory } from './SlotUtility';
+import { SlotFreeSpinStats } from './SlotFreeSpinStats';
+import { SlotFreeSpinProcess } from './Match3FreeSpinProcess';
 
 // Match3.ts - Holds the state
 export enum SpinState {
@@ -34,6 +34,11 @@ export interface SlotOnJackpotMatchData {
     symbols: SlotSymbol[];
 }
 
+export interface SlotFreeSpinTriggerData {
+    /** Free spins won total */
+    totalFreeSpins: number;
+}
+
 /** Interface for onMatch event data */
 export interface SlotOnBigWinTriggerData {
     amount: number;
@@ -50,17 +55,34 @@ export interface SlotOnJackpotTriggerData {
     amount: number;
 }
 
+export interface SlotFreeSpinStartData {
+    currentSpin: number;
+    remainingSpins: number;
+}
+
+export interface SlotOnNextFreeSpinData {
+    jackpots: Record<string, { type: number; active: number; required: number }>;
+    currentSpin: number;
+    remainingSpin: number;
+}
+
+export interface SlotOnFreeSpinCompleteData {
+    amount: number;
+    spins: number;
+}
+
 /**
  * The main match3 class that sets up game's sub-systems and provide some useful callbacks.
  * All game events are set as plain callbacks for simplicity
  */
 export class Match3 extends Container {
+    public game = 'olympusstory';
     /** State if spinning */
     public spinning: boolean;
     /** Match3 game basic configuration */
     public config: Match3Config;
     /** Compute score, grade, number of matches */
-    public stats: Match3Stats;
+    public freeSpinStats: SlotFreeSpinStats;
     /** Holds the grid state and display */
     public board: Match3Board;
     /** Sort out actions that the player can take */
@@ -68,7 +90,7 @@ export class Match3 extends Container {
     /** Process matches and fills up the grid */
     public process: Match3Process;
     /** Process matches and fills up the grid */
-    public freeSpinProcess: Match3FreeSpinProcess;
+    public freeSpinProcess: SlotFreeSpinProcess;
     /** Handles pieces with special powers */
     public jackpot: Match3Jackpot;
 
@@ -78,24 +100,22 @@ export class Match3 extends Container {
     public onWin?: (win: number) => void;
     /** Fire when big win */
     public onBigWinTrigger?: (data: SlotOnBigWinTriggerData) => Promise<void>;
-
     /** Firew when a spin started, regardless of the spin type */
     public onSpinStart?: () => void;
+
     /** Firew when free spin triggered */
-    public onFreeSpinTrigger?: () => void;
+    public onFreeSpinTrigger?: (data: SlotFreeSpinTriggerData) => void;
     /** Fires when special triggered */
     public onJackpotMatch?: (data: SlotOnJackpotMatchData) => Promise<void>;
     /** Fires when multiplier jackpot triggered */
     public onJackpotTrigger?: (data: SlotOnJackpotTriggerData) => Promise<void>;
 
     /** Fires when the game start auto-processing the grid */
-    public onFreeSpinStart?: (count: number) => void;
+    public onFreeSpinStart?: (data: SlotFreeSpinStartData) => void;
+    /** Fires when the game start auto-processing the grid */
+    public onNextFreeSpinStart?: (data: SlotOnNextFreeSpinData) => void;
     /** Fires when the game finishes auto-processing the grid */
-    public onFreeSpinComplete?: () => void;
-    /** Fires when the game start auto-processing the grid */
-    public onFreeSpinRoundStart?: (currentCount: number, remainingCount: number) => void;
-    /** Fires when the game start auto-processing the grid */
-    public onFreeSpinRoundComplete?: (currentCount: number, remainingCount: number) => void;
+    public onFreeSpinComplete?: (data: SlotOnFreeSpinCompleteData) => void;
 
     /** Fires when the game start auto-processing the grid */
     public onProcessStart?: () => void;
@@ -108,12 +128,14 @@ export class Match3 extends Container {
 
         // Game sub-systems
         this.config = slotGetConfig();
-        this.stats = new Match3Stats(this);
         this.board = new Match3Board(this);
         this.actions = new Match3Actions(this);
+
         this.process = new Match3Process(this);
         this.jackpot = new Match3Jackpot(this);
-        this.freeSpinProcess = new Match3FreeSpinProcess(this);
+
+        this.freeSpinStats = new SlotFreeSpinStats(this);
+        this.freeSpinProcess = new SlotFreeSpinProcess(this);
     }
 
     /**
@@ -132,18 +154,23 @@ export class Match3 extends Container {
     /** Fully reset the game */
     public reset() {
         this.interactiveChildren = false;
-        this.stats.reset();
         this.board.reset();
         this.process.reset();
+        this.freeSpinStats.reset();
         this.freeSpinProcess.reset();
         this.jackpot.reset();
     }
 
-    /** Start the spin and disable interaction */
-    public async spin(bet: number) {
+    /**
+     * Start the spin and disable interaction
+     * @param bet
+     * @param feature  Feature 0 = normal and the default value 1 = for buy free spin
+     *
+     **/
+    public async spin(bet: number, feature?: number) {
         if (this.spinning) return;
         this.spinning = true;
-        await this.actions.actionSpin(bet);
+        await this.actions.actionSpin(bet, feature);
         this.spinning = false;
     }
 

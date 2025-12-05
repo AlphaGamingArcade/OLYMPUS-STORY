@@ -5,6 +5,7 @@ import { sfx } from '../utils/audio';
 import { Label } from './Label';
 import { formatCurrency } from '../utils/formatter';
 import { ShadowLabel } from './ShadowLabel';
+import { waitFor } from '../utils/asyncUtils';
 
 const defaultJackpotTierOptions = {
     name: 'multiplier_label_grand',
@@ -275,7 +276,7 @@ export class JackpotTier extends Container {
     }
 
     /** Add one active dot with animation */
-    public addActiveDot() {
+    public async addActiveDot() {
         const nextActive = this.activeDots + 1;
 
         // Check if we're completing a set
@@ -319,6 +320,12 @@ export class JackpotTier extends Container {
         // Update dots to show empty set (no animation needed)
         this.updateDots();
         this.animateDot(this.activeDots - 1);
+
+        await waitFor(0.75);
+        if (this.activeDots == this.totalDots) {
+            this.activeDots = 0;
+            this.updateDots();
+        }
     }
 
     public hideTimesText() {

@@ -12,6 +12,12 @@ const easeSingleBounce = registerCustomEase(
     'M0,0,C0.14,0,0.27,0.191,0.352,0.33,0.43,0.462,0.53,0.963,0.538,1,0.546,0.997,0.672,0.97,0.778,0.97,0.888,0.97,0.993,0.997,1,1',
 );
 
+export interface FreeSpinWinPopupData {
+    amount: number;
+    spins: number;
+    callback: () => void;
+}
+
 /** Popup displaying win amount with coin effects */
 export class FreeSpinWinPopup extends Container {
     /** The dark semi-transparent background covering current screen */
@@ -59,7 +65,7 @@ export class FreeSpinWinPopup extends Container {
     /** Counting animation tween reference */
     private countTween?: gsap.core.Tween;
     /** Count animation duration */
-    private coutnAnimationDuration: number = 5;
+    private countAnimationDuration: number = 5;
     /** Flag to track if animation is skippable */
     private isSkippable = false;
     /** Screen height for calculating off-screen positions */
@@ -377,7 +383,7 @@ export class FreeSpinWinPopup extends Container {
 
         const countTween = gsap.to(this, {
             currentWinAmount: this.targetWinAmount,
-            duration: this.coutnAnimationDuration,
+            duration: this.countAnimationDuration,
             ease: 'power2.out',
             onUpdate: () => {
                 // const formatted = `${this.currency}${this.currentWinAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
@@ -554,12 +560,12 @@ export class FreeSpinWinPopup extends Container {
     }
 
     /** Set things up just before showing the popup */
-    public prepare(data: any) {
+    public prepare(data: FreeSpinWinPopupData) {
         if (data) {
-            this.targetWinAmount = data.winAmount;
-            this.coutnAnimationDuration = 2;
-            this.spinsCount = data.spinsCount;
-            this.onPressConfirm = data.callBack;
+            this.targetWinAmount = data.amount;
+            this.countAnimationDuration = 2;
+            this.spinsCount = data.spins;
+            this.onPressConfirm = data.callback;
 
             this.bottomText.text = `IN ${this.spinsCount} FREE SPINS`;
         }

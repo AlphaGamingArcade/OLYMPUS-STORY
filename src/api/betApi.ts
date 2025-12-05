@@ -4,7 +4,15 @@ export class BetAPI {
      * @param type - The type of spin ('n' for new, 'r' for refill, 'f' for free).
      * @returns {Promise<{reels: number[][]}>} A promise that resolves with the reels data.
      */
-    static async spin({ bet, feature }: { bet: number; feature?: number }): Promise<{ reels: number[][] }> {
+    static async spin({
+        game,
+        bet,
+        feature,
+    }: {
+        game: string;
+        bet: number;
+        feature?: number;
+    }): Promise<{ reels: number[][]; freeSpins?: number }> {
         try {
             // Define the URL of your Express server endpoint
             const url = 'http://172.25.16.1:3000/spin';

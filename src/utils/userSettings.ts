@@ -20,6 +20,7 @@ class UserSettings {
     private spinMode: SpinMode;
     private betIndex: number;
     private betOptions: number[];
+    private freeSpins: number;
     private currency: string;
     private balance: number;
 
@@ -27,6 +28,7 @@ class UserSettings {
         this.spinMode = 'normal-spin';
         this.currency = 'usd';
         this.balance = 0;
+        this.freeSpins = 0;
 
         this.betOptions = [0.5, 1, 5, 10, 15, 20, 50, 100, 1000];
         this.betIndex = 0;
@@ -87,6 +89,10 @@ class UserSettings {
         return this.betOptions[this.betIndex];
     }
 
+    public getFreeSpins() {
+        return this.freeSpins;
+    }
+
     public getCurrency() {
         return this.currency;
     }
@@ -102,6 +108,10 @@ class UserSettings {
 
     public setBalance(amount: number) {
         this.balance = amount;
+    }
+
+    public setFreeSpins(totalSpins: number) {
+        this.freeSpins = totalSpins;
     }
 }
 

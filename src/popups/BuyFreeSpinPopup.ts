@@ -11,10 +11,12 @@ const easeSingleBounce = registerCustomEase(
     'M0,0,C0.14,0,0.27,0.191,0.352,0.33,0.43,0.462,0.53,0.963,0.538,1,0.546,0.997,0.672,0.97,0.778,0.97,0.888,0.97,0.993,0.997,1,1',
 );
 
+type BuyFreeSpinPopupCallbackAction = 'confirm' | 'cancel';
+
 export type BuyFreeSpinPopupData = {
     currency: string;
     amount: number;
-    callback: () => void;
+    callback: (action: BuyFreeSpinPopupCallbackAction) => void;
 };
 
 /** Popup displaying win amount with coin effects */
@@ -49,14 +51,12 @@ export class BuyFreeSpinPopup extends Container {
     private closeButton: IconButton;
     /** click anywhere text */
     private clickAnywhere: ShadowLabel;
-    /** click anywhere state */
-    private canClickAnywhere = false;
-    /** on click continue */
-    private onPressConfirm?: () => void;
     /** Single combined glow and bounce animation timeline */
     private animationTimeline?: gsap.core.Timeline;
     /** Screen height for calculating off-screen positions */
     private screenHeight = 0;
+    /** Action callback */
+    private callback?: (action: BuyFreeSpinPopupCallbackAction) => void;
 
     constructor() {
         super();
@@ -212,9 +212,7 @@ export class BuyFreeSpinPopup extends Container {
         this.confirmButton.y = buttonY;
         this.confirmButton.x = -100;
         this.panel.addChild(this.confirmButton);
-        this.confirmButton.onPress.connect(() => {
-            navigation.dismissPopup();
-        });
+        this.confirmButton.onPress.connect(() => this.callback?.('confirm'));
 
         this.closeButton = new IconButton({
             icon: 'modal-buy-free-spin-x',
@@ -227,9 +225,7 @@ export class BuyFreeSpinPopup extends Container {
         this.closeButton.y = buttonY;
         this.closeButton.x = 100;
         this.panel.addChild(this.closeButton);
-        this.closeButton.onPress.connect(() => {
-            navigation.dismissPopup();
-        });
+        this.closeButton.onPress.connect(() => this.callback?.('cancel'));
 
         // CLICK ANYWHERE
         this.clickAnywhere = new ShadowLabel({
@@ -254,12 +250,6 @@ export class BuyFreeSpinPopup extends Container {
         this.bg.eventMode = 'static';
         this.eventMode = 'static';
         this.interactiveChildren = true;
-
-        this.on('pointertap', () => {
-            // Otherwise handle normal click
-            if (!this.canClickAnywhere) return;
-            this.onPressConfirm?.();
-        });
     }
 
     /** Start all continuous animations in a single optimized timeline */
@@ -341,8 +331,7 @@ export class BuyFreeSpinPopup extends Container {
             this.currency = data.currency;
 
             this.amountLabel.text = formatCurrency(this.amount, this.currency);
-            this.onPressConfirm = data.callback;
-            this.topText.text = `BUY FREE SPINS`;
+            this.callback = data.callback;
         }
     }
 
@@ -496,8 +485,6 @@ export class BuyFreeSpinPopup extends Container {
 
     /** Dismiss the popup, animated */
     public async hide() {
-        this.canClickAnywhere = false;
-
         if (navigation.currentScreen) {
             navigation.currentScreen.filters = [];
         }

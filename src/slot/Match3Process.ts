@@ -58,11 +58,6 @@ export class Match3Process {
         return this.processing;
     }
 
-    /** Current round index */
-    public getProcessRound() {
-        return this.round;
-    }
-
     // In Match3Process class
     public addWinAmount(amount: number): void {
         this.winAmount += amount;
@@ -263,6 +258,7 @@ export class Match3Process {
     /** Create brand-new symbols in empty spaces and animate them falling in */
     private async refillGrid() {
         const result = await BetAPI.spin({
+            game: this.match3.game,
             bet: this.betAmount,
         });
         const newPieces = match3FillUp(this.match3.board.grid, this.match3.board.commonTypes, result.reels);
@@ -309,7 +305,9 @@ export class Match3Process {
                 if (i < 2) await waitFor(1);
             }
 
-            await this.match3.onFreeSpinTrigger?.();
+            const freeSpinCount = this.match3.freeSpinStats.getAvailableFreeSpins();
+            const freeSpinTriggerData = { totalFreeSpins: freeSpinCount };
+            await this.match3.onFreeSpinTrigger?.(freeSpinTriggerData);
         } else {
             this.stop();
         }

@@ -1,10 +1,14 @@
 import { Container, Ticker } from 'pixi.js';
 import {
     Match3,
+    SlotFreeSpinStartData,
+    SlotFreeSpinTriggerData,
     SlotOnBigWinTriggerData,
+    SlotOnFreeSpinCompleteData,
     SlotOnJackpotMatchData,
     SlotOnJackpotTriggerData,
     SlotOnMatchData,
+    SlotOnNextFreeSpinData,
 } from '../slot/Match3';
 import { Pillar } from '../ui/Pillar';
 import { navigation } from '../utils/navigation';
@@ -20,8 +24,8 @@ import { RoundResult } from '../ui/RoundResult';
 import { ControlPanel } from '../ui/ControlPanel';
 import { BetAction, userSettings } from '../utils/userSettings';
 import { BabyZeus } from '../ui/BabyZeus';
-import { FreeSpinPopup } from '../popups/FreeSpinPopup';
-import { FreeSpinWinPopup } from '../popups/FreeSpinWinPopup';
+import { FreeSpinPopup, FreeSpinPopupData } from '../popups/FreeSpinPopup';
+import { FreeSpinWinPopup, FreeSpinWinPopupData } from '../popups/FreeSpinWinPopup';
 import { gameConfig } from '../utils/gameConfig';
 import { JackpotWinPopup, JackpotWinPopupData } from '../popups/JackpotWinPopup';
 import { BuyFreeSpinPopup, BuyFreeSpinPopupData } from '../popups/BuyFreeSpinPopup';
@@ -97,9 +101,12 @@ export class GameScreen extends Container {
             navigation.presentPopup<BuyFreeSpinPopupData>(BuyFreeSpinPopup, {
                 currency: this.currency,
                 amount: amount,
-                callback: () => {
-                    console.log('CALL BACK FOR DISMISSS');
-                    navigation.dismissPopup();
+                callback: async (action) => {
+                    await navigation.dismissPopup();
+                    await waitFor(0.7);
+                    if (action == 'confirm') {
+                        this.startSpinning(1); // 1 is is buy feature
+                    }
                 },
             });
         });
@@ -162,11 +169,12 @@ export class GameScreen extends Container {
         this.match3.onSpinStart = this.onSpinStart.bind(this);
         this.match3.onJackpotMatch = this.onJackpotMatch.bind(this);
         this.match3.onJackpotTrigger = this.onJackpotTrigger.bind(this);
+
         this.match3.onFreeSpinTrigger = this.onFreeSpinTrigger.bind(this);
         this.match3.onFreeSpinStart = this.onFreeSpinStart.bind(this);
+        this.match3.onNextFreeSpinStart = this.onNextFreeSpinStart.bind(this);
         this.match3.onFreeSpinComplete = this.onFreeSpinComplete.bind(this);
-        this.match3.onFreeSpinRoundStart = this.onFreeSpinRoundStart.bind(this);
-        this.match3.onFreeSpinRoundComplete = this.onFreeSpinRoundComplete.bind(this);
+
         this.match3.onProcessStart = this.onProcessStart.bind(this);
         this.match3.onProcessComplete = this.onProcessComplete.bind(this);
         this.gameContainer.addChild(this.match3);
@@ -262,7 +270,7 @@ export class GameScreen extends Container {
         }
     }
 
-    public startSpinning() {
+    public startSpinning(feature?: number) {
         if (this.finished) return;
         this.finished = true;
         this.controlPanel.disableBetting();
@@ -273,7 +281,7 @@ export class GameScreen extends Container {
         this.roundResult.clearResults();
 
         const bet = userSettings.getBet();
-        this.match3.spin(bet);
+        this.match3.spin(bet, feature);
     }
 
     /** Prepare the screen just before showing */
@@ -472,14 +480,18 @@ export class GameScreen extends Container {
     }
 
     /** Fires when the match3 grid finishes auto-processing */
-    private async onFreeSpinTrigger(): Promise<void> {
+    private async onFreeSpinTrigger(data: SlotFreeSpinTriggerData): Promise<void> {
         return new Promise((resolve) => {
-            navigation.presentPopup(FreeSpinPopup, async () => {
-                await navigation.dismissPopup();
-                await waitFor(1);
-                const bet = userSettings.getBet();
-                this.match3.actions.actionFreeSpin(bet);
-                resolve();
+            navigation.presentPopup<FreeSpinPopupData>(FreeSpinPopup, {
+                totalFreeSpins: data.totalFreeSpins,
+                callback: async () => {
+                    await navigation.dismissPopup();
+                    await waitFor(1);
+
+                    const bet = userSettings.getBet();
+                    this.match3.actions.actionFreeSpin(bet);
+                    resolve();
+                },
             });
         });
     }
@@ -493,17 +505,22 @@ export class GameScreen extends Container {
     }
 
     /** Fires when the match3 grid finishes auto-processing */
-    private async onFreeSpinStart() {
-        console.log('FREE SPIN PROCESS STARTING');
+    private async onFreeSpinStart(data: SlotFreeSpinStartData) {
+        console.log('Free Spin Started', data);
+    }
+
+    private async onNextFreeSpinStart(data: SlotOnNextFreeSpinData) {
+        this.roundResult.clearResults();
+        this.vfx?.playSetActiveJackpots(data);
     }
 
     /** Fires when the match3 grid finishes auto-processing */
-    private async onFreeSpinComplete() {
+    private async onFreeSpinComplete(data: SlotOnFreeSpinCompleteData) {
         return new Promise((resolve) => {
-            navigation.presentPopup(FreeSpinWinPopup, {
-                winAmount: 1000,
-                spinsCount: 3,
-                callBack: async () => {
+            navigation.presentPopup<FreeSpinWinPopupData>(FreeSpinWinPopup, {
+                amount: data.amount,
+                spins: data.spins,
+                callback: async () => {
                     await navigation.dismissPopup();
                     await waitFor(1);
                     if (!this.match3.process.isProcessing() && !this.match3.freeSpinProcess.isProcessing())
@@ -512,16 +529,6 @@ export class GameScreen extends Container {
                 },
             });
         });
-    }
-
-    /** Fires when the match3 grid finishes auto-processing */
-    private async onFreeSpinRoundStart() {
-        console.log('FREE SPIN ROUND PROCESS STARTING');
-    }
-
-    /** Fires when the match3 grid finishes auto-processing */
-    private async onFreeSpinRoundComplete() {
-        console.log('FREE SPIN PROCESS COMPLETED');
     }
 
     /** Fires when the match3 grid finishes auto-processing */

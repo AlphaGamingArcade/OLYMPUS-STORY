@@ -5,12 +5,6 @@ interface Match3ActionsConfig {
     isFreeSpin: boolean;
 }
 
-/** Feature
- *  0 = normal and the default value
- *  1 = for buy free spin
- */
-type Feature = 0 | 1;
-
 /**
  * These are the actions player can take: move pieces (swap) or tap if they are special.
  * Action effects happens instantly, and the game will deal with whatever state the grid ends up with.
@@ -26,7 +20,13 @@ export class Match3Actions {
         this.match3 = match3;
     }
 
-    public async actionSpin(bet: number, feature: Feature = 0) {
+    /**
+     *
+     * @param bet
+     * @param feature  Feature 0 = normal and the default value 1 = for buy free spin
+     *
+     **/
+    public async actionSpin(bet: number, feature?: number) {
         this.match3.onSpinStart?.();
 
         await this.match3.board.fallToBottomGrid();
@@ -39,7 +39,7 @@ export class Match3Actions {
     }
 
     public async actionFreeSpin(bet: number) {
-        this.match3.freeSpinProcess.start(bet, 5);
+        this.match3.freeSpinProcess.start(bet);
     }
 
     /**

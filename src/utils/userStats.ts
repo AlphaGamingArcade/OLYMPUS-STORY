@@ -1,4 +1,4 @@
-import { Match3StatsData } from '../slot/Match3Stats';
+import { Match3StatsData } from '../slot/Match3FreeSpinStats';
 import { storage } from './storage';
 
 // Keys for saved items in storage

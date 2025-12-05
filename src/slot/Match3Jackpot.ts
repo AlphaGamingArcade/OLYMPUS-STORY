@@ -1,5 +1,5 @@
-import { Match3 } from './Match3';
-import { Match3Position, slotGetJackpotMatches } from './SlotUtility';
+import { Match3, SlotOnNextFreeSpinData } from './Match3';
+import { Match3Position, slotGetJackpotMatches, slotGetJackpotWinsByType } from './SlotUtility';
 import { SlotSymbol } from './SlotSymbol';
 import { Jackpot } from './Match3Config';
 import { waitFor } from '../utils/asyncUtils';
@@ -16,15 +16,16 @@ export class Match3Jackpot {
     /** Bet amount */
     public betAmount = 0;
     /** Jackpot record */
-    public jackpots: Record<string, { type: number; active: number }> = {};
+    public jackpots: Record<string, { type: number; active: number; required: number }> = {};
     /** Jackpot record */
-    public winJackpots: Record<string, { type: number; active: number }> = {};
+    public winJackpots: Record<string, { type: number; active: number; required: number }> = {};
     /** Config Jackpots */
     private configJackpots: Jackpot[];
 
     constructor(match3: Match3) {
         this.match3 = match3;
         this.configJackpots = [];
+        this.initializeJackpots();
     }
 
     public setup(jackpotConfig: Jackpot[]) {
@@ -34,14 +35,24 @@ export class Match3Jackpot {
     /** Remove all specials handlers */
     public reset() {
         this.betAmount = 0;
-        this.jackpots = {};
+        this.initializeJackpots();
         this.processing = false;
+    }
+
+    private initializeJackpots() {
+        for (const config of this.configJackpots) {
+            this.jackpots[config.type] = {
+                type: config.type,
+                active: 0,
+                required: config.requiredSymbols,
+            };
+        }
     }
 
     public async process(bet: number) {
         this.betAmount = bet;
 
-        const matches = slotGetJackpotMatches(this.match3.board.grid);
+        const matches = slotGetJackpotMatches(this.match3.board.grid, this.configJackpots);
         const piecesByType: Record<number, SlotSymbol[]> = {};
 
         // Collect all pieces by type
@@ -51,10 +62,10 @@ export class Match3Jackpot {
                 if (piece) {
                     (piecesByType[piece.type] ??= []).push(piece);
 
-                    this.jackpots[piece.type] = {
-                        type: piece.type,
-                        active: (this.jackpots[piece.type]?.active || 0) + 1,
-                    };
+                    // Simply increment - structure already exists
+                    if (this.jackpots[piece.type]) {
+                        this.jackpots[piece.type].active += 1;
+                    }
                 }
             }
         }
@@ -98,22 +109,7 @@ export class Match3Jackpot {
     }
 
     public async displayJackpotWins() {
-        const jackpotWinsByType: Record<string, { times: number; jackpot: Jackpot }> = {};
-
-        for (const [type, jackpotData] of Object.entries(this.jackpots)) {
-            const configJackpot = this.configJackpots.find((config) => config.type === Number(type));
-
-            if (configJackpot && jackpotData.active >= configJackpot.requiredSymbols) {
-                const times = Math.floor(jackpotData.active / configJackpot.requiredSymbols);
-
-                if (times > 0) {
-                    jackpotWinsByType[type] = {
-                        times,
-                        jackpot: configJackpot,
-                    };
-                }
-            }
-        }
+        const jackpotWinsByType = slotGetJackpotWinsByType(this.jackpots, this.configJackpots);
 
         // Display modals for each winning jackpot
         for (const [_, jackpotWinData] of Object.entries(jackpotWinsByType)) {
@@ -127,6 +123,33 @@ export class Match3Jackpot {
                 times: jackpotWinData.times,
                 amount: amount,
             });
+
+            await waitFor(0.5);
+        }
+    }
+
+    /** Carry over remaining points that did not win on last spin */
+    public setupNextFreeSpinJackpots(data: SlotOnNextFreeSpinData) {
+        this.jackpots = data.jackpots;
+    }
+
+    /** Free Spin display jackpot */
+    public async displayFreeSpinJackpotWins() {
+        const jackpotWinsByType = slotGetJackpotWinsByType(this.jackpots, this.configJackpots);
+
+        // Display modals for each winning jackpot
+        for (const [_, jackpotWinData] of Object.entries(jackpotWinsByType)) {
+            await waitFor(0.5);
+
+            const amount = jackpotWinData.times * (this.betAmount * jackpotWinData.jackpot.multiplier);
+            this.match3.freeSpinProcess.addWinAmount(amount);
+
+            await this.match3.onJackpotTrigger?.({
+                jackpot: jackpotWinData.jackpot,
+                times: jackpotWinData.times,
+                amount: amount,
+            });
+
             await waitFor(0.5);
         }
     }

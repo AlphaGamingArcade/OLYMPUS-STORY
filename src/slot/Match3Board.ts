@@ -131,10 +131,18 @@ export class Match3Board {
      */
     public async fillGrid(bet: number, feature?: number) {
         const result = await BetAPI.spin({
+            game: this.match3.game,
             bet,
             feature,
         });
         this.match3.board.grid = result.reels;
+
+        // Add win free spins
+        if (result.freeSpins) {
+            this.match3.freeSpinStats.reset();
+            const winFreeSpinsData = { freeSpins: result.freeSpins };
+            this.match3.freeSpinStats.registerWinFreeSpins(winFreeSpinsData);
+        }
 
         // Get all positions from the grid
         const positions: Match3Position[] = [];
