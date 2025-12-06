@@ -1,5 +1,5 @@
 import { gameConfig } from '../utils/gameConfig';
-import { Jackpot, Pattern, Paytable } from './Match3Config';
+import { Jackpot, Pattern, Paytable } from './SlotConfig';
 
 /** Piece type on each position in the grid */
 export type Match3Type = number;

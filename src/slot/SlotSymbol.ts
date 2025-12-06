@@ -147,11 +147,17 @@ export class SlotSymbol extends Container {
     }
 
     /** Fall to position animation */
-    public async animateFall(x: number, y: number, onStart?: () => void, onComplete?: () => void) {
+    public async animateFall(x: number, y: number) {
         this.lock();
         resolveAndKillTweens(this.position);
         const duration = 0.5;
-        await gsap.to(this.position, { x, y, duration, ease: easeSingleBounce, onStart, onComplete });
+
+        await gsap.to(this.position, {
+            x,
+            y,
+            duration,
+            ease: easeSingleBounce,
+        });
         this.unlock();
     }
 
@@ -169,6 +175,31 @@ export class SlotSymbol extends Container {
 
             this.spine.state.addListener(listener);
             this.spine.state.setAnimation(0, 'animation', false);
+        });
+    }
+
+    /** Play animation */
+    public async animateBounce(): Promise<void> {
+        // Check if 'bounce' animation exists
+        const hasBounce = this.spine.skeleton.data.animations.some((anim) => anim.name === 'bounce');
+
+        if (!hasBounce) {
+            console.warn('[animateBounce] Animation "bounce" not found in skeleton data');
+            return Promise.resolve();
+        }
+
+        this.lock();
+
+        return new Promise((resolve) => {
+            const listener = {
+                complete: () => {
+                    this.spine.state.removeListener(listener);
+                    resolve();
+                },
+            };
+
+            this.spine.state.addListener(listener);
+            this.spine.state.setAnimation(4, 'bounce', false);
         });
     }
 

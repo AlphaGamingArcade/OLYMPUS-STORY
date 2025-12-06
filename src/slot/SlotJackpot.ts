@@ -1,7 +1,7 @@
-import { Match3, SlotOnNextFreeSpinData } from './Match3';
+import { Slot, SlotOnNextFreeSpinData } from './Slot';
 import { Match3Position, slotGetJackpotMatches, slotGetJackpotWinsByType } from './SlotUtility';
 import { SlotSymbol } from './SlotSymbol';
-import { Jackpot } from './Match3Config';
+import { Jackpot } from './SlotConfig';
 import { waitFor } from '../utils/asyncUtils';
 
 /**
@@ -9,10 +9,10 @@ import { waitFor } from '../utils/asyncUtils';
  * special handler that will figure out match patterns (process) that will cause them to spawn
  * and release its power (trigger) when touched or popped out.
  */
-export class Match3Jackpot {
+export class SlotJackpot {
     public processing: boolean = false;
     /** The Match3 instance */
-    public match3: Match3;
+    public slot: Slot;
     /** Bet amount */
     public betAmount = 0;
     /** Jackpot record */
@@ -22,8 +22,8 @@ export class Match3Jackpot {
     /** Config Jackpots */
     private configJackpots: Jackpot[];
 
-    constructor(match3: Match3) {
-        this.match3 = match3;
+    constructor(slot: Slot) {
+        this.slot = slot;
         this.configJackpots = [];
         this.initializeJackpots();
     }
@@ -52,13 +52,13 @@ export class Match3Jackpot {
     public async process(bet: number) {
         this.betAmount = bet;
 
-        const matches = slotGetJackpotMatches(this.match3.board.grid, this.configJackpots);
+        const matches = slotGetJackpotMatches(this.slot.board.grid, this.configJackpots);
         const piecesByType: Record<number, SlotSymbol[]> = {};
 
         // Collect all pieces by type
         for (const match of matches) {
             for (const position of match) {
-                const piece = this.match3.board.getPieceByPosition(position);
+                const piece = this.slot.board.getPieceByPosition(position);
                 if (piece) {
                     (piecesByType[piece.type] ??= []).push(piece);
 
@@ -89,8 +89,8 @@ export class Match3Jackpot {
         // Process winning groups one at a time
         for (const symbols of winPieces) {
             const positions: Match3Position[] = symbols.map((symbol) => ({ row: symbol.row, column: symbol.column }));
-            await this.match3.board.playPieces(positions);
-            await this.match3.onJackpotMatch?.({
+            await this.slot.board.playPieces(positions);
+            await this.slot.onJackpotMatch?.({
                 symbols,
             });
         }
@@ -101,8 +101,8 @@ export class Match3Jackpot {
                 row: symbol.row,
                 column: symbol.column,
             }));
-            await this.match3.board.playPieces(positions);
-            await this.match3.onJackpotMatch?.({
+            await this.slot.board.playPieces(positions);
+            await this.slot.onJackpotMatch?.({
                 symbols: nonWinPieces,
             });
         }
@@ -116,9 +116,9 @@ export class Match3Jackpot {
             await waitFor(0.5);
 
             const amount = jackpotWinData.times * (this.betAmount * jackpotWinData.jackpot.multiplier);
-            this.match3.process.addWinAmount(amount);
+            this.slot.process.addWinAmount(amount);
 
-            await this.match3.onJackpotTrigger?.({
+            await this.slot.onJackpotTrigger?.({
                 jackpot: jackpotWinData.jackpot,
                 times: jackpotWinData.times,
                 amount: amount,
@@ -142,9 +142,9 @@ export class Match3Jackpot {
             await waitFor(0.5);
 
             const amount = jackpotWinData.times * (this.betAmount * jackpotWinData.jackpot.multiplier);
-            this.match3.freeSpinProcess.addWinAmount(amount);
+            this.slot.freeSpinProcess.addWinAmount(amount);
 
-            await this.match3.onJackpotTrigger?.({
+            await this.slot.onJackpotTrigger?.({
                 jackpot: jackpotWinData.jackpot,
                 times: jackpotWinData.times,
                 amount: amount,

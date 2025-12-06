@@ -1,7 +1,7 @@
 import { Container, Sprite } from 'pixi.js';
 import { List } from '@pixi/ui';
 import { Label } from './Label';
-import { Jackpot } from '../slot/Match3Config';
+import { Jackpot } from '../slot/SlotConfig';
 import { gameConfig } from '../utils/gameConfig';
 
 export class FeatureSection extends Container {

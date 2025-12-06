@@ -1,7 +1,7 @@
 import { Container } from 'pixi.js';
 import { Label } from './Label';
 import { userSettings } from '../utils/userSettings';
-import { Paytable } from '../slot/Match3Config';
+import { Paytable } from '../slot/SlotConfig';
 import { List } from '@pixi/ui';
 import { gameConfig } from '../utils/gameConfig';
 import { PaytableCard } from './PaytableCard';

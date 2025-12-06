@@ -1,6 +1,6 @@
 import { BetAPI } from '../api/betApi';
 import { AsyncQueue, waitFor } from '../utils/asyncUtils';
-import { Match3 } from './Match3';
+import { Slot } from './Slot';
 import {
     match3GetEmptyPositions,
     match3ApplyGravity,
@@ -36,7 +36,7 @@ import { gameConfig } from '../utils/gameConfig';
  */
 export class SlotFreeSpinProcess {
     /** Reference to main Match3 controller */
-    private match3: Match3;
+    private slot: Slot;
 
     /** Whether a free-spin round is currently running */
     private processing = false;
@@ -59,8 +59,8 @@ export class SlotFreeSpinProcess {
     /** Task queue managing asynchronous step sequencing */
     private queue: AsyncQueue;
 
-    constructor(match3: Match3) {
-        this.match3 = match3;
+    constructor(slot: Slot) {
+        this.slot = slot;
         this.queue = new AsyncQueue();
     }
 
@@ -107,7 +107,7 @@ export class SlotFreeSpinProcess {
         if (this.processing) return;
         this.processing = true;
 
-        this.match3.process.stop();
+        this.slot.process.stop();
 
         this.round = 0;
         this.currentFreeSpin = 0;
@@ -115,14 +115,14 @@ export class SlotFreeSpinProcess {
         this.currentSpinWinAmount = 0;
 
         // Get free spin count from stats
-        const freeSpinCount = this.match3.freeSpinStats.getAvailableFreeSpins();
+        const freeSpinCount = this.slot.freeSpinStats.getAvailableFreeSpins();
         this.remainingFreeSpins = freeSpinCount;
 
         const freeSpinStartData = {
             currentSpin: this.currentFreeSpin,
             remainingSpins: this.remainingFreeSpins,
         };
-        this.match3.onFreeSpinStart?.(freeSpinStartData);
+        this.slot.onFreeSpinStart?.(freeSpinStartData);
 
         console.log('[Match3] ======= FREE SPIN PROCESSING START ==========');
         console.log('[Match3] Total free spins:', freeSpinCount);
@@ -138,15 +138,15 @@ export class SlotFreeSpinProcess {
         this.queue.clear();
 
         console.log('[Match3] FREE SPIN rounds:', this.round);
-        console.log('[Match3] FREE SPIN Board pieces:', this.match3.board.pieces.length);
-        console.log('[Match3] FREE SPIN Grid:\n' + match3GridToString(this.match3.board.grid));
+        console.log('[Match3] FREE SPIN Board pieces:', this.slot.board.pieces.length);
+        console.log('[Match3] FREE SPIN Grid:\n' + match3GridToString(this.slot.board.grid));
         console.log('[Match3] ======= FREE SPIN PROCESSING COMPLETE =======');
 
         const data = {
-            amount: this.match3.freeSpinStats.getWin(),
-            spins: this.match3.freeSpinStats.getTotalFreeSpinsPlayed(),
+            amount: this.slot.freeSpinStats.getWin(),
+            spins: this.slot.freeSpinStats.getTotalFreeSpinsPlayed(),
         };
-        this.match3.onFreeSpinComplete?.(data);
+        this.slot.onFreeSpinComplete?.(data);
     }
 
     /** Start the next free-spin round, or end the sequence if none remain */
@@ -165,21 +165,21 @@ export class SlotFreeSpinProcess {
         this.remainingFreeSpins -= 1;
 
         // Mark the free spin as consumed in stats
-        this.match3.freeSpinStats.consumeFreeSpin();
+        this.slot.freeSpinStats.consumeFreeSpin();
 
         // Clear jackpots that were already awarded and carryover for next spin the remaining points
-        const nextFreeSpinJackpots = slotGetNextFreeSpinJackpots(this.match3.jackpot.jackpots);
+        const nextFreeSpinJackpots = slotGetNextFreeSpinJackpots(this.slot.jackpot.jackpots);
         const data = {
             jackpots: nextFreeSpinJackpots,
             currentSpin: this.currentFreeSpin,
             remainingSpin: this.remainingFreeSpins,
         };
-        this.match3.jackpot.setupNextFreeSpinJackpots(data);
-        this.match3.onNextFreeSpinStart?.(data);
+        this.slot.jackpot.setupNextFreeSpinJackpots(data);
+        this.slot.onNextFreeSpinStart?.(data);
 
         // Animate the previous grid falling away, then clear board
-        await this.match3.board.fallToBottomGrid();
-        this.match3.board.reset();
+        await this.slot.board.fallToBottomGrid();
+        this.slot.board.reset();
 
         // Reset the free spin win
         this.currentSpinWinAmount = 0;
@@ -196,16 +196,16 @@ export class SlotFreeSpinProcess {
     /** Generate the board for a free-spin round using backend reel data */
     public async fillGrid() {
         const result = await BetAPI.spin({
-            game: this.match3.game,
+            game: this.slot.game,
             bet: this.betAmount,
         });
-        this.match3.board.grid = result.reels;
+        this.slot.board.grid = result.reels;
 
         // Collect all grid positions that contain pieces
         const positions: Match3Position[] = [];
-        for (let col = 0; col < this.match3.board.columns; col++) {
-            for (let row = 0; row < this.match3.board.rows; row++) {
-                if (this.match3.board.grid[row][col] !== 0) {
+        for (let col = 0; col < this.slot.board.columns; col++) {
+            for (let row = 0; row < this.slot.board.rows; row++) {
+                if (this.slot.board.grid[row][col] !== 0) {
                     positions.push({ row, column: col });
                 }
             }
@@ -216,8 +216,8 @@ export class SlotFreeSpinProcess {
 
         // Instantiate all new pieces and place them above the board
         for (const position of positions) {
-            const pieceType = match3GetPieceType(this.match3.board.grid, position);
-            const piece = this.match3.board.createPiece(position, pieceType);
+            const pieceType = match3GetPieceType(this.slot.board.grid, position);
+            const piece = this.slot.board.createPiece(position, pieceType);
 
             if (!piecesPerColumn[piece.column]) {
                 piecesPerColumn[piece.column] = 0;
@@ -229,10 +229,10 @@ export class SlotFreeSpinProcess {
             const y = piece.y;
 
             const countInColumn = piecesPerColumn[piece.column];
-            const height = this.match3.board.getHeight();
+            const height = this.slot.board.getHeight();
 
             // Spawn higher for each stacked element in the same column
-            piece.y = -height * 0.5 - countInColumn * this.match3.config.tileSize;
+            piece.y = -height * 0.5 - countInColumn * this.slot.config.tileSize;
 
             piecesByColumn[piece.column].push({ piece, x, y });
         }
@@ -307,7 +307,7 @@ export class SlotFreeSpinProcess {
 
     /** Update stats for matches found during free spins */
     private async updateStats() {
-        const matches = slotGetMatches(this.match3.board.grid);
+        const matches = slotGetMatches(this.slot.board.grid);
         if (!matches.length) return;
 
         console.log('[Match3] Update free spin stats');
@@ -316,16 +316,16 @@ export class SlotFreeSpinProcess {
     /** Handle all standard (non-jackpot) matches */
     private async processRegularMatches() {
         console.log('[Match3] Process regular matches (free spin)');
-        const matches = slotGetMatches(this.match3.board.grid);
+        const matches = slotGetMatches(this.slot.board.grid);
         if (matches.length > 0) this.hasRoundWin = true;
 
         const animePlayPieces = [];
         const winMatches = [];
 
         for (const match of matches) {
-            animePlayPieces.push(this.match3.board.playPieces(match));
+            animePlayPieces.push(this.slot.board.playPieces(match));
 
-            const types = this.match3.board.getTypesByPositions(match);
+            const types = this.slot.board.getTypesByPositions(match);
             const paytable = gameConfig.getPaytableByType(types[0]);
             const winAmount = slotGetRegularMatchesWinAmount(this.betAmount, types, paytable);
             winMatches.push({ amount: winAmount, types });
@@ -333,7 +333,7 @@ export class SlotFreeSpinProcess {
 
         await Promise.all(animePlayPieces);
 
-        this.match3.onMatch?.({
+        this.slot.onMatch?.({
             wins: winMatches,
         });
 
@@ -341,12 +341,12 @@ export class SlotFreeSpinProcess {
         const winTotal = winMatches.reduce((acc, value) => (acc = acc + value.amount), 0);
         this.currentSpinWinAmount += winTotal;
         const winData = { amount: winTotal };
-        this.match3.freeSpinStats.registerWin(winData);
-        this.match3.onWin?.(this.match3.freeSpinStats.getWin());
+        this.slot.freeSpinStats.registerWin(winData);
+        this.slot.onWin?.(this.slot.freeSpinStats.getWin());
 
         const popPromises = [];
         for (const match of matches) {
-            popPromises.push(this.match3.board.popPieces(match));
+            popPromises.push(this.slot.board.popPieces(match));
         }
         await Promise.all(popPromises);
     }
@@ -355,7 +355,7 @@ export class SlotFreeSpinProcess {
         const bigWinCatergory = slotGetBigWinCategory(this.currentSpinWinAmount, this.betAmount);
         if (bigWinCatergory) {
             await waitFor(0.5);
-            await this.match3.onBigWinTrigger?.({
+            await this.slot.onBigWinTrigger?.({
                 amount: this.currentSpinWinAmount,
                 category: bigWinCatergory,
             });
@@ -365,34 +365,34 @@ export class SlotFreeSpinProcess {
 
     /** Handle jackpot-related matches (grand, angelic, blessed, divine) */
     private async processJackpotMatches() {
-        await this.match3.jackpot.process(this.betAmount);
+        await this.slot.jackpot.process(this.betAmount);
     }
 
     public addWinAmount(amount: number): void {
         this.currentSpinWinAmount += amount;
         const winData = { amount };
-        this.match3.freeSpinStats.registerWin(winData);
-        this.match3.onWin?.(this.match3.freeSpinStats.getWin());
+        this.slot.freeSpinStats.registerWin(winData);
+        this.slot.onWin?.(this.slot.freeSpinStats.getWin());
     }
 
     /** Apply gravity and animate pieces falling downward */
     private async applyGravity() {
-        const changes = match3ApplyGravity(this.match3.board.grid);
+        const changes = match3ApplyGravity(this.slot.board.grid);
 
-        console.log('[Match3] Apply gravity (free spin) - moved pieces:', changes, changes.length);
+        console.log('[Match3] Apply gravity (free spin) - moved pieces:', changes.length);
 
         const animPromises = [];
 
         for (const change of changes) {
             const from = change[0];
             const to = change[1];
-            const piece = this.match3.board.getPieceByPosition(from);
+            const piece = this.slot.board.getPieceByPosition(from);
             if (!piece) continue;
 
             piece.row = to.row;
             piece.column = to.column;
 
-            const newPos = this.match3.board.getViewPositionByGridPosition(to);
+            const newPos = this.slot.board.getViewPositionByGridPosition(to);
             animPromises.push(piece.animateFall(newPos.x, newPos.y));
         }
 
@@ -402,11 +402,11 @@ export class SlotFreeSpinProcess {
     /** Refill all empty cells with brand-new pieces falling from above */
     private async refillGrid() {
         const result = await BetAPI.spin({
-            game: this.match3.game,
+            game: this.slot.game,
             bet: this.betAmount,
         });
 
-        const newPieces = match3FillUp(this.match3.board.grid, this.match3.board.commonTypes, result.reels);
+        const newPieces = match3FillUp(this.slot.board.grid, this.slot.board.commonTypes, result.reels);
 
         console.log('[Match3] Refill grid (free spin) - new pieces:', newPieces.length);
 
@@ -414,8 +414,8 @@ export class SlotFreeSpinProcess {
         const piecesPerColumn: Record<number, number> = {};
 
         for (const pos of newPieces) {
-            const pieceType = match3GetPieceType(this.match3.board.grid, pos);
-            const piece = this.match3.board.createPiece(pos, pieceType);
+            const pieceType = match3GetPieceType(this.slot.board.grid, pos);
+            const piece = this.slot.board.createPiece(pos, pieceType);
 
             if (!piecesPerColumn[piece.column]) piecesPerColumn[piece.column] = 0;
             piecesPerColumn[piece.column]++;
@@ -424,9 +424,9 @@ export class SlotFreeSpinProcess {
             const y = piece.y;
 
             const countInColumn = piecesPerColumn[piece.column];
-            const height = this.match3.board.getHeight();
+            const height = this.slot.board.getHeight();
 
-            piece.y = -height * 0.5 - countInColumn * this.match3.config.tileSize;
+            piece.y = -height * 0.5 - countInColumn * this.slot.config.tileSize;
 
             animPromises.push(piece.animateFall(x, y));
         }
@@ -440,8 +440,8 @@ export class SlotFreeSpinProcess {
      * free-spin round has ended and the next one should begin.
      */
     private async processCheckpoint() {
-        const newMatches = slotGetMatches(this.match3.board.grid);
-        const emptySpaces = match3GetEmptyPositions(this.match3.board.grid);
+        const newMatches = slotGetMatches(this.slot.board.grid);
+        const emptySpaces = match3GetEmptyPositions(this.slot.board.grid);
 
         console.log('[Match3] Checkpoint (free spin) - New matches:', newMatches.length);
         console.log('[Match3] Checkpoint (free spin) - Empty spaces:', emptySpaces.length);
@@ -452,7 +452,7 @@ export class SlotFreeSpinProcess {
         } else {
             console.log(`[Match3] ======= FREE SPIN #${this.currentFreeSpin} COMPLETE ==========`);
 
-            await this.match3.jackpot.displayFreeSpinJackpotWins();
+            await this.slot.jackpot.displayFreeSpinJackpotWins();
             await this.displayBigWins();
 
             this.runNextFreeSpin();

@@ -2,7 +2,7 @@ import { Container, FillGradient, Text } from 'pixi.js';
 import gsap from 'gsap';
 import { i18n } from '../utils/i18n';
 import { SlotPreview } from '../slot/preview/SlotPreview';
-import { slotGetConfig } from '../slot/Match3Config';
+import { slotGetConfig } from '../slot/SlotConfig';
 import { Pillar } from '../ui/Pillar';
 import { PlayButton } from '../ui/PlayButton';
 import { navigation } from '../utils/navigation';

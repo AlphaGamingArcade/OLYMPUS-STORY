@@ -4,7 +4,6 @@ import { navigation } from '../utils/navigation';
 import { ShadowLabel } from '../ui/ShadowLabel';
 import { registerCustomEase, resolveAndKillTweens } from '../utils/animation';
 import { randomRange } from '../utils/random';
-import { waitFor } from '../utils/asyncUtils';
 import { formatCurrency } from '../utils/formatter';
 
 /** Custom ease curve for y animation of falling pieces - minimal bounce */
@@ -386,7 +385,6 @@ export class FreeSpinWinPopup extends Container {
             duration: this.countAnimationDuration,
             ease: 'power2.out',
             onUpdate: () => {
-                // const formatted = `${this.currency}${this.currentWinAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
                 this.winAmount.text = formatCurrency(this.currentWinAmount, this.currency);
             },
             onComplete: () => {
@@ -409,6 +407,7 @@ export class FreeSpinWinPopup extends Container {
                                 duration: 0.3,
                                 ease: 'power2.out',
                             });
+
                             this.canClickAnywhere = true;
                             this.isSkippable = false;
                         },
@@ -621,6 +620,7 @@ export class FreeSpinWinPopup extends Container {
         this.bottomText.y = 220;
 
         this.createFlyingCoins();
+        this.startContinuousAnimations();
 
         const entranceTl = gsap.timeline();
 
@@ -727,12 +727,6 @@ export class FreeSpinWinPopup extends Container {
         );
 
         await entranceTl;
-
-        this.startContinuousAnimations();
-
-        // Close modal automatically
-        await waitFor(1);
-        console.log('Close Modal automatically');
     }
 
     /** Dismiss the popup, animated */

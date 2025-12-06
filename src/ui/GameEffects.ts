@@ -2,15 +2,12 @@ import { Container } from 'pixi.js';
 import { randomRange } from '../utils/random';
 import gsap from 'gsap';
 import { GameScreen } from '../screens/GameScreen';
-import { earthquake } from '../utils/animation';
 import { getDistance } from '../utils/maths';
 import { pool } from '../utils/pool';
 import { sfx } from '../utils/audio';
-import { PopExplosion } from './PopExplosion';
-import { waitFor } from '../utils/asyncUtils';
 import { SlotSymbol } from '../slot/SlotSymbol';
-import { SlotOnJackpotMatchData, SlotOnNextFreeSpinData } from '../slot/Match3';
-import { Jackpot } from '../slot/Match3Config';
+import { SlotOnJackpotMatchData, SlotOnNextFreeSpinData } from '../slot/Slot';
+import { Jackpot } from '../slot/SlotConfig';
 
 /**
  * All gameplay special effects, isolated on its own class in a way that can be changed freely, without affecting gameplay.
@@ -54,7 +51,7 @@ export class GameEffects extends Container {
             piece.setup({
                 name: data.symbols[i].name,
                 type: data.symbols[i].type,
-                size: this.game.match3.board.tileSize,
+                size: this.game.slot.board.tileSize,
                 interactive: false,
             });
             piece.position.copyFrom(position);
@@ -175,114 +172,5 @@ export class GameEffects extends Container {
                 this.game.divineJackpotTier.setActiveDots(active);
             }
         }
-    }
-
-    /** Play a short explosion effect in given position */
-    private async playPopExplosion(position: { x: number; y: number }) {
-        const explosion = pool.get(PopExplosion);
-        explosion.x = position.x;
-        explosion.y = position.y;
-        this.addChild(explosion);
-        await explosion.play();
-        this.removeChild(explosion);
-        pool.giveBack(explosion);
-    }
-
-    /** Explode piece out of the board, part of the play grid explosion animation */
-    private async playPieceExplosion(piece: SlotSymbol) {
-        const position = this.toLocal(piece.getGlobalPosition());
-        const x = position.x + piece.x * 2 + randomRange(-100, 100);
-        const yUp = position.y + randomRange(-100, -200);
-        const yDown = yUp + 600;
-        const animatedPiece = pool.get(SlotSymbol);
-        const duration = randomRange(0.5, 0.8);
-        gsap.killTweensOf(animatedPiece);
-        gsap.killTweensOf(animatedPiece.scale);
-        animatedPiece.setup({
-            name: piece.name,
-            type: piece.type,
-            size: this.game.match3.board.tileSize,
-            interactive: false,
-        });
-        animatedPiece.position.copyFrom(position);
-        animatedPiece.alpha = 1;
-        this.addChild(animatedPiece);
-        await waitFor(randomRange(0, 0.3));
-
-        this.playPopExplosion(position);
-
-        const upTime = duration * 0.4;
-        const downTime = duration * 0.5;
-        const curveTime = duration * 0.1;
-
-        // Create timeline for smoother control
-        const tl = gsap.timeline();
-
-        // Up motion
-        tl.to(animatedPiece, { y: yUp, duration: upTime, ease: 'circ.out' }, 0);
-
-        // Down motion with curve at the end
-        tl.to(
-            animatedPiece,
-            {
-                y: yDown - 50, // Stop a bit before final position
-                duration: downTime,
-                ease: 'circ.in',
-            },
-            upTime,
-        );
-
-        // Final curve down
-        tl.to(
-            animatedPiece,
-            {
-                y: yDown,
-                duration: curveTime,
-                ease: 'power2.in',
-            },
-            upTime + downTime,
-        );
-
-        // Horizontal movement with curve at the end
-        tl.to(
-            animatedPiece,
-            {
-                x: x - 30, // Stop before final position
-                duration: duration - curveTime,
-                ease: 'linear',
-            },
-            0,
-        );
-
-        // Final horizontal curve
-        tl.to(
-            animatedPiece,
-            {
-                x: x,
-                duration: curveTime,
-                ease: 'power2.in',
-            },
-            duration - curveTime,
-        );
-
-        // Fade and scale
-        tl.to(animatedPiece, { alpha: 0, duration: 0.2, ease: 'linear' }, duration - 0.2);
-        tl.to(animatedPiece.scale, { x: 2, y: 2, duration, ease: 'linear' }, 0);
-
-        await tl;
-
-        this.removeChild(animatedPiece);
-        pool.giveBack(piece);
-    }
-
-    /** Explode all pieces out of the board, when gameplay finishes */
-    public async playGridExplosion() {
-        earthquake(this.game.pivot, 10);
-        const animPromises: Promise<void>[] = [];
-        this.game.match3.board.pieces.forEach((piece) => {
-            animPromises.push(this.playPieceExplosion(piece));
-        });
-        this.game.match3.board.piecesContainer.visible = false;
-        await Promise.all(animPromises);
     }
 }

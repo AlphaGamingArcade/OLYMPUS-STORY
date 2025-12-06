@@ -28,10 +28,10 @@ let scatterReels = [
 ];
 
 let winReels = [
-    [1, 4, 2, 2, 5, 2],
-    [8, 1, 3, 2, 1, 4],
-    [2, 9, 6, 7, 2, 5],
-    [1, 2, 2, 2, 2, 11],
+    [1, 12, 2, 2, 5, 2],
+    [8, 1, 13, 14, 1, 4],
+    [2, 11, 6, 7, 2, 5],
+    [1, 11, 2, 2, 2, 11],
     [1, 1, 1, 1, 2, 2],
 ];
 
@@ -71,16 +71,22 @@ function hasAtLeastNSymbols(reels, symbol, minCount) {
  *
  * */
 
+let balance = 10000000;
+
 app.post('/spin', async (req, res) => {
     await utils.waitFor(delay); // 1 sec
 
     // buy feature
     if (req.body && req.body.feature && req.body.feature == 1) {
+        balance = balance - req.body.bet * 100;
+
         return res.json({
             reels: scatterReels,
             freeSpins: 25,
         });
     }
+
+    balance = balance - req.body.bet;
 
     // Generate 5 reels, each with 5 random symbols from the symbols array
     let symbolsByReel = [
@@ -99,14 +105,14 @@ app.post('/spin', async (req, res) => {
     );
 
     res.json({
-        reels: reels,
+        reels: winReels,
         freeSpins: hasAtLeastNSymbols(reels, 10, 4) ? 12 : undefined,
     });
 });
 
 app.get('/collect', async (req, res) => {
     res.json({
-        balance: 100000,
+        balance,
     });
 });
 

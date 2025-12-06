@@ -1,6 +1,6 @@
 import { Container, Ticker } from 'pixi.js';
 import {
-    Match3,
+    Slot,
     SlotFreeSpinStartData,
     SlotFreeSpinTriggerData,
     SlotOnBigWinTriggerData,
@@ -9,14 +9,14 @@ import {
     SlotOnJackpotTriggerData,
     SlotOnMatchData,
     SlotOnNextFreeSpinData,
-} from '../slot/Match3';
+} from '../slot/Slot';
 import { Pillar } from '../ui/Pillar';
 import { navigation } from '../utils/navigation';
 import { GameEffects } from '../ui/GameEffects';
 import { bgm } from '../utils/audio';
 import { GameOvertime } from '../ui/GameOvertime';
 import { waitFor } from '../utils/asyncUtils';
-import { slotGetConfig } from '../slot/Match3Config';
+import { slotGetConfig } from '../slot/SlotConfig';
 import { JackpotTier } from '../ui/JackpotTier';
 import { GameLogo } from '../ui/GameLogo';
 import { BuyFreeSpinButton } from '../ui/BuyFreeSpinButton';
@@ -40,7 +40,7 @@ export class GameScreen extends Container {
     /** Assets bundles required by this screen */
     public static assetBundles = ['game', 'common'];
     /** The Math3 game */
-    public readonly match3: Match3;
+    public readonly slot: Slot;
     /** Inner container for the match3 */
     public readonly gameContainer: Container;
     /** Countdown displayed when the gameplay is about to finish */
@@ -162,22 +162,22 @@ export class GameScreen extends Container {
         this.grandJackpotTier.setTotalDots(2);
         this.grandJackpotTier.setActiveDots(0);
 
-        this.match3 = new Match3();
-        this.match3.onMatch = this.onMatch.bind(this);
-        this.match3.onWin = this.onWin.bind(this);
-        this.match3.onBigWinTrigger = this.onBigWinTrigger.bind(this);
-        this.match3.onSpinStart = this.onSpinStart.bind(this);
-        this.match3.onJackpotMatch = this.onJackpotMatch.bind(this);
-        this.match3.onJackpotTrigger = this.onJackpotTrigger.bind(this);
+        this.slot = new Slot();
+        this.slot.onMatch = this.onMatch.bind(this);
+        this.slot.onWin = this.onWin.bind(this);
+        this.slot.onBigWinTrigger = this.onBigWinTrigger.bind(this);
+        this.slot.onSpinStart = this.onSpinStart.bind(this);
+        this.slot.onJackpotMatch = this.onJackpotMatch.bind(this);
+        this.slot.onJackpotTrigger = this.onJackpotTrigger.bind(this);
 
-        this.match3.onFreeSpinTrigger = this.onFreeSpinTrigger.bind(this);
-        this.match3.onFreeSpinStart = this.onFreeSpinStart.bind(this);
-        this.match3.onNextFreeSpinStart = this.onNextFreeSpinStart.bind(this);
-        this.match3.onFreeSpinComplete = this.onFreeSpinComplete.bind(this);
+        this.slot.onFreeSpinTrigger = this.onFreeSpinTrigger.bind(this);
+        this.slot.onFreeSpinStart = this.onFreeSpinStart.bind(this);
+        this.slot.onNextFreeSpinStart = this.onNextFreeSpinStart.bind(this);
+        this.slot.onFreeSpinComplete = this.onFreeSpinComplete.bind(this);
 
-        this.match3.onProcessStart = this.onProcessStart.bind(this);
-        this.match3.onProcessComplete = this.onProcessComplete.bind(this);
-        this.gameContainer.addChild(this.match3);
+        this.slot.onProcessStart = this.onProcessStart.bind(this);
+        this.slot.onProcessComplete = this.onProcessComplete.bind(this);
+        this.gameContainer.addChild(this.slot);
 
         this.vfx = new GameEffects(this);
         this.addChild(this.vfx);
@@ -281,7 +281,7 @@ export class GameScreen extends Container {
         this.roundResult.clearResults();
 
         const bet = userSettings.getBet();
-        this.match3.spin(bet, feature);
+        this.slot.spin(bet, feature);
     }
 
     /** Prepare the screen just before showing */
@@ -290,30 +290,30 @@ export class GameScreen extends Container {
         this.currency = userSettings.getCurrency();
 
         this.pillar?.setup(match3Config);
-        this.match3.setup(match3Config);
+        this.slot.setup(match3Config);
     }
 
     /** Update the screen */
     public update(time: Ticker) {
-        this.match3.update(time.deltaMS);
+        this.slot.update(time.deltaMS);
     }
 
     /** Pause gameplay - automatically fired when a popup is presented */
     public async pause() {
         this.gameContainer.interactiveChildren = false;
-        this.match3.pause();
+        this.slot.pause();
     }
 
     /** Resume gameplay */
     public async resume() {
         this.gameContainer.interactiveChildren = true;
-        this.match3.resume();
+        this.slot.resume();
     }
 
     /** Fully reset the game, clearing all pieces and shelf blocks */
     public reset() {
         this.pillar?.reset();
-        this.match3.reset();
+        this.slot.reset();
     }
 
     /** Resize the screen, fired whenever window size changes */
@@ -410,13 +410,12 @@ export class GameScreen extends Container {
     /** Show screen with animations */
     public async show() {
         bgm.play('common/bgm-game.mp3', { volume: 0.5 });
-        this.match3.startPlaying();
+        this.slot.startPlaying();
     }
 
     /** Hide screen with animations */
     public async hide() {
         this.overtime.hide();
-        this.vfx?.playGridExplosion();
         await waitFor(0.3);
     }
 
@@ -489,7 +488,7 @@ export class GameScreen extends Container {
                     await waitFor(1);
 
                     const bet = userSettings.getBet();
-                    this.match3.actions.actionFreeSpin(bet);
+                    this.slot.actions.actionFreeSpin(bet);
                     resolve();
                 },
             });
@@ -512,6 +511,7 @@ export class GameScreen extends Container {
     private async onNextFreeSpinStart(data: SlotOnNextFreeSpinData) {
         this.roundResult.clearResults();
         this.vfx?.playSetActiveJackpots(data);
+        this.controlPanel.setFreeSpinMessage(`FREE SPINS LEFT ${data.remainingSpin}`);
     }
 
     /** Fires when the match3 grid finishes auto-processing */
@@ -521,10 +521,10 @@ export class GameScreen extends Container {
                 amount: data.amount,
                 spins: data.spins,
                 callback: async () => {
+                    this.controlPanel.setFreeSpinMessage('');
                     await navigation.dismissPopup();
                     await waitFor(1);
-                    if (!this.match3.process.isProcessing() && !this.match3.freeSpinProcess.isProcessing())
-                        this.finish();
+                    if (!this.slot.process.isProcessing() && !this.slot.freeSpinProcess.isProcessing()) this.finish();
                     resolve;
                 },
             });
@@ -538,7 +538,7 @@ export class GameScreen extends Container {
 
     /** Fires when the match3 grid finishes auto-processing */
     private onProcessComplete() {
-        if (!this.match3.process.isProcessing() && !this.match3.freeSpinProcess.isProcessing()) this.finish();
+        if (!this.slot.process.isProcessing() && !this.slot.freeSpinProcess.isProcessing()) this.finish();
     }
 
     private async finish() {

@@ -1,4 +1,4 @@
-import { Match3 } from './Match3';
+import { Slot } from './Slot';
 
 /** Default gameplay stats data */
 const defaultStatsData = {
@@ -19,12 +19,12 @@ export type SlotOnWinData = { amount: number };
  */
 export class SlotFreeSpinStats {
     /** The Match3 instance */
-    private match3: Match3;
+    private slot: Slot;
     /** Current internal stats data */
     private data: SlotFreeSpinStatsData;
 
-    constructor(match3: Match3) {
-        this.match3 = match3;
+    constructor(slot: Slot) {
+        this.slot = slot;
         this.data = { ...defaultStatsData };
     }
 
@@ -44,7 +44,7 @@ export class SlotFreeSpinStats {
         this.data.availableFreeSpins += data.freeSpins;
 
         console.log(
-            `[SlotFreeSpinStats] Won ${data.freeSpins} free spins! Total won: ${this.data.totalFreeSpinsWon} ${this.match3.board.grid}`,
+            `[SlotFreeSpinStats] Won ${data.freeSpins} free spins! Total won: ${this.data.totalFreeSpinsWon} ${this.slot.board.grid}`,
         );
     }
 

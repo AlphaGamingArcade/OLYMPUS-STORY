@@ -1,6 +1,6 @@
 import { Container, Graphics } from 'pixi.js';
 import { pool } from '../../utils/pool';
-import { Match3Config, slotGetBlocks } from '../Match3Config';
+import { Match3Config, slotGetBlocks } from '../SlotConfig';
 import {
     Match3Position,
     match3SetPieceType,

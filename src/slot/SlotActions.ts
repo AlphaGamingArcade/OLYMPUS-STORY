@@ -1,4 +1,4 @@
-import { Match3 } from './Match3';
+import { Slot } from './Slot';
 
 /** Interface for actions configuration */
 interface Match3ActionsConfig {
@@ -9,15 +9,15 @@ interface Match3ActionsConfig {
  * These are the actions player can take: move pieces (swap) or tap if they are special.
  * Action effects happens instantly, and the game will deal with whatever state the grid ends up with.
  */
-export class Match3Actions {
+export class SlotActions {
     /** The match3 instance */
-    public match3: Match3;
+    public slot: Slot;
 
     /** Free all moves, meaning that they will always be valid regardles of matching results */
     public freeMoves = false;
 
-    constructor(match3: Match3) {
-        this.match3 = match3;
+    constructor(slot: Slot) {
+        this.slot = slot;
     }
 
     /**
@@ -27,19 +27,19 @@ export class Match3Actions {
      *
      **/
     public async actionSpin(bet: number, feature?: number) {
-        this.match3.onSpinStart?.();
+        this.slot.onSpinStart?.();
 
-        await this.match3.board.fallToBottomGrid();
-        this.match3.board.reset();
+        await this.slot.board.fallToBottomGrid();
+        this.slot.board.reset();
 
-        await this.match3.board.fillGrid(bet, feature);
+        await this.slot.board.fillGrid(bet, feature);
 
-        this.match3.jackpot.reset();
-        this.match3.process.start(bet);
+        this.slot.jackpot.reset();
+        this.slot.process.start(bet);
     }
 
     public async actionFreeSpin(bet: number) {
-        this.match3.freeSpinProcess.start(bet);
+        this.slot.freeSpinProcess.start(bet);
     }
 
     /**

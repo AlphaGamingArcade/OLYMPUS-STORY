@@ -3,8 +3,8 @@ import { IconButton } from './IconButton2';
 import { userSettings } from '../utils/userSettings';
 import { MatchPattern } from './MatchPattern';
 import { AudioButton } from './AudioButton';
+import { formatCurrency } from '../utils/formatter';
 import { SpinButton, SpinButtonState } from './SpinButton';
-import { LabelValue } from './LabelValue';
 
 export interface WinMatchPattern {
     times: number;
@@ -16,11 +16,14 @@ export interface WinMatchPattern {
 /**
  * Control panel for the game, displaying credit, bet info, and action buttons
  */
+
 export class ControlPanel extends Container {
     private background: Sprite;
     private contentContainer: Container;
-    private creditDisplay: LabelValue;
-    private betDisplay: LabelValue;
+    private creditLabel: Text;
+    private creditValue: Text;
+    private betLabel: Text;
+    private betValue: Text;
     private messageText: Text;
     private matchPattern: MatchPattern;
     private winMatchPatterns: WinMatchPattern[] = [];
@@ -57,23 +60,47 @@ export class ControlPanel extends Container {
         this.contentContainer = new Container();
         this.addChild(this.contentContainer);
 
-        // Credit display
-        this.creditDisplay = new LabelValue({
-            labelText: 'CREDIT',
-            fontSize: 22,
-            align: 'left',
+        // Credit display (bottom left)
+        this.creditLabel = new Text({
+            text: 'CREDIT',
+            style: {
+                fontSize: 18,
+                fill: 0xffffff,
+                fontWeight: 'bold',
+            },
         });
-        this.creditDisplay.setValue(userSettings.getBalance(), this.currency);
-        this.contentContainer.addChild(this.creditDisplay);
+        this.contentContainer.addChild(this.creditLabel);
 
-        // Bet display
-        this.betDisplay = new LabelValue({
-            labelText: 'BET',
-            fontSize: 22,
-            align: 'left',
+        this.creditValue = new Text({
+            text: formatCurrency(userSettings.getBalance(), this.currency),
+            style: {
+                fontSize: 20,
+                fill: 0xffd700,
+                fontWeight: 'bold',
+            },
         });
-        this.betDisplay.setValue(userSettings.getBet(), this.currency);
-        this.contentContainer.addChild(this.betDisplay);
+        this.contentContainer.addChild(this.creditValue);
+
+        // Bet display (bottom left, next to credit)
+        this.betLabel = new Text({
+            text: 'BET',
+            style: {
+                fontSize: 22,
+                fill: 0xffffff,
+                fontWeight: 'bold',
+            },
+        });
+        this.contentContainer.addChild(this.betLabel);
+
+        this.betValue = new Text({
+            text: formatCurrency(userSettings.getBet(), userSettings.getCurrency()),
+            style: {
+                fontSize: 22,
+                fill: 0xffd700,
+                fontWeight: 'bold',
+            },
+        });
+        this.contentContainer.addChild(this.betValue);
 
         // Center message
         this.messageText = new Text({
@@ -90,7 +117,7 @@ export class ControlPanel extends Container {
         this.matchPattern = new MatchPattern();
         this.contentContainer.addChild(this.matchPattern);
 
-        // Free spins label
+        // Bet display (bottom left, next to credit)
         this.freeSpinsLabel = new Text({
             text: '',
             style: {
@@ -168,7 +195,7 @@ export class ControlPanel extends Container {
 
             // Adjust button sizes for mobile
             const buttonScale = 2;
-            const spinButtonScale = 1.75;
+            const spinButtonScale = 2;
 
             this.audioButton.scale.set(buttonScale);
             this.infoButton.scale.set(buttonScale);
@@ -210,19 +237,33 @@ export class ControlPanel extends Container {
             this.settingsButton.x = rightBtnEndX;
             this.settingsButton.y = rightBtnY + 130;
 
-            // Bottom left - Credit display
-            this.creditDisplay.x = 90;
-            this.creditDisplay.y = 300;
-            this.creditDisplay.scale.set(1.6);
-            this.creditDisplay.setAlign('left');
+            // Bottom left - Credit info (vertical stack)
+            const creditStartX = 90;
+            const creditEndX = width - 90;
+            const bottomY = 340;
 
-            // Bottom right - Bet display
-            this.betDisplay.x = width - this.betDisplay.width * 1.5;
-            this.betDisplay.y = 300;
-            this.betDisplay.scale.set(1.6);
-            this.betDisplay.setAlign('right');
+            this.creditLabel.x = creditStartX;
+            this.creditLabel.y = bottomY - 40;
+            this.creditLabel.style.fontSize = 32;
+            this.creditLabel.anchor.set(0, 0);
 
-            // Message
+            this.creditValue.x = creditStartX;
+            this.creditValue.y = bottomY;
+            this.creditValue.style.fontSize = 42;
+            this.creditValue.anchor.set(0, 0);
+
+            // Bottom right - Bet info (vertical stack, aligned to right edge)
+            this.betLabel.x = creditEndX;
+            this.betLabel.y = bottomY - 40;
+            this.betLabel.style.fontSize = 32;
+            this.betLabel.anchor.set(1, 0);
+
+            this.betValue.x = creditEndX;
+            this.betValue.y = bottomY;
+            this.betValue.style.fontSize = 42;
+            this.betValue.anchor.set(1, 0);
+
+            // Message (bottom center, small)
             this.messageText.x = this.contentWidth / 2;
             this.messageText.y = height / 2;
             this.messageText.style.fontSize = 42;
@@ -245,7 +286,7 @@ export class ControlPanel extends Container {
 
             // Adjust button sizes for mobile
             const buttonScale = 1.5;
-            const spinButtonScale = 1.25;
+            const spinButtonScale = 1.5;
 
             this.audioButton.scale.set(buttonScale);
             this.infoButton.scale.set(buttonScale);
@@ -263,21 +304,34 @@ export class ControlPanel extends Container {
             this.infoButton.x = 210;
             this.infoButton.y = 100;
 
-            // Bottom left - Credit and Bet displays
-            this.creditDisplay.x = 260;
-            this.creditDisplay.y = 130;
-            this.creditDisplay.scale.set(1.3);
-            this.creditDisplay.setAlign('left');
+            // Bottom left - Credit and Bet (horizontal, compact)
+            const creditStartX = 180;
+            const bottomY = 160;
 
-            this.betDisplay.x = 500;
-            this.betDisplay.y = 130;
-            this.betDisplay.scale.set(1.3);
-            this.betDisplay.setAlign('left');
+            this.creditLabel.x = creditStartX;
+            this.creditLabel.y = bottomY;
+            this.creditLabel.style.fontSize = 32;
+            this.creditLabel.anchor.set(0, 0);
+
+            this.creditValue.x = creditStartX + 160;
+            this.creditValue.y = bottomY;
+            this.creditValue.style.fontSize = 32;
+            this.creditValue.anchor.set(0, 0);
+
+            this.betLabel.x = creditStartX + 380;
+            this.betLabel.y = bottomY;
+            this.betLabel.style.fontSize = 32;
+            this.betLabel.anchor.set(0, 0);
+
+            this.betValue.x = creditStartX + 480;
+            this.betValue.y = bottomY;
+            this.betValue.style.fontSize = 32;
+            this.betValue.anchor.set(0, 0);
 
             // Center message (smaller font)
             this.messageText.x = this.contentWidth / 2;
-            this.messageText.y = 60;
-            this.messageText.style.fontSize = 42;
+            this.messageText.y = 70;
+            this.messageText.style.fontSize = 22;
 
             // Right side buttons (horizontal, compact)
             const rightCenterX = this.contentWidth - 310;
@@ -295,6 +349,11 @@ export class ControlPanel extends Container {
             // Autoplay button (bottom right, compact)
             this.autoplayButton.x = this.contentWidth - 180;
             this.autoplayButton.y = 160;
+
+            // Message (bottom center, small)
+            this.messageText.x = this.contentWidth / 2;
+            this.messageText.y = 60;
+            this.messageText.style.fontSize = 42;
 
             this.freeSpinsLabel.x = this.contentWidth / 2;
             this.freeSpinsLabel.y = this.panelHeight / 2;
@@ -330,19 +389,22 @@ export class ControlPanel extends Container {
             this.audioButton.y = 40;
             this.settingsButton.x = 50;
             this.settingsButton.y = 100;
-            this.infoButton.x = 110;
+            this.infoButton.x = 120;
             this.infoButton.y = 70;
 
-            // Bottom left - Credit and Bet displays
-            this.creditDisplay.x = 130;
-            this.creditDisplay.y = 100;
-            this.creditDisplay.scale.set(1);
-            this.creditDisplay.setAlign('left');
+            // Bottom left - Credit and Bet info (horizontal layout)
+            const creditStartX = 130;
+            const bottomY = 125;
 
-            this.betDisplay.x = 330;
-            this.betDisplay.y = 100;
-            this.betDisplay.scale.set(1);
-            this.betDisplay.setAlign('left');
+            this.creditLabel.x = creditStartX;
+            this.creditLabel.y = bottomY;
+            this.creditValue.x = creditStartX + 70;
+            this.creditValue.y = bottomY;
+
+            this.betLabel.x = creditStartX + 250;
+            this.betLabel.y = bottomY;
+            this.betValue.x = creditStartX + 300;
+            this.betValue.y = bottomY;
 
             // Center message (relative to content container)
             this.messageText.x = this.contentWidth / 2;
@@ -380,14 +442,14 @@ export class ControlPanel extends Container {
      * Update credit display
      */
     public setCredit(value: number) {
-        this.creditDisplay.setValue(value, this.currency);
+        this.creditValue.text = `$${value.toFixed(2)}`;
     }
 
     /**
      * Update bet display
      */
     public setBet(value: number) {
-        this.betDisplay.setValue(value, this.currency);
+        this.betValue.text = `$${value.toFixed(2)}`;
     }
 
     /**

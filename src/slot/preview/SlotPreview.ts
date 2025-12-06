@@ -1,5 +1,5 @@
 import { Container } from 'pixi.js';
-import { Match3Config, slotGetConfig } from '../Match3Config';
+import { Match3Config, slotGetConfig } from '../SlotConfig';
 import { Match3Position, Match3Type } from '../SlotUtility';
 import { Match3BoardPreview } from './Match3BoardPreview';
 

@@ -1,14 +1,14 @@
 import { Container } from 'pixi.js';
-import { Match3Actions } from './Match3Actions';
-import { Match3Board } from './Match3Board';
-import { Jackpot, Match3Config, slotGetConfig } from './Match3Config';
-import { Match3Process } from './Match3Process';
+import { SlotActions } from './SlotActions';
+import { Jackpot, Match3Config, slotGetConfig } from './SlotConfig';
+import { SlotProcess } from './SlotProcess';
 import { SlotSymbol } from './SlotSymbol';
-import { Match3Jackpot } from './Match3Jackpot';
+import { SlotJackpot } from './SlotJackpot';
 import { gameConfig } from '../utils/gameConfig';
 import { SlotBigWinCategory } from './SlotUtility';
-import { SlotFreeSpinStats } from './SlotFreeSpinStats';
-import { SlotFreeSpinProcess } from './Match3FreeSpinProcess';
+import { SlotFreeSpinStats } from './SlotFreeSpinsStats';
+import { SlotFreeSpinProcess } from './SlotFreeSpinProcess';
+import { SlotBoard } from './SlotBoard';
 
 // Match3.ts - Holds the state
 export enum SpinState {
@@ -75,7 +75,7 @@ export interface SlotOnFreeSpinCompleteData {
  * The main match3 class that sets up game's sub-systems and provide some useful callbacks.
  * All game events are set as plain callbacks for simplicity
  */
-export class Match3 extends Container {
+export class Slot extends Container {
     public game = 'olympusstory';
     /** State if spinning */
     public spinning: boolean;
@@ -84,15 +84,15 @@ export class Match3 extends Container {
     /** Compute score, grade, number of matches */
     public freeSpinStats: SlotFreeSpinStats;
     /** Holds the grid state and display */
-    public board: Match3Board;
+    public board: SlotBoard;
     /** Sort out actions that the player can take */
-    public actions: Match3Actions;
+    public actions: SlotActions;
     /** Process matches and fills up the grid */
-    public process: Match3Process;
+    public process: SlotProcess;
     /** Process matches and fills up the grid */
     public freeSpinProcess: SlotFreeSpinProcess;
     /** Handles pieces with special powers */
-    public jackpot: Match3Jackpot;
+    public jackpot: SlotJackpot;
 
     /** Fires when matches */
     public onMatch?: (data: SlotOnMatchData) => void;
@@ -128,12 +128,10 @@ export class Match3 extends Container {
 
         // Game sub-systems
         this.config = slotGetConfig();
-        this.board = new Match3Board(this);
-        this.actions = new Match3Actions(this);
-
-        this.process = new Match3Process(this);
-        this.jackpot = new Match3Jackpot(this);
-
+        this.board = new SlotBoard(this);
+        this.actions = new SlotActions(this);
+        this.process = new SlotProcess(this);
+        this.jackpot = new SlotJackpot(this);
         this.freeSpinStats = new SlotFreeSpinStats(this);
         this.freeSpinProcess = new SlotFreeSpinProcess(this);
     }

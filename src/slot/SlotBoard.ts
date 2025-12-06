@@ -1,7 +1,6 @@
 import { Container, Graphics } from 'pixi.js';
 import { pool } from '../utils/pool';
-import { Match3 } from './Match3';
-import { Match3Config, slotGetBlocks } from './Match3Config';
+import { Match3Config, slotGetBlocks } from './SlotConfig';
 import {
     Match3Position,
     match3SetPieceType,
@@ -13,15 +12,16 @@ import {
 } from './SlotUtility';
 import { SlotSymbol } from './SlotSymbol';
 import { BetAPI } from '../api/betApi';
+import { Slot } from './Slot';
 
 /**
  * Holds the grid state and control its visual representation, creating and removing pieces accordingly.
  * As a convention for this game, 'grid' is usually referring to the match3 state (array of types),
  * and 'board' is its visual representation with sprites.
  */
-export class Match3Board {
+export class SlotBoard {
     /** The Match3 instance */
-    public match3: Match3;
+    public slot: Slot;
     /** The grid state, with only numbers */
     public grid: Match3Grid = [];
     /** All piece sprites currently being used in the grid */
@@ -41,14 +41,14 @@ export class Match3Board {
     /** Map piece types to piece names */
     public typesMap!: Record<number, string>;
 
-    constructor(match3: Match3) {
-        this.match3 = match3;
+    constructor(slot: Slot) {
+        this.slot = slot;
 
         this.piecesContainer = new Container();
-        this.match3.addChild(this.piecesContainer);
+        this.slot.addChild(this.piecesContainer);
 
         this.piecesMask = new Graphics().rect(-2, -2, 4, 4).fill({ color: 0xff0000, alpha: 0.5 });
-        this.match3.addChild(this.piecesMask);
+        this.slot.addChild(this.piecesMask);
         this.piecesContainer.mask = this.piecesMask;
     }
 
@@ -94,7 +94,7 @@ export class Match3Board {
         const piecesPerColumn: Record<number, number> = {};
 
         // Use existing pieces from the board
-        for (const piece of this.match3.board.pieces) {
+        for (const piece of this.slot.board.pieces) {
             // Count pieces per column so new pieces can be stacked up accordingly
             if (!piecesPerColumn[piece.column]) {
                 piecesPerColumn[piece.column] = 0;
@@ -104,8 +104,8 @@ export class Match3Board {
 
             const x = piece.x;
             const columnCount = piecesPerColumn[piece.column];
-            const height = this.match3.board.getHeight();
-            const targetY = height * 0.5 + columnCount * this.match3.config.tileSize;
+            const height = this.slot.board.getHeight();
+            const targetY = height * 0.5 + columnCount * this.slot.config.tileSize;
 
             piecesByColumn[piece.column].push({ piece, x, y: targetY });
         }
@@ -131,24 +131,24 @@ export class Match3Board {
      */
     public async fillGrid(bet: number, feature?: number) {
         const result = await BetAPI.spin({
-            game: this.match3.game,
+            game: this.slot.game,
             bet,
             feature,
         });
-        this.match3.board.grid = result.reels;
+        this.slot.board.grid = result.reels;
 
         // Add win free spins
         if (result.freeSpins) {
-            this.match3.freeSpinStats.reset();
+            this.slot.freeSpinStats.reset();
             const winFreeSpinsData = { freeSpins: result.freeSpins };
-            this.match3.freeSpinStats.registerWinFreeSpins(winFreeSpinsData);
+            this.slot.freeSpinStats.registerWinFreeSpins(winFreeSpinsData);
         }
 
         // Get all positions from the grid
         const positions: Match3Position[] = [];
-        for (let col = 0; col < this.match3.board.columns; col++) {
-            for (let row = 0; row < this.match3.board.rows; row++) {
-                if (this.match3.board.grid[row][col] !== 0) {
+        for (let col = 0; col < this.slot.board.columns; col++) {
+            for (let row = 0; row < this.slot.board.rows; row++) {
+                if (this.slot.board.grid[row][col] !== 0) {
                     positions.push({ row, column: col });
                 }
             }
@@ -159,8 +159,8 @@ export class Match3Board {
         const piecesPerColumn: Record<number, number> = {};
 
         for (const position of positions) {
-            const pieceType = match3GetPieceType(this.match3.board.grid, position);
-            const piece = this.match3.board.createPiece(position, pieceType);
+            const pieceType = match3GetPieceType(this.slot.board.grid, position);
+            const piece = this.slot.board.createPiece(position, pieceType);
 
             // Count pieces per column so new pieces can be stacked up accordingly
             if (!piecesPerColumn[piece.column]) {
@@ -172,8 +172,8 @@ export class Match3Board {
             const x = piece.x;
             const y = piece.y;
             const columnCount = piecesPerColumn[piece.column];
-            const height = this.match3.board.getHeight();
-            piece.y = -height * 0.5 - columnCount * this.match3.config.tileSize;
+            const height = this.slot.board.getHeight();
+            piece.y = -height * 0.5 - columnCount * this.slot.config.tileSize;
 
             piecesByColumn[piece.column].push({ piece, x, y });
         }
@@ -228,7 +228,7 @@ export class Match3Board {
         piece.setup({
             name,
             type: pieceType,
-            size: this.match3.config.tileSize,
+            size: this.slot.config.tileSize,
             interactive: true,
         });
         piece.row = position.row;

@@ -1,4 +1,4 @@
-import { Block, Jackpot, Paytable } from '../slot/Match3Config';
+import { Block, Jackpot, Paytable } from '../slot/SlotConfig';
 
 // Default fallbacks (keep your existing arrays as fallbacks)
 const defaultBlocks: Block[] = [
