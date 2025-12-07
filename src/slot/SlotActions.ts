@@ -27,19 +27,21 @@ export class SlotActions {
      *
      **/
     public async actionSpin(bet: number, feature?: number) {
-        this.slot.onSpinStart?.();
+        // Check balance here
 
-        await this.slot.board.fallToBottomGrid();
-        this.slot.board.reset();
-
-        await this.slot.board.fillGrid(bet, feature);
-
-        this.slot.jackpot.reset();
-        this.slot.process.start(bet);
+        this.slot.process.start(bet, feature);
     }
 
     public async actionFreeSpin(bet: number) {
-        this.slot.freeSpinProcess.start(bet);
+        // Check balance
+
+        this.slot.freeSpinsProcess.start(bet);
+    }
+
+    public async actionAutoplaySpin(bet: number, totalSpins: number) {
+        // Check balance
+
+        this.slot.autoplayProcess.start(bet, totalSpins);
     }
 
     /**

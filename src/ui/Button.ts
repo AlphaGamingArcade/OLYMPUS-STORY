@@ -18,7 +18,7 @@ type ButtonOptions = typeof defaultButtonOptions;
  */
 export class Button extends FancyButton {
     /** The buttoon message displayed */
-    public messageLabel: Label;
+    private messageLabel: Label;
 
     constructor(options: Partial<ButtonOptions> = {}) {
         const opts = { ...defaultButtonOptions, ...options };
@@ -84,5 +84,9 @@ export class Button extends FancyButton {
             this.pivot.y = -200;
         }
         this.visible = false;
+    }
+
+    public setText(text: string) {
+        this.messageLabel.text = text;
     }
 }

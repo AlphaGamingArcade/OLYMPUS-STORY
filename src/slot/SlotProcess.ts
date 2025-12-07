@@ -88,16 +88,25 @@ export class SlotProcess {
     }
 
     /** Begin resolving the board until no more actions remain */
-    public async start(bet: number) {
+    public async start(bet: number, feature?: number) {
         if (this.processing) return;
         this.processing = true;
 
+        this.slot.onSpinStart?.();
+        await this.slot.board.fallToBottomGrid();
+
+        // Clean up
+        this.slot.board.reset();
+        this.slot.jackpot.reset();
+
+        // Fill new symbols
+        await this.slot.board.fillGrid(bet, feature);
+
         this.betAmount = bet;
         this.winAmount = 0;
-
         this.round = 0;
-        this.slot.onProcessStart?.();
 
+        this.slot.onProcessStart?.();
         console.log('[Match3] ======= PROCESSING START ==========');
         this.runProcessRound();
     }
@@ -305,7 +314,7 @@ export class SlotProcess {
                 if (i < 2) await waitFor(1);
             }
 
-            const freeSpinCount = this.slot.freeSpinStats.getAvailableFreeSpins();
+            const freeSpinCount = this.slot.freeSpinsStats.getAvailableFreeSpins();
             const freeSpinTriggerData = { totalFreeSpins: freeSpinCount };
             await this.slot.onFreeSpinTrigger?.(freeSpinTriggerData);
         } else {

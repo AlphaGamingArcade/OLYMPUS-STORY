@@ -2,6 +2,7 @@ import { Container, Sprite, Texture } from 'pixi.js';
 import gsap from 'gsap';
 import { RoundResultItem } from './RoundResultItem';
 import { IconButton } from './IconButton';
+import { pool } from '../utils/pool';
 
 /**
  * Round Result container with title and result items
@@ -122,7 +123,7 @@ export class RoundResult extends Container {
 
     /** Add a result item */
     public addResult(total: number, symbolTexture: string, amount: number, currency: string) {
-        const resultItem = new RoundResultItem();
+        const resultItem = pool.get(RoundResultItem);
         resultItem.scale.set(0.5);
         resultItem.setup(total, symbolTexture, amount, currency);
 

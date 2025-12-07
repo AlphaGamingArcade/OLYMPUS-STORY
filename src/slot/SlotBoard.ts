@@ -139,9 +139,9 @@ export class SlotBoard {
 
         // Add win free spins
         if (result.freeSpins) {
-            this.slot.freeSpinStats.reset();
+            this.slot.freeSpinsStats.reset();
             const winFreeSpinsData = { freeSpins: result.freeSpins };
-            this.slot.freeSpinStats.registerWinFreeSpins(winFreeSpinsData);
+            this.slot.freeSpinsStats.registerWinFreeSpins(winFreeSpinsData);
         }
 
         // Get all positions from the grid

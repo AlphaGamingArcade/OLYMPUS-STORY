@@ -142,7 +142,7 @@ export class SlotJackpot {
             await waitFor(0.5);
 
             const amount = jackpotWinData.times * (this.betAmount * jackpotWinData.jackpot.multiplier);
-            this.slot.freeSpinProcess.addWinAmount(amount);
+            this.slot.freeSpinsProcess.addWinAmount(amount);
 
             await this.slot.onJackpotTrigger?.({
                 jackpot: jackpotWinData.jackpot,

@@ -36,9 +36,13 @@ export class LabelValue extends Container {
         this.labelText = new Text({
             text: config.labelText,
             style: {
-                fontSize: this.fontSize * 0.8,
+                fontSize: this.fontSize,
                 fill: this.labelColor,
                 fontWeight: this.fontWeight,
+                stroke: {
+                    color: '#3a3a3a',
+                    width: 1,
+                },
             },
         });
 
@@ -50,6 +54,10 @@ export class LabelValue extends Container {
                 fontSize: this.fontSize,
                 fill: this.valueColor,
                 fontWeight: this.fontWeight,
+                stroke: {
+                    color: '#3a3a3a',
+                    width: 1,
+                },
             },
         });
 

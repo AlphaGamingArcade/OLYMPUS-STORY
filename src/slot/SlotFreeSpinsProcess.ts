@@ -34,7 +34,7 @@ import { gameConfig } from '../utils/gameConfig';
  * Everything runs through an AsyncQueue, allowing animations and transitions
  * to be chained cleanly and asynchronously.
  */
-export class SlotFreeSpinProcess {
+export class SlotFreeSpinsProcess {
     /** Reference to main Match3 controller */
     private slot: Slot;
 
@@ -115,7 +115,7 @@ export class SlotFreeSpinProcess {
         this.currentSpinWinAmount = 0;
 
         // Get free spin count from stats
-        const freeSpinCount = this.slot.freeSpinStats.getAvailableFreeSpins();
+        const freeSpinCount = this.slot.freeSpinsStats.getAvailableFreeSpins();
         this.remainingFreeSpins = freeSpinCount;
 
         const freeSpinStartData = {
@@ -133,7 +133,6 @@ export class SlotFreeSpinProcess {
     /** Stop the free-spin process and print debug info */
     public async stop() {
         if (!this.processing) return;
-
         this.processing = false;
         this.queue.clear();
 
@@ -143,10 +142,11 @@ export class SlotFreeSpinProcess {
         console.log('[Match3] ======= FREE SPIN PROCESSING COMPLETE =======');
 
         const data = {
-            amount: this.slot.freeSpinStats.getWin(),
-            spins: this.slot.freeSpinStats.getTotalFreeSpinsPlayed(),
+            amount: this.slot.freeSpinsStats.getWin(),
+            spins: this.slot.freeSpinsStats.getTotalFreeSpinsPlayed(),
         };
-        this.slot.onFreeSpinComplete?.(data);
+
+        await this.slot.onFreeSpinComplete?.(data);
     }
 
     /** Start the next free-spin round, or end the sequence if none remain */
@@ -165,14 +165,14 @@ export class SlotFreeSpinProcess {
         this.remainingFreeSpins -= 1;
 
         // Mark the free spin as consumed in stats
-        this.slot.freeSpinStats.consumeFreeSpin();
+        this.slot.freeSpinsStats.consumeFreeSpin();
 
         // Clear jackpots that were already awarded and carryover for next spin the remaining points
         const nextFreeSpinJackpots = slotGetNextFreeSpinJackpots(this.slot.jackpot.jackpots);
         const data = {
             jackpots: nextFreeSpinJackpots,
             currentSpin: this.currentFreeSpin,
-            remainingSpin: this.remainingFreeSpins,
+            remainingSpins: this.remainingFreeSpins,
         };
         this.slot.jackpot.setupNextFreeSpinJackpots(data);
         this.slot.onNextFreeSpinStart?.(data);
@@ -341,8 +341,8 @@ export class SlotFreeSpinProcess {
         const winTotal = winMatches.reduce((acc, value) => (acc = acc + value.amount), 0);
         this.currentSpinWinAmount += winTotal;
         const winData = { amount: winTotal };
-        this.slot.freeSpinStats.registerWin(winData);
-        this.slot.onWin?.(this.slot.freeSpinStats.getWin());
+        this.slot.freeSpinsStats.registerWin(winData);
+        this.slot.onWin?.(this.slot.freeSpinsStats.getWin());
 
         const popPromises = [];
         for (const match of matches) {
@@ -371,8 +371,8 @@ export class SlotFreeSpinProcess {
     public addWinAmount(amount: number): void {
         this.currentSpinWinAmount += amount;
         const winData = { amount };
-        this.slot.freeSpinStats.registerWin(winData);
-        this.slot.onWin?.(this.slot.freeSpinStats.getWin());
+        this.slot.freeSpinsStats.registerWin(winData);
+        this.slot.onWin?.(this.slot.freeSpinsStats.getWin());
     }
 
     /** Apply gravity and animate pieces falling downward */

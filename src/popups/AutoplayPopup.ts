@@ -6,8 +6,8 @@ import { IconButton } from '../ui/IconButton2';
 import { Button } from '../ui/Button';
 import { Slider } from '../ui/Slider';
 
-export type OnPressAutoplayData = {
-    spins: number;
+export type AutoplayPopupData = {
+    callback: (spins: number) => void;
 };
 
 /** Popup for autoplay settings */
@@ -32,11 +32,13 @@ export class AutoplayPopup extends Container {
     private autoplayButton: Button;
     /** autoplay slider */
     private autoplaySlider: Slider;
-    /** on autoplay press */
-    private _onPressAutoplay?: (data: OnPressAutoplayData) => void;
+    /** autoplay count */
+    private autoplayCount: number = 10;
     /** Panel dimensions */
     private panelWidth = 540;
     private panelHeight = 570;
+
+    private onAutoplayPress?: (spins: number) => void;
 
     constructor() {
         super();
@@ -109,22 +111,17 @@ export class AutoplayPopup extends Container {
             value: 10,
         });
         this.autoplaySlider.onUpdate.connect((value: number) => {
-            const rounded = Math.round(value / 10) * 10; // Round to nearest 10
-            this.autoplaySlider.text = `Number of Auto Spins (${rounded})`;
+            this.autoplayCount = Math.round(value / 10) * 10; // Round to nearest 10
+            this.autoplaySlider.text = `Number of Auto Spins (${this.autoplayCount})`;
+            this.autoplayButton.setText(`Autoplay (${this.autoplayCount})`);
         });
         this.layout.addChild(this.autoplaySlider);
 
         // Autoplay start button
         this.autoplayButton = new Button({
-            text: 'Autoplay',
+            text: `Autoplay (${this.autoplayCount})`,
         });
-        this.autoplayButton.onPress.connect(async () => {
-            if (this._onPressAutoplay) {
-                // const spins = Math.round(this.autoplaySlider.value / 10) * 10;
-                await navigation.dismissPopup();
-                // this._onPressAutoplay({ spins });
-            }
-        });
+        this.autoplayButton.onPress.connect(() => this.onAutoplayPress?.(this.autoplayCount));
         this.autoplayButton.anchor.set(0.5);
         this.layout.addChild(this.autoplayButton);
 
@@ -149,12 +146,10 @@ export class AutoplayPopup extends Container {
     }
 
     /** Set things up just before showing the popup */
-    public prepare(callBack: (data: OnPressAutoplayData) => void) {
-        this._onPressAutoplay = callBack;
-
-        // Reset to defaults
-        // this.autoplaySlider.value = 10;
-        // this.autoplaySlider.text = 'Number of Auto Spins (10)';
+    public prepare(data: AutoplayPopupData) {
+        if (data) {
+            this.onAutoplayPress = data.callback;
+        }
     }
 
     /** Show the popup */
