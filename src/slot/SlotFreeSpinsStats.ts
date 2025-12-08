@@ -18,7 +18,7 @@ export type SlotOnWinData = { amount: number };
  * Computes scores and general gameplay stats during the session.
  */
 export class SlotFreeSpinsStats {
-    /** The Match3 instance */
+    /** The Slot instance */
     private slot: Slot;
     /** Current internal stats data */
     private data: SlotFreeSpinStatsData;

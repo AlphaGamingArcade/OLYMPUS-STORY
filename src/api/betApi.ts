@@ -15,7 +15,7 @@ export class BetAPI {
     }): Promise<{ reels: number[][]; freeSpins?: number }> {
         try {
             // Define the URL of your Express server endpoint
-            const url = 'http://192.168.68.119:3000/spin';
+            const url = 'http://172.25.16.1:3000/spin';
 
             // Make a POST request to the Express server
             const response = await fetch(url, {

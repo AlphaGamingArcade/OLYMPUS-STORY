@@ -7,11 +7,11 @@ const defaultConfig = {
     tileSize: 130,
 };
 
-/** Match3 configuration */
-export type Match3Config = typeof defaultConfig;
+/** Slot configuration */
+export type SlotConfig = typeof defaultConfig;
 
 /** Build a config object overriding default values if suitable */
-export function slotGetConfig(): Match3Config {
+export function slotGetConfig(): SlotConfig {
     return defaultConfig;
 }
 

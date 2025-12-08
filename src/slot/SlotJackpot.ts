@@ -1,5 +1,5 @@
 import { Slot, SlotOnNextFreeSpinData } from './Slot';
-import { Match3Position, slotGetJackpotMatches, slotGetJackpotWinsByType } from './SlotUtility';
+import { SlotPosition, slotGetJackpotMatches, slotGetJackpotWinsByType } from './SlotUtility';
 import { SlotSymbol } from './SlotSymbol';
 import { Jackpot } from './SlotConfig';
 import { waitFor } from '../utils/asyncUtils';
@@ -11,7 +11,7 @@ import { waitFor } from '../utils/asyncUtils';
  */
 export class SlotJackpot {
     public processing: boolean = false;
-    /** The Match3 instance */
+    /** The Slot instance */
     public slot: Slot;
     /** Bet amount */
     public betAmount = 0;
@@ -88,7 +88,7 @@ export class SlotJackpot {
 
         // Process winning groups one at a time
         for (const symbols of winPieces) {
-            const positions: Match3Position[] = symbols.map((symbol) => ({ row: symbol.row, column: symbol.column }));
+            const positions: SlotPosition[] = symbols.map((symbol) => ({ row: symbol.row, column: symbol.column }));
             await this.slot.board.playPieces(positions);
             await this.slot.onJackpotMatch?.({
                 symbols,
@@ -97,7 +97,7 @@ export class SlotJackpot {
 
         // Animate non-winning pieces all at once
         if (nonWinPieces.length > 0) {
-            const positions: Match3Position[] = nonWinPieces.map((symbol) => ({
+            const positions: SlotPosition[] = nonWinPieces.map((symbol) => ({
                 row: symbol.row,
                 column: symbol.column,
             }));

@@ -1,14 +1,14 @@
 import { Container, Graphics } from 'pixi.js';
 import { pool } from '../utils/pool';
-import { Match3Config, slotGetBlocks } from './SlotConfig';
+import { SlotConfig, slotGetBlocks } from './SlotConfig';
 import {
-    Match3Position,
+    SlotPosition,
     match3SetPieceType,
-    match3GetPieceType,
+    slotGetPieceType,
     match3CreateGrid,
     match3ForEach,
-    Match3Grid,
-    Match3Type,
+    SlotGrid,
+    SlotType,
 } from './SlotUtility';
 import { SlotSymbol } from './SlotSymbol';
 import { BetAPI } from '../api/betApi';
@@ -20,10 +20,10 @@ import { Slot } from './Slot';
  * and 'board' is its visual representation with sprites.
  */
 export class SlotBoard {
-    /** The Match3 instance */
+    /** The Slot instance */
     public slot: Slot;
     /** The grid state, with only numbers */
-    public grid: Match3Grid = [];
+    public grid: SlotGrid = [];
     /** All piece sprites currently being used in the grid */
     public pieces: SlotSymbol[] = [];
     /** Mask all pieces inside board dimensions */
@@ -37,7 +37,7 @@ export class SlotBoard {
     /** The size (width & height) of each board slot */
     public tileSize = 0;
     /** List of common types available for the game */
-    public commonTypes: Match3Type[] = [];
+    public commonTypes: SlotType[] = [];
     /** Map piece types to piece names */
     public typesMap!: Record<number, string>;
 
@@ -54,9 +54,9 @@ export class SlotBoard {
 
     /**
      * Setup the initial grid state and fill up the view with pieces
-     * @param config Match3 config params
+     * @param config Slot config params
      */
-    public setup(config: Match3Config) {
+    public setup(config: SlotConfig) {
         this.rows = config.rows;
         this.columns = config.columns;
         this.tileSize = config.tileSize;
@@ -83,7 +83,7 @@ export class SlotBoard {
         this.grid = match3CreateGrid(this.rows, this.columns, this.commonTypes);
 
         // Fill up the visual board with piece sprites
-        match3ForEach(this.grid, (gridPosition: Match3Position, type: Match3Type) => {
+        match3ForEach(this.grid, (gridPosition: SlotPosition, type: SlotType) => {
             this.createPiece(gridPosition, type);
         });
     }
@@ -145,7 +145,7 @@ export class SlotBoard {
         }
 
         // Get all positions from the grid
-        const positions: Match3Position[] = [];
+        const positions: SlotPosition[] = [];
         for (let col = 0; col < this.slot.board.columns; col++) {
             for (let row = 0; row < this.slot.board.rows; row++) {
                 if (this.slot.board.grid[row][col] !== 0) {
@@ -159,7 +159,7 @@ export class SlotBoard {
         const piecesPerColumn: Record<number, number> = {};
 
         for (const position of positions) {
-            const pieceType = match3GetPieceType(this.slot.board.grid, position);
+            const pieceType = slotGetPieceType(this.slot.board.grid, position);
             const piece = this.slot.board.createPiece(position, pieceType);
 
             // Count pieces per column so new pieces can be stacked up accordingly
@@ -220,7 +220,7 @@ export class SlotBoard {
         }
     }
 
-    public createPiece(position: Match3Position, pieceType: Match3Type) {
+    public createPiece(position: SlotPosition, pieceType: SlotType) {
         const name = this.typesMap[pieceType];
         const piece = pool.get(SlotSymbol);
         const viewPosition = this.getViewPositionByGridPosition(position);
@@ -263,7 +263,7 @@ export class SlotBoard {
      * @param position The position where the piece should be spawned
      * @param pieceType The type of the piece to be spawned
      */
-    public async spawnPiece(position: Match3Position, pieceType: Match3Type) {
+    public async spawnPiece(position: SlotPosition, pieceType: SlotType) {
         const oldPiece = this.getPieceByPosition(position);
         if (oldPiece) this.disposePiece(oldPiece);
         match3SetPieceType(this.grid, position, pieceType);
@@ -277,9 +277,9 @@ export class SlotBoard {
      * @param position The grid position of the piece to be popped out
      * @param causedBySpecial If the pop was caused by special effect
      */
-    public async playPiece(position: Match3Position) {
+    public async playPiece(position: SlotPosition) {
         const piece = this.getPieceByPosition(position);
-        const type = match3GetPieceType(this.grid, position);
+        const type = slotGetPieceType(this.grid, position);
         if (!type || !piece) return;
         await piece.animatePlay();
     }
@@ -289,9 +289,9 @@ export class SlotBoard {
      * @param position The grid position of the piece to be popped out
      * @param causedBySpecial If the pop was caused by special effect
      */
-    public async playSpecialPiece(position: Match3Position) {
+    public async playSpecialPiece(position: SlotPosition) {
         const piece = this.getPieceByPosition(position);
-        const type = match3GetPieceType(this.grid, position);
+        const type = slotGetPieceType(this.grid, position);
         if (!type || !piece) return;
         await piece.animateSpecialPlay();
     }
@@ -301,9 +301,9 @@ export class SlotBoard {
      * @param position The grid position of the piece to be popped out
      * @param causedBySpecial If the pop was caused by special effect
      */
-    public async popPiece(position: Match3Position) {
+    public async popPiece(position: SlotPosition) {
         const piece = this.getPieceByPosition(position);
-        const type = match3GetPieceType(this.grid, position);
+        const type = slotGetPieceType(this.grid, position);
         if (!type || !piece) return;
         // Set piece position in the grid to 0 and pop it out of the board
         match3SetPieceType(this.grid, position, 0);
@@ -321,7 +321,7 @@ export class SlotBoard {
      * @param positions List of positions to be popped out
      * @param causedBySpecial If this was caused by special effects
      */
-    public async playPieces(positions: Match3Position[]) {
+    public async playPieces(positions: SlotPosition[]) {
         const animPromises = [];
         for (const position of positions) {
             animPromises.push(this.playPiece(position));
@@ -334,7 +334,7 @@ export class SlotBoard {
      * @param positions List of positions to be popped out
      * @param causedBySpecial If this was caused by special effects
      */
-    public async playSpecialPieces(positions: Match3Position[]) {
+    public async playSpecialPieces(positions: SlotPosition[]) {
         const animPromises = [];
         for (const position of positions) {
             animPromises.push(this.playSpecialPiece(position));
@@ -347,7 +347,7 @@ export class SlotBoard {
      * @param positions List of positions to be popped out
      * @param causedBySpecial If this was caused by special effects
      */
-    public async popPieces(positions: Match3Position[]) {
+    public async popPieces(positions: SlotPosition[]) {
         const animPromises = [];
         for (const position of positions) {
             animPromises.push(this.popPiece(position));
@@ -360,7 +360,7 @@ export class SlotBoard {
      * @param position The grid position to look for
      * @returns
      */
-    public getPieceByPosition(position: Match3Position) {
+    public getPieceByPosition(position: SlotPosition) {
         for (const piece of this.pieces) {
             if (piece.row === position.row && piece.column === position.column) {
                 return piece;
@@ -374,7 +374,7 @@ export class SlotBoard {
      * @param position The grid position to be converted
      * @returns The equivalet x & y position in the board
      */
-    public getViewPositionByGridPosition(position: Match3Position) {
+    public getViewPositionByGridPosition(position: SlotPosition) {
         const offsetX = ((this.columns - 1) * this.tileSize) / 2;
         const offsetY = ((this.rows - 1) * this.tileSize) / 2;
         const x = position.column * this.tileSize - offsetX;
@@ -387,8 +387,8 @@ export class SlotBoard {
      * @param position
      * @returns The type of the piece
      */
-    public getTypeByPosition(position: Match3Position) {
-        return match3GetPieceType(this.grid, position);
+    public getTypeByPosition(position: SlotPosition) {
+        return slotGetPieceType(this.grid, position);
     }
 
     /**
@@ -396,7 +396,7 @@ export class SlotBoard {
      * @param position
      * @returns The type of the piece
      */
-    public getTypesByPositions(positions: Match3Position[]) {
+    public getTypesByPositions(positions: SlotPosition[]) {
         let types = [];
         for (const position of positions) {
             types.push(this.getTypeByPosition(position));

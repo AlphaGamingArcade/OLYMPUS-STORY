@@ -477,6 +477,16 @@ export class ControlPanel extends Container {
         this.spinButton.setState(SpinButtonState.PLAY);
     }
 
+    /** Enabled autoplay button */
+    public disableAutoplay() {
+        this.autoplayButton.enabled = false;
+    }
+
+    /** Enabled autoplay button */
+    public enableAutoplay() {
+        this.autoplayButton.enabled = true;
+    }
+
     /**
      * Set button event handlers
      */

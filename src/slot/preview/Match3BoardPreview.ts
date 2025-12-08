@@ -1,14 +1,14 @@
 import { Container, Graphics } from 'pixi.js';
 import { pool } from '../../utils/pool';
-import { Match3Config, slotGetBlocks } from '../SlotConfig';
+import { SlotConfig, slotGetBlocks } from '../SlotConfig';
 import {
-    Match3Position,
+    SlotPosition,
     match3SetPieceType,
-    match3GetPieceType,
+    slotGetPieceType,
     match3CreateGrid,
     match3ForEach,
-    Match3Grid,
-    Match3Type,
+    SlotGrid,
+    SlotType,
 } from '../SlotUtility';
 import { SlotSymbol } from '../SlotSymbol';
 import { SlotPreview } from './SlotPreview';
@@ -18,11 +18,11 @@ import { SlotPreview } from './SlotPreview';
  * As a convention for this game, 'grid' is usually referring to the match3 state (array of types),
  * and 'board' is its visual representation with sprites.
  */
-export class Match3BoardPreview {
-    /** The Match3 instance */
+export class SlotBoardPreview {
+    /** The Slot instance */
     public match3: SlotPreview;
     /** The grid state, with only numbers */
-    public grid: Match3Grid = [];
+    public grid: SlotGrid = [];
     /** All piece sprites currently being used in the grid */
     public pieces: SlotSymbol[] = [];
     /** Mask all pieces inside board dimensions */
@@ -36,7 +36,7 @@ export class Match3BoardPreview {
     /** The size (width & height) of each board slot */
     public tileSize = 0;
     /** List of common types available for the game */
-    public commonTypes: Match3Type[] = [];
+    public commonTypes: SlotType[] = [];
     /** Map piece types to piece names */
     public typesMap!: Record<number, string>;
 
@@ -53,9 +53,9 @@ export class Match3BoardPreview {
 
     /**
      * Setup the initial grid state and fill up the view with pieces
-     * @param config Match3 config params
+     * @param config Slot config params
      */
-    public setup(config: Match3Config) {
+    public setup(config: SlotConfig) {
         this.rows = config.rows;
         this.columns = config.columns;
         this.tileSize = config.tileSize;
@@ -79,7 +79,7 @@ export class Match3BoardPreview {
         // Create the initial grid state
         this.grid = match3CreateGrid(this.rows, this.columns, this.commonTypes);
         // Fill up the visual board with piece sprites
-        match3ForEach(this.grid, (gridPosition: Match3Position, type: Match3Type) => {
+        match3ForEach(this.grid, (gridPosition: SlotPosition, type: SlotType) => {
             this.createPiece(gridPosition, type);
         });
     }
@@ -89,7 +89,7 @@ export class Match3BoardPreview {
         this.grid = match3CreateGrid(this.rows, this.columns, this.commonTypes);
 
         // Fill up the visual board with piece sprites
-        match3ForEach(this.grid, (gridPosition: Match3Position, type: Match3Type) => {
+        match3ForEach(this.grid, (gridPosition: SlotPosition, type: SlotType) => {
             this.createPiece(gridPosition, type);
         });
     }
@@ -106,7 +106,7 @@ export class Match3BoardPreview {
         this.pieces.length = 0;
     }
 
-    public createPiece(position: Match3Position, pieceType: Match3Type) {
+    public createPiece(position: SlotPosition, pieceType: SlotType) {
         const name = this.typesMap[pieceType];
         const piece = pool.get(SlotSymbol);
         const viewPosition = this.getViewPositionByGridPosition(position);
@@ -148,7 +148,7 @@ export class Match3BoardPreview {
      * @param position The position where the piece should be spawned
      * @param pieceType The type of the piece to be spawned
      */
-    public async spawnPiece(position: Match3Position, pieceType: Match3Type) {
+    public async spawnPiece(position: SlotPosition, pieceType: SlotType) {
         const oldPiece = this.getPieceByPosition(position);
         if (oldPiece) this.disposePiece(oldPiece);
         match3SetPieceType(this.grid, position, pieceType);
@@ -162,7 +162,7 @@ export class Match3BoardPreview {
      * @param position The grid position to look for
      * @returns
      */
-    public getPieceByPosition(position: Match3Position) {
+    public getPieceByPosition(position: SlotPosition) {
         for (const piece of this.pieces) {
             if (piece.row === position.row && piece.column === position.column) {
                 return piece;
@@ -176,7 +176,7 @@ export class Match3BoardPreview {
      * @param position The grid position to be converted
      * @returns The equivalet x & y position in the board
      */
-    public getViewPositionByGridPosition(position: Match3Position) {
+    public getViewPositionByGridPosition(position: SlotPosition) {
         const offsetX = ((this.columns - 1) * this.tileSize) / 2;
         const offsetY = ((this.rows - 1) * this.tileSize) / 2;
         const x = position.column * this.tileSize - offsetX;
@@ -189,8 +189,8 @@ export class Match3BoardPreview {
      * @param position
      * @returns The type of the piece
      */
-    public getTypeByPosition(position: Match3Position) {
-        return match3GetPieceType(this.grid, position);
+    public getTypeByPosition(position: SlotPosition) {
+        return slotGetPieceType(this.grid, position);
     }
 
     /** Get the visual width of the board */

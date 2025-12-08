@@ -3,6 +3,7 @@ import {
     Slot,
     SlotFreeSpinStartData,
     SlotFreeSpinTriggerData,
+    SlotOnAutoplaySpinCompleteData,
     SlotOnAutoplaySpinStartData,
     SlotOnAutoplayStartData,
     SlotOnBigWinTriggerData,
@@ -37,7 +38,7 @@ import { InfoPopup, InfoPopupData } from '../popups/InfoPopup';
 import { formatCurrency } from '../utils/formatter';
 import { BigWinPopup, BigWinPopupData } from '../popups/BigWinPopup';
 
-/** The screen tha holds the Match3 game */
+/** The screen tha holds the Slot game */
 export class GameScreen extends Container {
     /** Assets bundles required by this screen */
     public static assetBundles = ['game', 'common'];
@@ -178,6 +179,7 @@ export class GameScreen extends Container {
         this.slot.onAutoplayStart = this.onAutoplayStart.bind(this);
         this.slot.onAutoplayComplete = this.onAutoplayComplete.bind(this);
         this.slot.onAutoplaySpinStart = this.onAutoplaySpinStart.bind(this);
+        this.slot.onAutoplaySpinComplete = this.onAutoplaySpinComplete.bind(this);
 
         this.gameContainer.addChild(this.slot);
 
@@ -197,14 +199,18 @@ export class GameScreen extends Container {
         this.controlPanel.onSpin(() => this.startSpinning());
         this.controlPanel.onSpacebar(() => this.startSpinning());
         this.controlPanel.onAutoplay(() => {
-            if (this.finished) return;
-            navigation.presentPopup<AutoplayPopupData>(AutoplayPopup, {
-                callback: async (spins: number) => {
-                    if (this.finished) return;
-                    await navigation.dismissPopup();
-                    this.startSpinning({ autoplaySpins: spins });
-                },
-            });
+            if (this.slot.isAutoplayPlaying()) {
+                this.slot.stopAutoplaySpin();
+            } else {
+                if (this.finished) return;
+                navigation.presentPopup<AutoplayPopupData>(AutoplayPopup, {
+                    callback: async (spins: number) => {
+                        if (this.finished) return;
+                        await navigation.dismissPopup();
+                        this.startSpinning({ autoplaySpins: spins });
+                    },
+                });
+            }
         });
 
         this.controlPanel.onSettings(() => {
@@ -562,6 +568,13 @@ export class GameScreen extends Container {
     /** Fires when the match3 grid finishes auto-processing */
     private onAutoplaySpinStart(data: SlotOnAutoplaySpinStartData) {
         this.roundResult.clearResults();
+        this.controlPanel.disableAutoplay();
+        this.controlPanel.setMessage(`AUTOPLAY SPINS LEFT ${data.remainingSpins}`);
+    }
+
+    /** Fires when the match3 grid finishes auto-processing */
+    private onAutoplaySpinComplete(data: SlotOnAutoplaySpinCompleteData) {
+        this.controlPanel.enableAutoplay();
         this.controlPanel.setMessage(`AUTOPLAY SPINS LEFT ${data.remainingSpins}`);
     }
 

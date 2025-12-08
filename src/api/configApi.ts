@@ -6,7 +6,6 @@ export class ConfigAPI {
             await waitFor(0.7);
 
             return {
-                rules: 'Symbols pay anywhere on the screen. The total number of the same symbol on the screen at the end of a spin determines the value of the win.',
                 feature: {
                     multiplier: 100,
                 },

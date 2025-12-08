@@ -1,6 +1,6 @@
 import { Container } from 'pixi.js';
 import { SlotActions } from './SlotActions';
-import { Jackpot, Match3Config, slotGetConfig } from './SlotConfig';
+import { Jackpot, SlotConfig, slotGetConfig } from './SlotConfig';
 import { SlotProcess } from './SlotProcess';
 import { SlotSymbol } from './SlotSymbol';
 import { SlotJackpot } from './SlotJackpot';
@@ -11,7 +11,7 @@ import { SlotFreeSpinsProcess } from './SlotFreeSpinsProcess';
 import { SlotBoard } from './SlotBoard';
 import { SlotAutoplayProcess } from './SlotAutoplayProcess';
 
-// Match3.ts - Holds the state
+// Slot.ts - Holds the state
 export enum SpinState {
     IDLE = 'idle',
     SPINNING = 'spinning',
@@ -83,6 +83,11 @@ export interface SlotOnAutoplaySpinStartData {
     remainingSpins: number;
 }
 
+export interface SlotOnAutoplaySpinCompleteData {
+    currentSpin: number;
+    remainingSpins: number;
+}
+
 export interface SlotOnAutoplayCompleteData {
     totalSpins: number;
 }
@@ -92,11 +97,16 @@ export interface SlotOnAutoplayCompleteData {
  * All game events are set as plain callbacks for simplicity
  */
 export class Slot extends Container {
+    /** Game code */
     public game = 'olympusstory';
-    /** State if spinning */
-    public isPlaying: boolean;
-    /** Match3 game basic configuration */
-    public config: Match3Config;
+    /** Playing flag */
+    public playing = false;
+    /** Autoplay Playing flag */
+    public autoplayPlaying = false;
+    /** Autoplay Playing flag */
+    public freeSpinPlaying = false;
+    /** Slot game basic configuration */
+    public config: SlotConfig;
     /** Compute score, grade, number of matches */
     public freeSpinsStats: SlotFreeSpinsStats;
     /** Holds the grid state and display */
@@ -120,33 +130,37 @@ export class Slot extends Container {
     public onBigWinTrigger?: (data: SlotOnBigWinTriggerData) => Promise<void>;
     /** Firew when a spin started, regardless of the spin type */
     public onSpinStart?: () => void;
-
     /** Firew when free spin triggered */
     public onFreeSpinTrigger?: (data: SlotFreeSpinTriggerData) => void;
     /** Fires when special triggered */
     public onJackpotMatch?: (data: SlotOnJackpotMatchData) => Promise<void>;
     /** Fires when multiplier jackpot triggered */
     public onJackpotTrigger?: (data: SlotOnJackpotTriggerData) => Promise<void>;
-
     /** Fires when the game start auto-processing the grid */
     public onFreeSpinStart?: (data: SlotFreeSpinStartData) => void;
     /** Fires when the game start auto-processing the grid */
     public onNextFreeSpinStart?: (data: SlotOnNextFreeSpinData) => void;
     /** Fires when the game finishes auto-processing the grid */
     public onFreeSpinComplete?: (data: SlotOnFreeSpinCompleteData) => Promise<void>;
-
     /** Fires when the game start auto-processing the grid */
     public onProcessStart?: () => void;
     /** Fires when the game finishes auto-processing the grid */
     public onProcessComplete?: () => void;
-    // Autoplay callbacks
+    // Fires when autoplay start
     public onAutoplayStart?: (data: SlotOnAutoplayStartData) => void;
+    // Fires when autoplay Spin start
     public onAutoplaySpinStart?: (data: SlotOnAutoplaySpinStartData) => void;
+    // Fires when autoplay Spin start
+    public onAutoplaySpinComplete?: (data: SlotOnAutoplaySpinStartData) => void;
+    // Fires when autoplay completed
     public onAutoplayComplete?: (data: SlotOnAutoplayCompleteData) => void;
 
     constructor() {
         super();
-        this.isPlaying = false;
+
+        this.playing = false;
+        this.autoplayPlaying = false;
+        this.freeSpinPlaying = false;
 
         // Game sub-systems
         this.config = slotGetConfig();
@@ -163,7 +177,11 @@ export class Slot extends Container {
      * Sets up a new match3 game with pieces, rows, columns, duration, etc.
      * @param config The config object in which the game will be based on
      */
-    public setup(config: Match3Config) {
+    public setup(config: SlotConfig) {
+        this.playing = false;
+        this.autoplayPlaying = false;
+        this.freeSpinPlaying = false;
+
         const jackpotConfig = gameConfig.getJackpots();
         this.config = config;
         this.reset();
@@ -174,6 +192,10 @@ export class Slot extends Container {
 
     /** Fully reset the game */
     public reset() {
+        this.playing = false;
+        this.autoplayPlaying = false;
+        this.freeSpinPlaying = false;
+
         this.interactiveChildren = false;
         this.board.reset();
         this.process.reset();
@@ -189,7 +211,7 @@ export class Slot extends Container {
      *
      **/
     public async startSpin(bet: number, feature?: number) {
-        this.interactiveChildren = false;
+        this.playing = true;
         await this.actions.actionSpin(bet, feature);
     }
 
@@ -200,12 +222,12 @@ export class Slot extends Container {
      *
      **/
     public async stopSpin() {
-        this.interactiveChildren = true;
+        this.playing = false;
     }
 
     /** Start the spin and disable interaction */
     public async startFreeSpin(bet: number) {
-        this.interactiveChildren = false;
+        this.freeSpinPlaying = true;
         await this.actions.actionFreeSpin(bet);
     }
 
@@ -216,19 +238,32 @@ export class Slot extends Container {
      *
      **/
     public async stopFreeSpin() {
-        this.interactiveChildren = false;
+        this.freeSpinPlaying = false;
     }
 
     /** Start the spin and disable interaction */
     public async startAutoplaySpin(bet: number, autoplays: number) {
-        this.interactiveChildren = false;
+        this.autoplayPlaying = true;
         await this.actions.actionAutoplaySpin(bet, autoplays);
     }
 
     /** Start the spin and disable interaction */
-    public async stopAutoplaySpin(bet: number, autoplays: number) {
-        this.interactiveChildren = false;
-        await this.actions.actionAutoplaySpin(bet, autoplays);
+    public async stopAutoplaySpin() {
+        this.autoplayPlaying = false;
+        this.actions.actionStopAutoplaySpin();
+    }
+
+    /** Is playing */
+    public isPlaying() {
+        return this.playing;
+    }
+    /** Is playing */
+    public isFreeSpinPlaying() {
+        return this.freeSpinPlaying;
+    }
+    /** Is playing */
+    public isAutoplayPlaying() {
+        return this.autoplayPlaying;
     }
 
     /** Pause the game */

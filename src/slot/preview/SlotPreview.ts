@@ -1,20 +1,20 @@
 import { Container } from 'pixi.js';
-import { Match3Config, slotGetConfig } from '../SlotConfig';
-import { Match3Position, Match3Type } from '../SlotUtility';
-import { Match3BoardPreview } from './Match3BoardPreview';
+import { SlotConfig, slotGetConfig } from '../SlotConfig';
+import { SlotPosition, SlotType } from '../SlotUtility';
+import { SlotBoardPreview } from './Match3BoardPreview';
 
 /** Interface for onMatch event data */
-export interface Match3OnMatchData {
+export interface SlotOnMatchData {
     /** List of all matches detected in the grid */
-    matches: Match3Position[][];
+    matches: SlotPosition[][];
     /** Combo level - starting from 1 */
     combo: number;
 }
 
 /** Interface for onPop event data */
-export interface Match3OnPopData {
+export interface SlotOnPopData {
     /** The type of the piece popped out */
-    type: Match3Type;
+    type: SlotType;
     /** Current combo level */
     combo: number;
     /** Tells if the given type is a special type */
@@ -24,11 +24,11 @@ export interface Match3OnPopData {
 }
 
 /** Interface for onMove event data */
-export interface Match3OnMoveData {
+export interface SlotOnMoveData {
     /** The starting grid position of the move */
-    from: Match3Position;
+    from: SlotPosition;
     /** The ending grid position of the move */
-    to: Match3Position;
+    to: SlotPosition;
     /** True if is a valid movement (creates a match) */
     valid: boolean;
 }
@@ -38,24 +38,24 @@ export interface Match3OnMoveData {
  * All game events are set as plain callbacks for simplicity
  */
 export class SlotPreview extends Container {
-    /** Match3 game basic configuration */
-    public config: Match3Config;
+    /** Slot game basic configuration */
+    public config: SlotConfig;
     /** Holds the grid state and display */
-    public board: Match3BoardPreview;
+    public board: SlotBoardPreview;
 
     constructor() {
         super();
 
         // Game sub-systems
         this.config = slotGetConfig();
-        this.board = new Match3BoardPreview(this);
+        this.board = new SlotBoardPreview(this);
     }
 
     /**
      * Sets up a new match3 game with pieces, rows, columns, duration, etc.
      * @param config The config object in which the game will be based on
      */
-    public setup(config: Match3Config) {
+    public setup(config: SlotConfig) {
         this.config = config;
         this.reset();
         this.board.setup(config);

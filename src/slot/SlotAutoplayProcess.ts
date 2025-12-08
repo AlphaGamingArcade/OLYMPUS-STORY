@@ -1,6 +1,6 @@
 import { AsyncQueue, waitFor } from '../utils/asyncUtils';
 import { Slot } from './Slot';
-import { match3GridToString } from './SlotUtility';
+import { slotGridToString } from './SlotUtility';
 
 /**
  * Controls autoplay flow - automatically plays multiple spins in sequence
@@ -112,8 +112,11 @@ export class SlotAutoplayProcess {
         this.queue.clear();
 
         console.log('[Autoplay] Board pieces:', this.slot.board.pieces.length);
-        console.log('[Autoplay] Grid:\n' + match3GridToString(this.slot.board.grid));
+        console.log('[Autoplay] Grid:\n' + slotGridToString(this.slot.board.grid));
         console.log('[Autoplay] ======= COMPLETE =======');
+
+        // mark autoplay as stop
+        this.slot.stopAutoplaySpin();
 
         // Notify complete
         this.slot.onAutoplayComplete?.({
@@ -175,7 +178,12 @@ export class SlotAutoplayProcess {
             }
         });
 
-        // Step 4: Move to checkpoint
+        // Step 4: Check for user interruption
+        this.queue.add(async () => {
+            await this.processPlayerInterruption();
+        });
+
+        // Step 5: Move to checkpoint
         this.queue.add(async () => {
             console.log(`[Autoplay] Spin ${this.currentAutoplaySpin} complete`);
             await this.processCheckpoint();
@@ -223,10 +231,17 @@ export class SlotAutoplayProcess {
     }
 
     /** Determine if another autoplay spin should run or if autoplay should stop */
-    private async processCheckpoint(): Promise<void> {
-        // Add delay between spins
-        await waitFor(1);
+    private async processPlayerInterruption(): Promise<void> {
+        const data = {
+            currentSpin: this.currentAutoplaySpin,
+            remainingSpins: this.remainingAutoplaySpins,
+        };
+        this.slot.onAutoplaySpinComplete?.(data);
+        await waitFor(1); // give time for user interruption
+    }
 
+    /** Determine if another autoplay spin should run or if autoplay should stop */
+    private async processCheckpoint(): Promise<void> {
         // Check if we should continue
         if (this.stopRequired) {
             console.log('[Autoplay] Stop requested at checkpoint');

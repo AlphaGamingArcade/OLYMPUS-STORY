@@ -1,4 +1,4 @@
-import { Match3StatsData } from '../slot/Match3FreeSpinStats';
+import { SlotStatsData } from '../slot/SlotFreeSpinStats';
 import { storage } from './storage';
 
 // Keys for saved items in storage
@@ -16,7 +16,7 @@ export class UserStats {
      * @param mode A valid game mode
      * @returns Gameplay stats of given mode
      */
-    public load(mode: string): Match3StatsData {
+    public load(mode: string): SlotStatsData {
         const obj = storage.getObject(KEY_PREFIX_STATS + mode);
         if (!obj) {
             return {
@@ -36,7 +36,7 @@ export class UserStats {
      * @param mode A valid game mode
      * @param data The stats data to be saved
      */
-    public save(mode: string, data: Match3StatsData) {
+    public save(mode: string, data: SlotStatsData) {
         if (data.score > this.loadBestScore(mode)) {
             storage.setNumber(KEY_PREFIX_BEST_SCORE + mode, data.score);
         }

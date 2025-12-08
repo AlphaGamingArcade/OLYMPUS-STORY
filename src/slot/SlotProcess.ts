@@ -3,15 +3,15 @@ import { AsyncQueue, waitFor } from '../utils/asyncUtils';
 import { gameConfig } from '../utils/gameConfig';
 import { Slot } from './Slot';
 import {
-    match3GetEmptyPositions,
-    match3ApplyGravity,
-    match3FillUp,
-    match3GetPieceType,
-    match3GridToString,
+    slotGetEmptyPositions,
+    slotFillUp,
+    slotGetPieceType,
+    slotGridToString,
     slotGetMatches,
     slotGetScatterMatches,
     slotGetRegularMatchesWinAmount,
     slotGetBigWinCategory,
+    slotApplyGravity,
 } from './SlotUtility';
 
 /**
@@ -29,7 +29,7 @@ import {
  * precise timing for animations and gameplay transitions.
  */
 export class SlotProcess {
-    /** Reference to the Match3 controller */
+    /** Reference to the Slot controller */
     private slot: Slot;
 
     /** Whether the board is currently resolving */
@@ -107,7 +107,7 @@ export class SlotProcess {
         this.round = 0;
 
         this.slot.onProcessStart?.();
-        console.log('[Match3] ======= PROCESSING START ==========');
+        console.log('[Slot] ======= PROCESSING START ==========');
         this.runProcessRound();
     }
 
@@ -117,10 +117,10 @@ export class SlotProcess {
         this.processing = false;
         this.queue.clear();
 
-        console.log('[Match3] Sequence rounds:', this.round);
-        console.log('[Match3] Board pieces:', this.slot.board.pieces.length);
-        console.log('[Match3] Grid:\n' + match3GridToString(this.slot.board.grid));
-        console.log('[Match3] ======= PROCESSING COMPLETE =======');
+        console.log('[Slot] Sequence rounds:', this.round);
+        console.log('[Slot] Board pieces:', this.slot.board.pieces.length);
+        console.log('[Slot] Grid:\n' + slotGridToString(this.slot.board.grid));
+        console.log('[Slot] ======= PROCESSING COMPLETE =======');
 
         this.slot.onProcessComplete?.();
     }
@@ -140,7 +140,7 @@ export class SlotProcess {
         // Step #1 – Start new round and analyze matches
         this.queue.add(async () => {
             this.round += 1;
-            console.log(`[Match3] -- SEQUENCE ROUND #${this.round} START`);
+            console.log(`[Slot] -- SEQUENCE ROUND #${this.round} START`);
             this.updateStats();
         });
 
@@ -164,6 +164,11 @@ export class SlotProcess {
                 await this.refillGrid();
             });
 
+            // Step to replace some symbols to match from the reels grid
+            this.queue.add(async () => {
+                await this.processReplaceMismatchedPieces();
+            });
+
             // Step #6 – Wait for jackpot to finish
             this.queue.add(async () => {
                 if (jackpotPromise) await jackpotPromise;
@@ -174,7 +179,7 @@ export class SlotProcess {
 
         // Step #7 – Finalize round and decide if another is needed
         this.queue.add(async () => {
-            console.log(`[Match3] -- SEQUENCE ROUND #${this.round} FINISH`);
+            console.log(`[Slot] -- SEQUENCE ROUND #${this.round} FINISH`);
             this.processCheckpoint();
         });
     }
@@ -184,12 +189,12 @@ export class SlotProcess {
         const matches = slotGetMatches(this.slot.board.grid);
         if (!matches.length) return;
 
-        console.log('[Match3] Update stats');
+        console.log('[Slot] Update stats');
     }
 
     /** Resolve and clear all standard pattern matches */
     private async processRegularMatches() {
-        console.log('[Match3] Process regular matches');
+        console.log('[Slot] Process regular matches');
         const matches = slotGetMatches(this.slot.board.grid);
         if (matches.length > 0) this.hasRoundWin = true;
 
@@ -241,10 +246,16 @@ export class SlotProcess {
         await this.slot.jackpot.process(this.betAmount);
     }
 
+    /** Handle jackpot-related matches (grand, angelic, blessed, divine) */
+    private async processReplaceMismatchedPieces() {
+        await waitFor(2);
+        console.log('[MISMATCHED]need to replace some pieces to match from server');
+    }
+
     /** Move all existing pieces downward to fill empty cells */
     private async applyGravity() {
-        const changes = match3ApplyGravity(this.slot.board.grid);
-        console.log('[Match3] Apply gravity - moved pieces:', changes.length);
+        const changes = slotApplyGravity(this.slot.board.grid);
+        console.log('[Slot] Apply gravity - moved pieces:', changes.length);
 
         const animPromises = [];
 
@@ -270,15 +281,15 @@ export class SlotProcess {
             game: this.slot.game,
             bet: this.betAmount,
         });
-        const newPieces = match3FillUp(this.slot.board.grid, this.slot.board.commonTypes, result.reels);
+        const newPieces = slotFillUp(this.slot.board.grid, this.slot.board.commonTypes, result.reels);
 
-        console.log('[Match3] Refill grid - new pieces:', newPieces.length);
+        console.log('[Slot] Refill grid - new pieces:', newPieces.length);
 
         const animPromises = [];
         const piecesPerColumn: Record<number, number> = {};
 
         for (const position of newPieces) {
-            const pieceType = match3GetPieceType(this.slot.board.grid, position);
+            const pieceType = slotGetPieceType(this.slot.board.grid, position);
             const piece = this.slot.board.createPiece(position, pieceType);
 
             if (!piecesPerColumn[piece.column]) piecesPerColumn[piece.column] = 0;
@@ -325,16 +336,16 @@ export class SlotProcess {
     /** Determine if another resolution round is required or if processing is complete */
     private async processCheckpoint() {
         const newMatches = slotGetMatches(this.slot.board.grid);
-        const emptySpaces = match3GetEmptyPositions(this.slot.board.grid);
+        const emptySpaces = slotGetEmptyPositions(this.slot.board.grid);
 
-        console.log('[Match3] Checkpoint - New matches:', newMatches.length);
-        console.log('[Match3] Checkpoint - Empty spaces:', emptySpaces.length);
+        console.log('[Slot] Checkpoint - New matches:', newMatches.length);
+        console.log('[Slot] Checkpoint - Empty spaces:', emptySpaces.length);
 
         if (newMatches.length || emptySpaces.length) {
-            console.log('[Match3] Checkpoint - Another sequence run is needed');
+            console.log('[Slot] Checkpoint - Another sequence run is needed');
             await this.runProcessRound();
         } else {
-            console.log('[Match3] Checkpoint - Check for jackpot wins then check free spin wins');
+            console.log('[Slot] Checkpoint - Check for jackpot wins then check free spin wins');
             await this.slot.jackpot.displayJackpotWins();
             await this.displayBigWins();
             await this.processFreeSpinCheckpoint();
