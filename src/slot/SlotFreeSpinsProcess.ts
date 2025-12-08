@@ -12,6 +12,8 @@ import {
     slotGetNextFreeSpinJackpots,
     slotApplyGravity,
     slotGetEmptyPositions,
+    SlotGrid,
+    slotGetMismatches,
 } from './SlotUtility';
 import { SlotSymbol } from './SlotSymbol';
 import { gameConfig } from '../utils/gameConfig';
@@ -122,6 +124,7 @@ export class SlotFreeSpinsProcess {
             currentSpin: this.currentFreeSpin,
             remainingSpins: this.remainingFreeSpins,
         };
+
         this.slot.onFreeSpinStart?.(freeSpinStartData);
 
         console.log('[Slot] ======= FREE SPIN PROCESSING START ==========');
@@ -141,6 +144,7 @@ export class SlotFreeSpinsProcess {
         console.log('[Slot] FREE SPIN Grid:\n' + slotGridToString(this.slot.board.grid));
         console.log('[Slot] ======= FREE SPIN PROCESSING COMPLETE =======');
 
+        this.slot.stopFreeSpin();
         const data = {
             amount: this.slot.freeSpinsStats.getWin(),
             spins: this.slot.freeSpinsStats.getTotalFreeSpinsPlayed(),
@@ -190,6 +194,19 @@ export class SlotFreeSpinsProcess {
 
         // Begin the resolution sequence for this round
         this.runProcessRound();
+    }
+
+    /** Handle jackpot-related matches (grand, angelic, blessed, divine) */
+    private async processReplaceMismatchedPieces(refillGrid: SlotGrid) {
+        const mismatches = slotGetMismatches(this.slot.board.grid, refillGrid);
+
+        const animReplacePromises = [];
+        for (const mismatch of mismatches) {
+            const { row, column } = mismatch;
+            animReplacePromises.push(this.slot.board.replacePiece(mismatch, refillGrid[row][column]));
+        }
+
+        await Promise.all(animReplacePromises);
     }
 
     /** Generate the board for a free-spin round using backend reel data */
@@ -282,11 +299,18 @@ export class SlotFreeSpinsProcess {
         // If this round had at least one match, do jackpot + refill
         if (this.hasRoundWin) {
             let jackpotPromise: Promise<void> | null = null;
+            let refillReels: SlotGrid = [];
 
             // Step #4 & #5 – Jackpot processing + refill simultaneously
             this.queue.add(async () => {
+                refillReels = await this.refillGrid();
+            });
+
+            // Step to replace some symbols to match from the reels grid
+            this.queue.add(async () => {
+                await this.processReplaceMismatchedPieces(refillReels);
+                await waitFor(0.7);
                 jackpotPromise = this.processJackpotMatches();
-                await this.refillGrid();
             });
 
             // Step #6 – Wait for jackpot to finish
@@ -431,6 +455,8 @@ export class SlotFreeSpinsProcess {
         }
 
         await Promise.all(animPromises);
+
+        return result.reels;
     }
 
     /**

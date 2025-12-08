@@ -12,6 +12,8 @@ import {
     slotGetRegularMatchesWinAmount,
     slotGetBigWinCategory,
     slotApplyGravity,
+    slotGetMismatches,
+    SlotGrid,
 } from './SlotUtility';
 
 /**
@@ -157,16 +159,27 @@ export class SlotProcess {
         // If this round had at least one match, do jackpot + refill
         if (this.hasRoundWin) {
             let jackpotPromise: Promise<void> | null = null;
+            let refillReels: SlotGrid = [];
 
             // Step #4 & #5 – Jackpot processing + refill simultaneously
             this.queue.add(async () => {
-                jackpotPromise = this.processJackpotMatches();
-                await this.refillGrid();
+                refillReels = await this.refillGrid();
             });
 
             // Step to replace some symbols to match from the reels grid
             this.queue.add(async () => {
-                await this.processReplaceMismatchedPieces();
+                await this.processReplaceMismatchedPieces(refillReels);
+                jackpotPromise = this.processJackpotMatches();
+            });
+
+            // Step #2 – Resolve standard matches
+            this.queue.add(async () => {
+                await this.processRegularMatches();
+            });
+
+            // Step #3 – Drop pieces (gravity)
+            this.queue.add(async () => {
+                await this.applyGravity();
             });
 
             // Step #6 – Wait for jackpot to finish
@@ -247,9 +260,18 @@ export class SlotProcess {
     }
 
     /** Handle jackpot-related matches (grand, angelic, blessed, divine) */
-    private async processReplaceMismatchedPieces() {
-        await waitFor(2);
-        console.log('[MISMATCHED]need to replace some pieces to match from server');
+    private async processReplaceMismatchedPieces(refillGrid: SlotGrid) {
+        const mismatches = slotGetMismatches(this.slot.board.grid, refillGrid);
+
+        const animReplacePromises = [];
+        for (const mismatch of mismatches) {
+            const { row, column } = mismatch;
+            animReplacePromises.push(this.slot.board.replacePiece(mismatch, refillGrid[row][column]));
+        }
+
+        await Promise.all(animReplacePromises);
+
+        await waitFor(0.7);
     }
 
     /** Move all existing pieces downward to fill empty cells */
@@ -308,6 +330,8 @@ export class SlotProcess {
         }
 
         await Promise.all(animPromises);
+
+        return result.reels as SlotGrid;
     }
 
     /** Detect scatter symbols and trigger free spins if requirements are met */
@@ -328,6 +352,7 @@ export class SlotProcess {
             const freeSpinCount = this.slot.freeSpinsStats.getAvailableFreeSpins();
             const freeSpinTriggerData = { totalFreeSpins: freeSpinCount };
             await this.slot.onFreeSpinTrigger?.(freeSpinTriggerData);
+            this.slot.onWin?.(0);
         } else {
             this.stop();
         }

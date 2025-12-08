@@ -5,6 +5,7 @@ import { MatchPattern } from './MatchPattern';
 import { AudioButton } from './AudioButton';
 import { SpinButton, SpinButtonState } from './SpinButton';
 import { LabelValue } from './LabelValue';
+import { BetAPI } from '../api/betApi';
 
 export interface WinMatchPattern {
     times: number;
@@ -485,6 +486,11 @@ export class ControlPanel extends Container {
     /** Enabled autoplay button */
     public enableAutoplay() {
         this.autoplayButton.enabled = true;
+    }
+
+    /** Collect */
+    public async collect() {
+        await BetAPI.collect();
     }
 
     /**

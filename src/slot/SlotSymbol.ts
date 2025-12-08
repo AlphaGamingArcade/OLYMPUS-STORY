@@ -264,9 +264,8 @@ export class SlotSymbol extends Container {
         resolveAndKillTweens(this.scale);
         this.scale.set(2);
         this.visible = true;
-
         const duration = 0.2;
-        await gsap.to(this.scale, { x: 1, y: 1, duration, ease: 'back.out' });
+        gsap.to(this.scale, { x: 1, y: 1, duration, ease: 'back.out' });
         this.unlock();
     }
 

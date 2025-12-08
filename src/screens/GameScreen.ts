@@ -320,6 +320,9 @@ export class GameScreen extends Container {
     /** Update the screen */
     public update(time: Ticker) {
         this.slot.update(time.deltaMS);
+        console.log('[FREE SPINS], IS FREE SPIN PLAYING', this.slot.isFreeSpinPlaying());
+        // console.log('[FREE SPINS], IS PLAYING', this.slot.isPlaying());
+        // console.log('[FREE SPINS], IS AUTOPLAY PLAYING', this.slot.isAutoplayPlaying());
     }
 
     /** Pause gameplay - automatically fired when a popup is presented */
@@ -459,10 +462,18 @@ export class GameScreen extends Container {
 
     /** Fires if player wins */
     private onWin(amount: number) {
-        if (amount > 0) {
+        if (this.slot.isPlaying()) {
+            if (amount > 0) {
+                this.controlPanel.setWinTitle(`WIN ${formatCurrency(amount, this.currency)}`);
+            } else {
+                this.controlPanel.setTitle(
+                    this.preBetGreetings[Math.floor(Math.random() * this.preBetGreetings.length)],
+                );
+            }
+        }
+
+        if (this.slot.isFreeSpinPlaying()) {
             this.controlPanel.setWinTitle(`WIN ${formatCurrency(amount, this.currency)}`);
-        } else {
-            this.controlPanel.setTitle(this.preBetGreetings[Math.floor(Math.random() * this.preBetGreetings.length)]);
         }
     }
 
@@ -511,7 +522,7 @@ export class GameScreen extends Container {
                     await waitFor(1);
 
                     const bet = userSettings.getBet();
-                    this.slot.actions.actionFreeSpin(bet);
+                    this.slot.startFreeSpin(bet);
                     resolve();
                 },
             });
@@ -545,6 +556,7 @@ export class GameScreen extends Container {
                 spins: data.spins,
                 callback: async () => {
                     this.controlPanel.setMessage('');
+                    await this.controlPanel.collect();
                     await navigation.dismissPopup();
                     await waitFor(1);
                     if (

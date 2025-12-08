@@ -1,24 +1,26 @@
 frame.png
-size:1073,695
+size:1030,767
 filter:Linear,Linear
 gem
-bounds:4,70,800,131
+bounds:160,494,800,131
 offsets:1,1,802,134
+left paint
+bounds:806,629,134,157
+rotate:90
+right paint
+bounds:4,593,137,152
+offsets:0,1,137,153
+rotate:90
 symbol-one
-bounds:1030,556,135,39
+bounds:273,724,135,39
 offsets:1,1,137,41
-rotate:90
 symbol-three
-bounds:1030,424,128,39
+bounds:412,724,128,39
 offsets:1,1,130,41
-rotate:90
 symbol-two
-bounds:1030,155,265,29
+bounds:4,734,265,29
 offsets:1,1,267,31
-rotate:90
 upper frame
-bounds:4,205,1022,486
+bounds:4,4,1022,486
 wings-L
-bounds:808,79,258,72
-wings-R
-bounds:808,4,257,71
+bounds:544,691,258,72

@@ -277,6 +277,20 @@ export class SlotBoard {
      * @param position The grid position of the piece to be popped out
      * @param causedBySpecial If the pop was caused by special effect
      */
+    public async replacePiece(position: SlotPosition, pieceType: SlotType) {
+        const oldPiece = this.getPieceByPosition(position);
+        if (oldPiece) this.disposePiece(oldPiece);
+        match3SetPieceType(this.grid, position, pieceType);
+        if (!pieceType) return;
+        const piece = this.createPiece(position, pieceType);
+        await piece.animateSpawn();
+    }
+
+    /**
+     * Pop a piece out of the board, triggering its effects if it is a special piece
+     * @param position The grid position of the piece to be popped out
+     * @param causedBySpecial If the pop was caused by special effect
+     */
     public async playPiece(position: SlotPosition) {
         const piece = this.getPieceByPosition(position);
         const type = slotGetPieceType(this.grid, position);

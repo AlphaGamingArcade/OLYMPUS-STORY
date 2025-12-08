@@ -355,6 +355,29 @@ export function slotGetScatterMatches(grid: SlotGrid): SlotPosition[][] {
  * @returns All position that have been changed.
  * Ex.: [[{row: 1, column: 1}, {row: 2, column: 1}]] - That piece moved 1 row down
  */
+export function slotGetMismatches(grid: SlotGrid, refillGrid: SlotGrid) {
+    const rows = grid.length;
+    const columns = grid[0].length;
+    const mismatches: SlotPosition[] = [];
+
+    for (let r = rows - 1; r >= 0; r--) {
+        for (let c = 0; c < columns; c++) {
+            let position = { row: r, column: c };
+            const type = slotGetPieceType(grid, position);
+            if (type != refillGrid[r][c]) {
+                mismatches.push({ row: r, column: c });
+            }
+        }
+    }
+    return mismatches;
+}
+
+/**
+ * Move all pieces in the grid to their next empty position, vertically
+ * @param grid The grid to be changed
+ * @returns All position that have been changed.
+ * Ex.: [[{row: 1, column: 1}, {row: 2, column: 1}]] - That piece moved 1 row down
+ */
 export function slotApplyGravity(grid: SlotGrid) {
     const rows = grid.length;
     const columns = grid[0].length;
