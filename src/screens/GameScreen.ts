@@ -85,7 +85,7 @@ export class GameScreen extends Container {
 
     constructor() {
         super();
-        this.currency = 'USD';
+        this.currency = 'usd';
         this.gameContainer = new Container();
         this.addChild(this.gameContainer);
 
@@ -197,8 +197,12 @@ export class GameScreen extends Container {
         /** Make sure this is always on bottom */
         this.controlPanel = new ControlPanel();
         this.addChild(this.controlPanel);
-        this.controlPanel.setCredit(100000);
-        this.controlPanel.setBet(2.0);
+
+        const balance = userSettings.getBalance();
+        const bet = userSettings.getBet();
+
+        this.controlPanel.setCredit(balance);
+        this.controlPanel.setBet(bet);
         this.controlPanel.setTitle(this.preBetGreetings[Math.floor(Math.random() * this.preBetGreetings.length)]);
 
         this.controlPanel.onSpin(() => this.startSpinning());

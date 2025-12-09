@@ -175,7 +175,7 @@ export class GameEffects extends Container {
         }
 
         // Define the sequence of animated textures and animation variables
-        const textureNames = ['particle-1', 'particle-2', 'particle-3', 'particle-4', 'particle-5'];
+        const textureNames = ['particle-2', 'particle-3', 'particle-4', 'particle-5'];
         const textures = textureNames.map((name) => Texture.from(name));
         const textureSequenceLength = textures.length;
         let currentFrameIndex = 0;
@@ -232,6 +232,20 @@ export class GameEffects extends Container {
             y: to.y + 40,
             duration: duration,
             ease: 'power1.inOut',
+            onComplete: () => {
+                // Update jackpot tier
+                if (piece.type == 11) {
+                    this.game.grandJackpotTier.addActiveDot();
+                } else if (piece.type == 12) {
+                    this.game.angelicJackpotTier.addActiveDot();
+                } else if (piece.type == 13) {
+                    this.game.blessedJackpotTier.addActiveDot();
+                } else if (piece.type == 14) {
+                    this.game.divineJackpotTier.addActiveDot();
+                }
+
+                sfx.play('common/sfx-bubble.wav');
+            },
         });
 
         // Remove trail update function
@@ -244,19 +258,6 @@ export class GameEffects extends Container {
 
         // Clean up rope
         rope.destroy();
-
-        // Update jackpot tier
-        if (piece.type == 11) {
-            this.game.grandJackpotTier.addActiveDot();
-        } else if (piece.type == 12) {
-            this.game.angelicJackpotTier.addActiveDot();
-        } else if (piece.type == 13) {
-            this.game.blessedJackpotTier.addActiveDot();
-        } else if (piece.type == 14) {
-            this.game.divineJackpotTier.addActiveDot();
-        }
-
-        sfx.play('common/sfx-bubble.wav');
     }
 
     public async playHideJackpotTimes(jackpot: Jackpot) {

@@ -127,7 +127,7 @@ export class SlotBoard {
             await new Promise((resolve) => setTimeout(resolve, delay)); // 50ms delay, adjust as needed
         }
 
-        // return to false when interruption is used
+        // return to false when interruption is used or even if not use
         this.slot.requireSpinInterrupt = false;
 
         await Promise.all(animPromises);
