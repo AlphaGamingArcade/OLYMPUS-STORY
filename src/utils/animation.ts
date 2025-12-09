@@ -70,3 +70,54 @@ export async function earthquake(target: { x: number; y: number }, power = 8, du
         },
     });
 }
+
+/**
+ * Cubic interpolation utility based on https://github.com/osuushi/Smooth.js
+ * Used for creating smooth curves from discrete points
+ */
+
+/**
+ * Clips the input index to valid array bounds
+ * @param k - Index to clip
+ * @param arr - Array to check bounds against
+ * @returns Clamped index value
+ */
+function clipInput(k: number, arr: number[]): number {
+    if (k < 0) k = 0;
+    if (k > arr.length - 1) k = arr.length - 1;
+    return arr[k];
+}
+
+/**
+ * Calculates the tangent at a given point for smooth interpolation
+ * @param k - Index in the array
+ * @param factor - Tangent factor (affects curve smoothness)
+ * @param array - Array of values
+ * @returns Tangent value
+ */
+function getTangent(k: number, factor: number, array: number[]): number {
+    return (factor * (clipInput(k + 1, array) - clipInput(k - 1, array))) / 2;
+}
+
+/**
+ * Performs cubic interpolation on an array of values
+ * @param array - Array of values to interpolate
+ * @param t - Position to interpolate (can be fractional)
+ * @param tangentFactor - Factor affecting curve smoothness (default: 1)
+ * @returns Interpolated value at position t
+ *
+ * @example
+ * const values = [0, 10, 20, 30];
+ * const smoothValue = cubicInterpolation(values, 1.5); // Gets value between index 1 and 2
+ */
+export function cubicInterpolation(array: number[], t: number, tangentFactor: number = 1): number {
+    const k = Math.floor(t);
+    const m = [getTangent(k, tangentFactor, array), getTangent(k + 1, tangentFactor, array)];
+    const p = [clipInput(k, array), clipInput(k + 1, array)];
+
+    t -= k;
+    const t2 = t * t;
+    const t3 = t * t2;
+
+    return (2 * t3 - 3 * t2 + 1) * p[0] + (t3 - 2 * t2 + t) * m[0] + (-2 * t3 + 3 * t2) * p[1] + (t3 - t2) * m[1];
+}

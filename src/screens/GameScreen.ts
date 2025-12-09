@@ -303,6 +303,7 @@ export class GameScreen extends Container {
     ) {
         if (this.finished) {
             // Interrupt spin
+            this.slot.interruptSpin();
             return;
         }
 

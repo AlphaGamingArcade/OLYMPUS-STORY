@@ -119,9 +119,16 @@ export class SlotBoard {
                 animPromises.push(piece.animateFall(x, y));
             }
 
-            const delay = slotGetSpinModeDelay(this.slot.spinMode);
+            let delay = slotGetSpinModeDelay(this.slot.spinMode);
+            // Change delay to 0 when interrupted
+            if (this.slot.requireSpinInterrupt) {
+                delay = 0;
+            }
             await new Promise((resolve) => setTimeout(resolve, delay)); // 50ms delay, adjust as needed
         }
+
+        // return to false when interruption is used
+        this.slot.requireSpinInterrupt = false;
 
         await Promise.all(animPromises);
     }
@@ -192,9 +199,18 @@ export class SlotBoard {
             }
 
             // Wait before starting next column
-            const delay = slotGetSpinModeDelay(this.slot.spinMode);
+            let delay = slotGetSpinModeDelay(this.slot.spinMode);
+
+            // if interrupted change delay to 0
+            if (this.slot.requireSpinInterrupt) {
+                delay = 0;
+            }
+
             await new Promise((resolve) => setTimeout(resolve, delay));
         }
+
+        // Always cancel interuption
+        this.slot.requireSpinInterrupt = false;
 
         // Wait for all animations to complete
         await Promise.all(animPromises);

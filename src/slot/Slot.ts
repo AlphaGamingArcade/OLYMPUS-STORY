@@ -101,6 +101,8 @@ export class Slot extends Container {
     public playing = false;
     /** spin mode */
     public spinMode: SlotSpinMode = 'normal-spin';
+    /** spin mode */
+    public requireSpinInterrupt = false;
     /** Autoplay Playing flag */
     public autoplayPlaying = false;
     /** Autoplay Playing flag */
@@ -242,6 +244,18 @@ export class Slot extends Container {
      **/
     public async stopFreeSpin() {
         this.freeSpinPlaying = false;
+    }
+
+    /**
+     * Start the spin and disable interaction
+     * @param bet
+     * @param feature  Feature 0 = normal and the default value 1 = for buy free spin
+     *
+     **/
+    public async interruptSpin() {
+        if (this.requireSpinInterrupt) return;
+        console.log('[DELAY]Interrupted');
+        this.requireSpinInterrupt = true;
     }
 
     /** Start the spin and disable interaction */
