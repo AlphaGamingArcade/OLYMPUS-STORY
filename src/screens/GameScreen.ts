@@ -17,7 +17,6 @@ import { Pillar } from '../ui/Pillar';
 import { navigation } from '../utils/navigation';
 import { GameEffects } from '../ui/GameEffects';
 import { bgm } from '../utils/audio';
-import { GameOvertime } from '../ui/GameOvertime';
 import { waitFor } from '../utils/asyncUtils';
 import { slotGetConfig } from '../slot/SlotConfig';
 import { JackpotTier } from '../ui/JackpotTier';
@@ -49,8 +48,6 @@ export class GameScreen extends Container {
     public readonly slot: Slot;
     /** Inner container for the match3 */
     public readonly gameContainer: Container;
-    /** Countdown displayed when the gameplay is about to finish */
-    public readonly overtime: GameOvertime;
     /** The match3 book shelf background */
     public readonly pillar?: Pillar;
 
@@ -190,9 +187,6 @@ export class GameScreen extends Container {
 
         this.vfx = new GameEffects(this);
         this.addChild(this.vfx);
-
-        this.overtime = new GameOvertime();
-        this.addChild(this.overtime);
 
         /** Make sure this is always on bottom */
         this.controlPanel = new ControlPanel();
@@ -421,45 +415,41 @@ export class GameScreen extends Container {
 
             this.babyZeus.x = 450;
             this.babyZeus.y = height - this.babyZeus.height * 0.5 - 100;
-
-            this.overtime.x = this.gameContainer.x;
-            this.overtime.y = this.gameContainer.y;
         } else {
-            const divY = 280;
-
+            const divY = 220;
             this.gameContainer.x = centerX;
             this.gameContainer.y = this.gameContainer.height * 0.5 - 100;
 
             this.buyFreeSpinButton.scale.set(0.65);
             this.buyFreeSpinButton.x = 220;
-            this.buyFreeSpinButton.y = height * 0.65 - 20;
+            this.buyFreeSpinButton.y = height * 0.6;
 
             this.gameLogo.scale.set(0.75);
-            this.gameLogo.x = 220;
-            this.gameLogo.y = height - this.gameLogo.height - divY;
+            this.gameLogo.x = divY;
+            this.gameLogo.y = height - this.gameLogo.height - divY - 120;
 
-            const multiplierTierY = height * 0.6;
+            const multiplierTierY = height * 0.6 - 40;
             const multiplierScale = 0.75;
 
             this.divineJackpotTier.scale.set(multiplierScale);
-            this.divineJackpotTier.x = width - this.roundResult.width * 0.5;
+            this.divineJackpotTier.x = width - this.roundResult.width * 0.6;
             this.divineJackpotTier.y = multiplierTierY;
 
             this.blessedJackpotTier.scale.set(multiplierScale);
-            this.blessedJackpotTier.x = width - this.roundResult.width * 0.5;
+            this.blessedJackpotTier.x = width - this.roundResult.width * 0.6;
             this.blessedJackpotTier.y = multiplierTierY + 110;
 
             this.angelicJackpotTier.scale.set(multiplierScale);
-            this.angelicJackpotTier.x = width - this.roundResult.width * 0.5;
+            this.angelicJackpotTier.x = width - this.roundResult.width * 0.6;
             this.angelicJackpotTier.y = multiplierTierY + 220;
 
             this.grandJackpotTier.scale.set(multiplierScale);
-            this.grandJackpotTier.x = width - this.roundResult.width * 0.5;
+            this.grandJackpotTier.x = width - this.roundResult.width * 0.6;
             this.grandJackpotTier.y = multiplierTierY + 330;
 
             this.roundResult.scale.set(0.75);
             this.roundResult.x = width * 0.5;
-            this.roundResult.y = height - this.roundResult.height - 320;
+            this.roundResult.y = height - this.roundResult.height - 360;
 
             this.babyZeus.x = 160;
             this.babyZeus.y = centerY - 120;
@@ -476,7 +466,6 @@ export class GameScreen extends Container {
 
     /** Hide screen with animations */
     public async hide() {
-        this.overtime.hide();
         await waitFor(0.3);
     }
 

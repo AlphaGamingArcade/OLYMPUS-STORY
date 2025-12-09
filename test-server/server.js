@@ -105,7 +105,7 @@ app.post('/spin', async (req, res) => {
     );
 
     res.json({
-        reels: winReels,
+        reels: reels,
         freeSpins: hasAtLeastNSymbols(reels, 10, 4) ? 12 : undefined,
     });
 });

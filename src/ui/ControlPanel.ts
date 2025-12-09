@@ -37,6 +37,8 @@ export class ControlPanel extends Container {
     private panelHeight = 160;
     private contentWidth = 1920;
 
+    private isMobile = false;
+    private isPortrait = false;
     private currency = 'usd';
     private shouldStopMatches = false;
 
@@ -81,7 +83,11 @@ export class ControlPanel extends Container {
             style: {
                 fontSize: 32,
                 fill: 0xffd700,
-                fontWeight: 'bold',
+                fontWeight: 'bolder',
+                stroke: {
+                    width: 2,
+                    color: '#616161ff',
+                },
             },
         });
         this.titleText.anchor.set(0.5, 0.75);
@@ -99,7 +105,7 @@ export class ControlPanel extends Container {
                 fontWeight: 'lighter',
             },
         });
-        this.messageText.anchor.set(0.5, -0.75);
+        this.messageText.anchor.set(0.5);
         this.contentContainer.addChild(this.messageText);
 
         // Create buttons
@@ -151,10 +157,11 @@ export class ControlPanel extends Container {
      * Layout the control panel based on screen width
      */
     public resize(width: number, height: number, isMobile?: boolean) {
-        const isPortrait = height > width;
+        this.isMobile = isMobile ?? false;
+        this.isPortrait = height > width;
 
         // === MOBILE PORTRAIT ===
-        if (isMobile && isPortrait) {
+        if (isMobile && this.isPortrait) {
             this.panelHeight = 400;
 
             // Background
@@ -225,14 +232,11 @@ export class ControlPanel extends Container {
 
             // Message
             this.titleText.x = this.contentWidth / 2;
-            this.titleText.y = height / 2;
+            this.titleText.y = -this.panelHeight - 80;
             this.titleText.style.fontSize = 42;
-
-            this.messageText.x = this.contentWidth / 2;
-            this.messageText.y = this.panelHeight / 2;
         }
         // === MOBILE LANDSCAPE ===
-        else if (isMobile && !isPortrait) {
+        else if (isMobile && !this.isPortrait) {
             this.panelHeight = 210;
 
             // Background
@@ -278,7 +282,7 @@ export class ControlPanel extends Container {
 
             // Center message (smaller font)
             this.titleText.x = this.contentWidth / 2;
-            this.titleText.y = 60;
+            this.titleText.y = 100;
             this.titleText.style.fontSize = 42;
 
             // Right side buttons (horizontal, compact)
@@ -297,9 +301,6 @@ export class ControlPanel extends Container {
             // Autoplay button (bottom right, compact)
             this.autoplayButton.x = this.contentWidth - 180;
             this.autoplayButton.y = 160;
-
-            this.messageText.x = this.contentWidth / 2;
-            this.messageText.y = this.panelHeight / 2;
         }
         // === DESKTOP ===
         else {
@@ -352,9 +353,6 @@ export class ControlPanel extends Container {
             this.titleText.y = 80;
             this.titleText.style.fontSize = 32;
 
-            this.messageText.x = this.contentWidth / 2;
-            this.messageText.y = this.panelHeight / 2;
-
             // Right side buttons (horizontal layout centered around spin button)
             const rightCenterX = this.contentWidth - 200;
             const buttonY = 40;
@@ -377,6 +375,9 @@ export class ControlPanel extends Container {
 
         this.matchPattern.x = this.contentWidth * 0.5 - this.matchPattern.width * 0.5;
         this.matchPattern.y = this.panelHeight - this.matchPattern.height - 20;
+
+        this.messageText.x = this.contentWidth * 0.5;
+        this.messageText.y = this.panelHeight - this.messageText.height * 0.5 - 20;
     }
 
     /**
@@ -398,7 +399,11 @@ export class ControlPanel extends Container {
      */
     public setTitle(title: string) {
         this.titleText.text = title;
-        this.titleText.style.fontSize = 32;
+        if (this.isMobile) {
+            this.titleText.style.fontSize = 42;
+        } else {
+            this.titleText.style.fontSize = 32;
+        }
         this.titleText.anchor.set(0.5, 0.75);
     }
 
@@ -417,8 +422,6 @@ export class ControlPanel extends Container {
     public setMessage(message: string) {
         this.messageText.text = message;
         // relayout the free spins label
-        this.messageText.x = this.contentWidth / 2;
-        this.messageText.y = this.panelHeight / 2;
     }
 
     /** Play all queued match patterns sequentially */
