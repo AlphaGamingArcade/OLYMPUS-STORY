@@ -1,3 +1,5 @@
+const BASE_URL = 'http://192.168.68.111:3000';
+
 export class BetAPI {
     /**
      * Calls the backend API to perform a spin operation.
@@ -15,7 +17,7 @@ export class BetAPI {
     }): Promise<{ reels: number[][]; freeSpins?: number }> {
         try {
             // Define the URL of your Express server endpoint
-            const url = 'http://192.168.68.121:3000/spin';
+            const url = `${BASE_URL}/spin`;
 
             // Make a POST request to the Express server
             const response = await fetch(url, {
@@ -56,7 +58,7 @@ export class BetAPI {
     static async collect() {
         try {
             // Define the URL of your Express server endpoint
-            const url = 'http://192.168.68.121:3000/collect';
+            const url = `${BASE_URL}/collect`;
 
             // Make a POST request to the Express server
             const response = await fetch(url, {
@@ -76,7 +78,7 @@ export class BetAPI {
             }
 
             // Parse the JSON response body
-            const data: { reels: number[][] } = await response.json();
+            const data: { balance: number } = await response.json();
 
             return data;
         } catch (error: any) {

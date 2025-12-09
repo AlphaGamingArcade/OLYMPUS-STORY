@@ -2,7 +2,6 @@ import { Container, Ticker } from 'pixi.js';
 import {
     Slot,
     SlotFreeSpinStartData,
-    SlotFreeSpinTriggerData,
     SlotOnAutoplaySpinCompleteData,
     SlotOnAutoplaySpinStartData,
     SlotOnAutoplayStartData,
@@ -12,6 +11,7 @@ import {
     SlotOnJackpotTriggerData,
     SlotOnMatchData,
     SlotOnNextFreeSpinData,
+    SlotOnWinFreeSpinTriggerData,
 } from '../slot/Slot';
 import { Pillar } from '../ui/Pillar';
 import { navigation } from '../utils/navigation';
@@ -37,6 +37,9 @@ import { SettingsPopup, SettingsPopupData } from '../popups/SettingsPopup';
 import { InfoPopup, InfoPopupData } from '../popups/InfoPopup';
 import { formatCurrency } from '../utils/formatter';
 import { BigWinPopup, BigWinPopupData } from '../popups/BigWinPopup';
+import { BetAPI } from '../api/betApi';
+import { ErrorPopup, ErrorPopupData } from '../popups/ErrorPopup';
+import { SlotOnWinExtraFreeSpinData } from '../slot/SlotFreeSpinsStats';
 
 /** The screen tha holds the Slot game */
 export class GameScreen extends Container {
@@ -77,6 +80,7 @@ export class GameScreen extends Container {
     public currency: string;
     /** Greetings */
     public preBetGreetings = ['HOLD SPACE FOR TURBO SPIN', 'PLACE YOUR BETS'];
+    /** Index */
     public betGreetings = ['HOLD SPACE FOR TURBO SPIN', 'GOOD LUCK!'];
 
     constructor() {
@@ -168,7 +172,8 @@ export class GameScreen extends Container {
         this.slot.onJackpotMatch = this.onJackpotMatch.bind(this);
         this.slot.onJackpotTrigger = this.onJackpotTrigger.bind(this);
 
-        this.slot.onFreeSpinTrigger = this.onFreeSpinTrigger.bind(this);
+        this.slot.onWinFreeSpinTrigger = this.onWinFreeSpinTrigger.bind(this);
+        this.slot.onWinExtraFreeSpinTrigger = this.onWinExtraFreeSpinTrigger.bind(this);
         this.slot.onFreeSpinStart = this.onFreeSpinStart.bind(this);
         this.slot.onNextFreeSpinStart = this.onNextFreeSpinStart.bind(this);
         this.slot.onFreeSpinComplete = this.onFreeSpinComplete.bind(this);
@@ -293,13 +298,27 @@ export class GameScreen extends Container {
     ) {
         if (this.finished) return;
 
+        const bet = userSettings.getBet();
+        const balance = userSettings.getBalance();
+
+        let toPayAmount = bet;
+
+        // For buy feature
+        if (options.feature == 1) {
+            toPayAmount = bet * 100;
+        }
+
+        if (balance < toPayAmount) {
+            return navigation.presentPopup<ErrorPopupData>(ErrorPopup, {
+                message: 'Balance not enough!',
+            });
+        }
+
         this.finished = true;
         this.controlPanel.disableBetting();
         this.buyFreeSpinButton.enabled = false;
         this.controlPanel.setTitle(this.betGreetings[Math.floor(Math.random() * this.betGreetings.length)]);
         this.roundResult.clearResults();
-
-        const bet = userSettings.getBet();
 
         if (options.autoplaySpins) {
             this.slot.startAutoplaySpin(bet, options.autoplaySpins);
@@ -320,7 +339,8 @@ export class GameScreen extends Container {
     /** Update the screen */
     public update(time: Ticker) {
         this.slot.update(time.deltaMS);
-        console.log('[FREE SPINS], IS FREE SPIN PLAYING', this.slot.isFreeSpinPlaying());
+        // console.log('[FREE SPINS]', this.slot.freeSpinsStats.getAvailableFreeSpins());
+        // console.log('[FREE SPINS], IS FREE SPIN PLAYING', this.slot.isFreeSpinPlaying());
         // console.log('[FREE SPINS], IS PLAYING', this.slot.isPlaying());
         // console.log('[FREE SPINS], IS AUTOPLAY PLAYING', this.slot.isAutoplayPlaying());
     }
@@ -457,11 +477,20 @@ export class GameScreen extends Container {
             }
 
             this.controlPanel.playMatchMessages();
+
+            const result = await BetAPI.collect();
+            userSettings.setBalance(result.balance);
+            this.controlPanel.setCredit(userSettings.getBalance());
         }
     }
 
     /** Fires if player wins */
     private onWin(amount: number) {
+        if (this.slot.isFreeSpinPlaying()) {
+            this.controlPanel.setWinTitle(`WIN ${formatCurrency(amount, this.currency)}`);
+            return;
+        }
+
         if (this.slot.isPlaying()) {
             if (amount > 0) {
                 this.controlPanel.setWinTitle(`WIN ${formatCurrency(amount, this.currency)}`);
@@ -470,10 +499,7 @@ export class GameScreen extends Container {
                     this.preBetGreetings[Math.floor(Math.random() * this.preBetGreetings.length)],
                 );
             }
-        }
-
-        if (this.slot.isFreeSpinPlaying()) {
-            this.controlPanel.setWinTitle(`WIN ${formatCurrency(amount, this.currency)}`);
+            return;
         }
     }
 
@@ -513,9 +539,11 @@ export class GameScreen extends Container {
     }
 
     /** Fires when the match3 grid finishes auto-processing */
-    private async onFreeSpinTrigger(data: SlotFreeSpinTriggerData): Promise<void> {
+    private async onWinFreeSpinTrigger(data: SlotOnWinFreeSpinTriggerData): Promise<void> {
         return new Promise((resolve) => {
             navigation.presentPopup<FreeSpinPopupData>(FreeSpinPopup, {
+                title: 'YOU HAVE WON',
+                message: 'FREE SPINS',
                 totalFreeSpins: data.totalFreeSpins,
                 callback: async () => {
                     await navigation.dismissPopup();
@@ -537,6 +565,21 @@ export class GameScreen extends Container {
         this.grandJackpotTier.setActiveDots(0);
     }
 
+    public async onWinExtraFreeSpinTrigger(data: SlotOnWinExtraFreeSpinData): Promise<void> {
+        return new Promise((resolve) => {
+            navigation.presentPopup<FreeSpinPopupData>(FreeSpinPopup, {
+                title: 'YOU HAVE WON',
+                message: 'EXTRA FREE SPINS',
+                totalFreeSpins: data.extraFreeSpins,
+                callback: async () => {
+                    await navigation.dismissPopup();
+                    await waitFor(1);
+                    resolve();
+                },
+            });
+        });
+    }
+
     /** Fires when the match3 grid finishes auto-processing */
     private async onFreeSpinStart(data: SlotFreeSpinStartData) {
         this.controlPanel.setMessage(`FREE SPINS LEFT ${data.remainingSpins}`);
@@ -556,7 +599,11 @@ export class GameScreen extends Container {
                 spins: data.spins,
                 callback: async () => {
                     this.controlPanel.setMessage('');
-                    await this.controlPanel.collect();
+
+                    const result = await BetAPI.collect();
+                    userSettings.setBalance(result.balance);
+                    this.controlPanel.setCredit(userSettings.getBalance());
+
                     await navigation.dismissPopup();
                     await waitFor(1);
                     if (

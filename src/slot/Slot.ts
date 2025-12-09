@@ -6,7 +6,7 @@ import { SlotSymbol } from './SlotSymbol';
 import { SlotJackpot } from './SlotJackpot';
 import { gameConfig } from '../utils/gameConfig';
 import { SlotBigWinCategory } from './SlotUtility';
-import { SlotFreeSpinsStats } from './SlotFreeSpinsStats';
+import { SlotFreeSpinsStats, SlotOnWinExtraFreeSpinData } from './SlotFreeSpinsStats';
 import { SlotFreeSpinsProcess } from './SlotFreeSpinsProcess';
 import { SlotBoard } from './SlotBoard';
 import { SlotAutoplayProcess } from './SlotAutoplayProcess';
@@ -35,9 +35,14 @@ export interface SlotOnJackpotMatchData {
     symbols: SlotSymbol[];
 }
 
-export interface SlotFreeSpinTriggerData {
+export interface SlotOnWinFreeSpinTriggerData {
     /** Free spins won total */
     totalFreeSpins: number;
+}
+
+export interface SlotExtraFreeSpinTriggerData {
+    /** Free spins won total */
+    totalExtraFreeSpins: number;
 }
 
 /** Interface for onMatch event data */
@@ -130,8 +135,10 @@ export class Slot extends Container {
     public onBigWinTrigger?: (data: SlotOnBigWinTriggerData) => Promise<void>;
     /** Firew when a spin started, regardless of the spin type */
     public onSpinStart?: () => void;
-    /** Firew when free spin triggered */
-    public onFreeSpinTrigger?: (data: SlotFreeSpinTriggerData) => void;
+    /** Fire when free spin triggered */
+    public onWinExtraFreeSpinTrigger?: (data: SlotOnWinExtraFreeSpinData) => void;
+    /** Fire when free spin triggered */
+    public onWinFreeSpinTrigger?: (data: SlotOnWinFreeSpinTriggerData) => void;
     /** Fires when special triggered */
     public onJackpotMatch?: (data: SlotOnJackpotMatchData) => Promise<void>;
     /** Fires when multiplier jackpot triggered */

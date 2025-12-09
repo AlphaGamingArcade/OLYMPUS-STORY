@@ -172,16 +172,6 @@ export class SlotProcess {
                 jackpotPromise = this.processJackpotMatches();
             });
 
-            // Step #2 – Resolve standard matches
-            this.queue.add(async () => {
-                await this.processRegularMatches();
-            });
-
-            // Step #3 – Drop pieces (gravity)
-            this.queue.add(async () => {
-                await this.applyGravity();
-            });
-
             // Step #6 – Wait for jackpot to finish
             this.queue.add(async () => {
                 if (jackpotPromise) await jackpotPromise;
@@ -351,7 +341,7 @@ export class SlotProcess {
 
             const freeSpinCount = this.slot.freeSpinsStats.getAvailableFreeSpins();
             const freeSpinTriggerData = { totalFreeSpins: freeSpinCount };
-            await this.slot.onFreeSpinTrigger?.(freeSpinTriggerData);
+            await this.slot.onWinFreeSpinTrigger?.(freeSpinTriggerData);
             this.slot.onWin?.(0);
         } else {
             this.stop();

@@ -14,6 +14,7 @@ import {
     slotGetEmptyPositions,
     SlotGrid,
     slotGetMismatches,
+    slotGetScatterMatches,
 } from './SlotUtility';
 import { SlotSymbol } from './SlotSymbol';
 import { gameConfig } from '../utils/gameConfig';
@@ -54,9 +55,10 @@ export class SlotFreeSpinsProcess {
 
     /** Total free spins still available */
     private remainingFreeSpins = 0;
-
     /** The index of the free spin currently being played */
     private currentFreeSpin = 0;
+    /** The index of the free spin currently being played */
+    private extraFreeSpins = 0;
 
     /** Task queue managing asynchronous step sequencing */
     private queue: AsyncQueue;
@@ -115,6 +117,7 @@ export class SlotFreeSpinsProcess {
         this.currentFreeSpin = 0;
         this.betAmount = bet;
         this.currentSpinWinAmount = 0;
+        this.extraFreeSpins = 0;
 
         // Get free spin count from stats
         const freeSpinCount = this.slot.freeSpinsStats.getAvailableFreeSpins();
@@ -216,6 +219,14 @@ export class SlotFreeSpinsProcess {
             bet: this.betAmount,
         });
         this.slot.board.grid = result.reels;
+
+        // Add win free spins
+        if (result.freeSpins) {
+            const extraFreeSpins = result.freeSpins;
+            this.extraFreeSpins = extraFreeSpins;
+            const winFreeSpinsData = { freeSpins: extraFreeSpins };
+            this.slot.freeSpinsStats.registerWinFreeSpins(winFreeSpinsData);
+        }
 
         // Collect all grid positions that contain pieces
         const positions: SlotPosition[] = [];
@@ -459,6 +470,29 @@ export class SlotFreeSpinsProcess {
         return result.reels;
     }
 
+    /** Detect scatter symbols and trigger free spins if requirements are met */
+    private async processExtraFreeSpinCheckpoint() {
+        const scatterMatches = slotGetScatterMatches(this.slot.board.grid);
+        const scatterTrigger = gameConfig.getScatterBlocksTrigger();
+
+        const hasScatterTrigger = scatterMatches.some((group) => group.length >= scatterTrigger);
+
+        if (hasScatterTrigger) {
+            for (let i = 0; i < 3; i++) {
+                const animatePlayPieces = scatterMatches.map((m) => this.slot.board.playPieces(m));
+                await Promise.all(animatePlayPieces);
+
+                if (i < 2) await waitFor(1);
+            }
+
+            const freeSpinTriggerData = { extraFreeSpins: this.extraFreeSpins };
+            await this.slot.onWinExtraFreeSpinTrigger?.(freeSpinTriggerData);
+            this.remainingFreeSpins += this.extraFreeSpins;
+        }
+
+        this.runNextFreeSpin();
+    }
+
     /**
      * Final checkpoint for the current round.
      * Determines whether another resolution round is necessary, or if the
@@ -480,7 +514,7 @@ export class SlotFreeSpinsProcess {
             await this.slot.jackpot.displayFreeSpinJackpotWins();
             await this.displayBigWins();
 
-            this.runNextFreeSpin();
+            await this.processExtraFreeSpinCheckpoint();
         }
     }
 }

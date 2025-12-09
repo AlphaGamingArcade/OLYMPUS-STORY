@@ -10,6 +10,8 @@ const easeSingleBounce = registerCustomEase(
 );
 
 export interface FreeSpinPopupData {
+    title: string;
+    message: string;
     totalFreeSpins: number;
     callback: () => void;
 }
@@ -31,7 +33,7 @@ export class FreeSpinPopup extends Container {
     /** You have won text */
     private youHaveWon: ShadowLabel;
     /** Free Spins text */
-    private freeSpins: ShadowLabel;
+    private messageLabel: ShadowLabel;
     /** Free Spins count */
     private spins: ShadowLabel;
     /** Congratulations */
@@ -180,7 +182,7 @@ export class FreeSpinPopup extends Container {
         this.panel.addChild(this.spins);
 
         // FREE SPINS
-        this.freeSpins = new ShadowLabel({
+        this.messageLabel = new ShadowLabel({
             text: 'FREE SPINS',
             style: {
                 fill: verticalGradient1,
@@ -196,8 +198,8 @@ export class FreeSpinPopup extends Container {
             shadowColor: '#000000',
             shadowAlpha: 1,
         });
-        this.freeSpins.y = 180;
-        this.panel.addChild(this.freeSpins);
+        this.messageLabel.y = 180;
+        this.panel.addChild(this.messageLabel);
 
         // CLICK ANYWHERE
         this.clickAnywhere = new ShadowLabel({
@@ -320,6 +322,8 @@ export class FreeSpinPopup extends Container {
     /** Set things up just before showing the popup */
     public prepare(data: FreeSpinPopupData) {
         if (data) {
+            this.youHaveWon.text = `${data.title}`;
+            this.messageLabel.text = `${data.message}`;
             this.spins.text = `${data.totalFreeSpins}`;
             this.onPressConfirm = data.callback;
         }
@@ -341,7 +345,7 @@ export class FreeSpinPopup extends Container {
         resolveAndKillTweens(this.textbox.scale);
         resolveAndKillTweens(this.spins);
         resolveAndKillTweens(this.spins.scale);
-        resolveAndKillTweens(this.freeSpins);
+        resolveAndKillTweens(this.messageLabel);
         resolveAndKillTweens(this.clickAnywhere);
 
         // Start continuous animations
@@ -379,8 +383,8 @@ export class FreeSpinPopup extends Container {
         this.spins.scale.set(0.5);
 
         // Free Spins hidden below
-        this.freeSpins.alpha = 0;
-        this.freeSpins.y = 220;
+        this.messageLabel.alpha = 0;
+        this.messageLabel.y = 220;
 
         // Create entrance timeline
         const entranceTl = gsap.timeline();
@@ -476,9 +480,9 @@ export class FreeSpinPopup extends Container {
         );
 
         // Free Spins slides up
-        entranceTl.to(this.freeSpins, { alpha: 1, duration: 0.15, ease: 'power2.out' }, 1.35);
+        entranceTl.to(this.messageLabel, { alpha: 1, duration: 0.15, ease: 'power2.out' }, 1.35);
         entranceTl.to(
-            this.freeSpins,
+            this.messageLabel,
             {
                 y: 180,
                 duration: 0.4,

@@ -12,6 +12,7 @@ const defaultStatsData = {
 export type SlotFreeSpinStatsData = typeof defaultStatsData;
 
 export type SlotOnWinFreeSpinData = { freeSpins: number };
+export type SlotOnWinExtraFreeSpinData = { extraFreeSpins: number };
 export type SlotOnWinData = { amount: number };
 
 /**

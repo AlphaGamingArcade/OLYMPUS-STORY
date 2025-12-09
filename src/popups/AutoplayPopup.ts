@@ -107,7 +107,7 @@ export class AutoplayPopup extends Container {
         this.autoplaySlider = new Slider({
             text: 'Number of Auto spins',
             min: 10,
-            max: 1000,
+            max: 1000000,
             value: 10,
         });
         this.autoplaySlider.onUpdate.connect((value: number) => {

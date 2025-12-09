@@ -12,6 +12,8 @@ import { ResultScreen } from './screens/ResultScreen';
 import { ConfigAPI } from './api/configApi';
 import { gameConfig } from './utils/gameConfig';
 import { FreeSpinPopup, FreeSpinPopupData } from './popups/FreeSpinPopup';
+import { BetAPI } from './api/betApi';
+import { userSettings } from './utils/userSettings';
 
 /** The PixiJS app Application instance, shared across the project */
 export const app = new Application();
@@ -82,7 +84,7 @@ function visibilityChange() {
 }
 
 async function loadGameConfig() {
-    const result = await ConfigAPI.config();
+    const [result, result2] = await Promise.all([ConfigAPI.config(), BetAPI.collect()]);
 
     // Game configuration from server
     gameConfig.setBlocks(result.blocks);
@@ -92,6 +94,9 @@ async function loadGameConfig() {
     gameConfig.setScatterBlocksTrigger(result.scatterBlocksTrigger);
     gameConfig.setBuyFreeSpinBetMultiplier(result.buyFreeSpinBetMultiplier);
     gameConfig.setJackpots(result.jackpots);
+
+    // User settings
+    userSettings.setBalance(result2.balance);
 }
 
 /** Setup app and initialise assets */
