@@ -212,7 +212,7 @@ export class GameScreen extends Container {
                 navigation.presentPopup<AutoplayPopupData>(AutoplayPopup, {
                     spinMode,
                     onSpinModeChanged(spinMode) {
-                        console.log('SPIN MODE', spinMode);
+                        userSettings.setSpinMode(spinMode);
                     },
                     callback: async (spins: number) => {
                         if (this.finished) return;
@@ -301,7 +301,10 @@ export class GameScreen extends Container {
             autoplaySpins?: number;
         } = {},
     ) {
-        if (this.finished) return;
+        if (this.finished) {
+            // Interrupt spin
+            return;
+        }
 
         const bet = userSettings.getBet();
         const balance = userSettings.getBalance();
@@ -325,10 +328,12 @@ export class GameScreen extends Container {
         this.controlPanel.setTitle(this.betGreetings[Math.floor(Math.random() * this.betGreetings.length)]);
         this.roundResult.clearResults();
 
+        const spinMode = userSettings.getSpinMode();
+
         if (options.autoplaySpins) {
-            this.slot.startAutoplaySpin(bet, options.autoplaySpins);
+            this.slot.startAutoplaySpin(bet, spinMode, options.autoplaySpins);
         } else {
-            this.slot.startSpin(bet, options.feature);
+            this.slot.startSpin(bet, spinMode, options.feature);
         }
     }
 

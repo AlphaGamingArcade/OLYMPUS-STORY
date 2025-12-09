@@ -5,11 +5,11 @@ import { CheckboxWithLabel } from '../ui/CheckboxWithLabel';
 import { IconButton } from '../ui/IconButton2';
 import { Button } from '../ui/Button';
 import { Slider } from '../ui/Slider';
-import { SpinMode } from '../utils/userSettings';
+import { SlotSpinMode } from '../slot/SlotConfig';
 
 export type AutoplayPopupData = {
-    spinMode: SpinMode;
-    onSpinModeChanged: (spinMode: SpinMode) => void;
+    spinMode: SlotSpinMode;
+    onSpinModeChanged: (spinMode: SlotSpinMode) => void;
     callback: (spins: number) => void;
 };
 
@@ -41,7 +41,7 @@ export class AutoplayPopup extends Container {
     private panelWidth = 540;
     private panelHeight = 570;
 
-    private onSpinModeCallback?: (spinMode: SpinMode) => void;
+    private onSpinModeCallback?: (spinMode: SlotSpinMode) => void;
     private onAutoplayPress?: (spins: number) => void;
 
     constructor() {

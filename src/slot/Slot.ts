@@ -1,6 +1,6 @@
 import { Container } from 'pixi.js';
 import { SlotActions } from './SlotActions';
-import { Jackpot, SlotConfig, slotGetConfig } from './SlotConfig';
+import { Jackpot, SlotConfig, slotGetConfig, SlotSpinMode } from './SlotConfig';
 import { SlotProcess } from './SlotProcess';
 import { SlotSymbol } from './SlotSymbol';
 import { SlotJackpot } from './SlotJackpot';
@@ -10,13 +10,6 @@ import { SlotFreeSpinsStats, SlotOnWinExtraFreeSpinData } from './SlotFreeSpinsS
 import { SlotFreeSpinsProcess } from './SlotFreeSpinsProcess';
 import { SlotBoard } from './SlotBoard';
 import { SlotAutoplayProcess } from './SlotAutoplayProcess';
-
-// Slot.ts - Holds the state
-export enum SpinState {
-    IDLE = 'idle',
-    SPINNING = 'spinning',
-    COMPLETE = 'complete',
-}
 
 /** Interface for onMatch event data */
 export interface WinMatch {
@@ -106,6 +99,8 @@ export class Slot extends Container {
     public game = 'olympusstory';
     /** Playing flag */
     public playing = false;
+    /** spin mode */
+    public spinMode: SlotSpinMode = 'normal-spin';
     /** Autoplay Playing flag */
     public autoplayPlaying = false;
     /** Autoplay Playing flag */
@@ -217,8 +212,9 @@ export class Slot extends Container {
      * @param feature  Feature 0 = normal and the default value 1 = for buy free spin
      *
      **/
-    public async startSpin(bet: number, feature?: number) {
+    public async startSpin(bet: number, spinMode: SlotSpinMode, feature?: number) {
         this.playing = true;
+        this.spinMode = spinMode;
         await this.actions.actionSpin(bet, feature);
     }
 
@@ -249,8 +245,9 @@ export class Slot extends Container {
     }
 
     /** Start the spin and disable interaction */
-    public async startAutoplaySpin(bet: number, autoplays: number) {
+    public async startAutoplaySpin(bet: number, spinMode: SlotSpinMode, autoplays: number) {
         this.autoplayPlaying = true;
+        this.spinMode = spinMode;
         await this.actions.actionAutoplaySpin(bet, autoplays);
     }
 

@@ -1,4 +1,4 @@
-import { Container, Texture, AnimatedSprite, Text } from 'pixi.js';
+import { Container, Texture, AnimatedSprite } from 'pixi.js';
 import gsap from 'gsap';
 import { resolveAndKillTweens, registerCustomEase, pauseTweens, resumeTweens } from '../utils/animation';
 import { Spine } from '@esotericsoftware/spine-pixi-v8';
@@ -35,7 +35,7 @@ export class SlotSymbol extends Container {
     /** The name of the piece - must match one of the available textures */
     public name = '';
 
-    public textLabel: Text;
+    // public textLabel: Text;
 
     constructor() {
         super();
@@ -58,15 +58,15 @@ export class SlotSymbol extends Container {
 
         this.onRender = () => this.renderUpdate();
 
-        this.textLabel = new Text({
-            text: this.type,
-            style: {
-                fontSize: 40,
-                fill: '#00ff00ff',
-                fontWeight: '800',
-            },
-        });
-        this.addChild(this.textLabel);
+        // this.textLabel = new Text({
+        //     text: this.type,
+        //     style: {
+        //         fontSize: 40,
+        //         fill: '#00ff00ff',
+        //         fontWeight: '800',
+        //     },
+        // });
+        // this.addChild(this.textLabel);
     }
 
     /** Create the explosion animated sprite */
@@ -140,8 +140,8 @@ export class SlotSymbol extends Container {
             this.explosionSprite.visible = false;
         }
 
-        this.textLabel.text = this.type;
-        this.addChild(this.textLabel);
+        // this.textLabel.text = this.type;
+        // this.addChild(this.textLabel);
 
         this.unlock();
     }

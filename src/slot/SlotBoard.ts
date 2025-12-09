@@ -1,6 +1,6 @@
 import { Container, Graphics } from 'pixi.js';
 import { pool } from '../utils/pool';
-import { SlotConfig, slotGetBlocks } from './SlotConfig';
+import { SlotConfig, slotGetBlocks, slotGetSpinModeDelay } from './SlotConfig';
 import {
     SlotPosition,
     match3SetPieceType,
@@ -118,7 +118,9 @@ export class SlotBoard {
             for (const { piece, x, y } of columnPieces) {
                 animPromises.push(piece.animateFall(x, y));
             }
-            await new Promise((resolve) => setTimeout(resolve, 50)); // 50ms delay, adjust as needed
+
+            const delay = slotGetSpinModeDelay(this.slot.spinMode);
+            await new Promise((resolve) => setTimeout(resolve, delay)); // 50ms delay, adjust as needed
         }
 
         await Promise.all(animPromises);
@@ -190,7 +192,8 @@ export class SlotBoard {
             }
 
             // Wait before starting next column
-            await new Promise((resolve) => setTimeout(resolve, 50));
+            const delay = slotGetSpinModeDelay(this.slot.spinMode);
+            await new Promise((resolve) => setTimeout(resolve, delay));
         }
 
         // Wait for all animations to complete

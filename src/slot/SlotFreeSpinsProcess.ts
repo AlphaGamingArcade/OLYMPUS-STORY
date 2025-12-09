@@ -6,7 +6,6 @@ import {
     slotGetPieceType,
     slotGridToString,
     slotGetMatches,
-    SlotPosition,
     slotGetRegularMatchesWinAmount,
     slotGetBigWinCategory,
     slotGetNextFreeSpinJackpots,
@@ -16,7 +15,6 @@ import {
     slotGetMismatches,
     slotGetScatterMatches,
 } from './SlotUtility';
-import { SlotSymbol } from './SlotSymbol';
 import { gameConfig } from '../utils/gameConfig';
 
 /**
@@ -192,7 +190,7 @@ export class SlotFreeSpinsProcess {
 
         // Queue filling for this free-spin round
         this.queue.add(async () => {
-            await this.fillGrid();
+            await this.slot.board.fillGrid(this.betAmount);
         });
 
         // Begin the resolution sequence for this round
@@ -210,73 +208,6 @@ export class SlotFreeSpinsProcess {
         }
 
         await Promise.all(animReplacePromises);
-    }
-
-    /** Generate the board for a free-spin round using backend reel data */
-    public async fillGrid() {
-        const result = await BetAPI.spin({
-            game: this.slot.game,
-            bet: this.betAmount,
-        });
-        this.slot.board.grid = result.reels;
-
-        // Add win free spins
-        if (result.freeSpins) {
-            const extraFreeSpins = result.freeSpins;
-            this.extraFreeSpins = extraFreeSpins;
-            const winFreeSpinsData = { freeSpins: extraFreeSpins };
-            this.slot.freeSpinsStats.registerWinFreeSpins(winFreeSpinsData);
-        }
-
-        // Collect all grid positions that contain pieces
-        const positions: SlotPosition[] = [];
-        for (let col = 0; col < this.slot.board.columns; col++) {
-            for (let row = 0; row < this.slot.board.rows; row++) {
-                if (this.slot.board.grid[row][col] !== 0) {
-                    positions.push({ row, column: col });
-                }
-            }
-        }
-
-        const piecesByColumn: Record<number, Array<{ piece: SlotSymbol; x: number; y: number }>> = {};
-        const piecesPerColumn: Record<number, number> = {};
-
-        // Instantiate all new pieces and place them above the board
-        for (const position of positions) {
-            const pieceType = slotGetPieceType(this.slot.board.grid, position);
-            const piece = this.slot.board.createPiece(position, pieceType);
-
-            if (!piecesPerColumn[piece.column]) {
-                piecesPerColumn[piece.column] = 0;
-                piecesByColumn[piece.column] = [];
-            }
-            piecesPerColumn[piece.column]++;
-
-            const x = piece.x;
-            const y = piece.y;
-
-            const countInColumn = piecesPerColumn[piece.column];
-            const height = this.slot.board.getHeight();
-
-            // Spawn higher for each stacked element in the same column
-            piece.y = -height * 0.5 - countInColumn * this.slot.config.tileSize;
-
-            piecesByColumn[piece.column].push({ piece, x, y });
-        }
-
-        // Play each column’s fall animation with a small stagger
-        const animPromises: Promise<void>[] = [];
-        for (const column in piecesByColumn) {
-            const columnPieces = piecesByColumn[column];
-
-            for (const { piece, x, y } of columnPieces) {
-                animPromises.push(piece.animateFall(x, y));
-            }
-
-            await new Promise((resolve) => setTimeout(resolve, 50));
-        }
-
-        await Promise.all(animPromises);
     }
 
     /**

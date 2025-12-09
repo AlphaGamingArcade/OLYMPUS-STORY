@@ -1,3 +1,4 @@
+import { SlotSpinMode } from '../slot/SlotConfig';
 import { bgm, setMasterVolume, sfx } from './audio';
 import { storage } from './storage';
 
@@ -5,8 +6,6 @@ import { storage } from './storage';
 const KEY_VOLUME_MASTER = 'volume-master';
 const KEY_VOLUME_BGM = 'volume-bgm';
 const KEY_VOLUME_SFX = 'volume-sfx';
-
-export type SpinMode = 'quick-spin' | 'turbo-spin' | 'normal-spin';
 
 export enum BetAction {
     INCREASE = 'increase',
@@ -17,7 +16,7 @@ export enum BetAction {
  * Persistent user settings of volumes and game mode.
  */
 class UserSettings {
-    private spinMode: SpinMode;
+    private spinMode: SlotSpinMode;
     private betIndex: number;
     private betOptions: number[];
     private freeSpins: number;
@@ -77,7 +76,7 @@ class UserSettings {
     }
 
     /** Set spin mode */
-    public setSpinMode(mode: SpinMode) {
+    public setSpinMode(mode: SlotSpinMode) {
         this.spinMode = mode;
     }
 
