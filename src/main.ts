@@ -84,6 +84,8 @@ function visibilityChange() {
 
 async function loadGameConfig() {
     const [result, result2] = await Promise.all([ConfigAPI.config(), BetAPI.collect()]);
+    const lang = getUrlParam('lang') ?? 'en';
+    const cur = getUrlParam('cur') ?? 'usd';
 
     // Game configuration from server
     gameConfig.setBlocks(result.blocks);
@@ -96,6 +98,8 @@ async function loadGameConfig() {
 
     // User settings
     userSettings.setBalance(result2.balance);
+    userSettings.setLanguage(lang);
+    userSettings.setCurrency(cur);
 }
 
 /** Setup app and initialise assets */
