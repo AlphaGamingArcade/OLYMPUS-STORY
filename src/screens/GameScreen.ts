@@ -208,7 +208,12 @@ export class GameScreen extends Container {
                 this.slot.stopAutoplaySpin();
             } else {
                 if (this.finished) return;
+                const spinMode = userSettings.getSpinMode();
                 navigation.presentPopup<AutoplayPopupData>(AutoplayPopup, {
+                    spinMode,
+                    onSpinModeChanged(spinMode) {
+                        console.log('SPIN MODE', spinMode);
+                    },
                     callback: async (spins: number) => {
                         if (this.finished) return;
                         await navigation.dismissPopup();

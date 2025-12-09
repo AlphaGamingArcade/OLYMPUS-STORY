@@ -5,8 +5,11 @@ import { CheckboxWithLabel } from '../ui/CheckboxWithLabel';
 import { IconButton } from '../ui/IconButton2';
 import { Button } from '../ui/Button';
 import { Slider } from '../ui/Slider';
+import { SpinMode } from '../utils/userSettings';
 
 export type AutoplayPopupData = {
+    spinMode: SpinMode;
+    onSpinModeChanged: (spinMode: SpinMode) => void;
     callback: (spins: number) => void;
 };
 
@@ -38,6 +41,7 @@ export class AutoplayPopup extends Container {
     private panelWidth = 540;
     private panelHeight = 570;
 
+    private onSpinModeCallback?: (spinMode: SpinMode) => void;
     private onAutoplayPress?: (spins: number) => void;
 
     constructor() {
@@ -95,11 +99,19 @@ export class AutoplayPopup extends Container {
             label: 'Quick spin',
             isChecked: false,
         });
+        this.quickSpinCheckbox.onSwitch(() => {
+            this.onSpinModeCallback?.(this.quickSpinCheckbox.check ? 'quick-spin' : 'normal-spin');
+            this.turboSpinCheckbox.check = false;
+        });
         this.layout.addChild(this.quickSpinCheckbox);
 
         this.turboSpinCheckbox = new CheckboxWithLabel({
             label: 'Turbo Spin',
             isChecked: false,
+        });
+        this.turboSpinCheckbox.onSwitch(() => {
+            this.onSpinModeCallback?.(this.turboSpinCheckbox.check ? 'turbo-spin' : 'normal-spin');
+            this.quickSpinCheckbox.check = false;
         });
         this.layout.addChild(this.turboSpinCheckbox);
 
@@ -148,6 +160,9 @@ export class AutoplayPopup extends Container {
     /** Set things up just before showing the popup */
     public prepare(data: AutoplayPopupData) {
         if (data) {
+            this.quickSpinCheckbox.check = data.spinMode == 'quick-spin';
+            this.turboSpinCheckbox.check = data.spinMode == 'turbo-spin';
+            this.onSpinModeCallback = data.onSpinModeChanged;
             this.onAutoplayPress = data.callback;
         }
     }

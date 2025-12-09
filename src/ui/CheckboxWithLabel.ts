@@ -47,7 +47,7 @@ export class CheckboxWithLabel extends Container {
         this.checkbox.forceSwitch(v);
     }
 
-    public onPress(callBack: () => void) {
+    public onSwitch(callBack: () => void) {
         this._onPress = callBack;
     }
 }

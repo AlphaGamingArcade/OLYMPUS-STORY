@@ -11,7 +11,6 @@ import { GameScreen } from './screens/GameScreen';
 import { ResultScreen } from './screens/ResultScreen';
 import { ConfigAPI } from './api/configApi';
 import { gameConfig } from './utils/gameConfig';
-import { FreeSpinPopup, FreeSpinPopupData } from './popups/FreeSpinPopup';
 import { BetAPI } from './api/betApi';
 import { userSettings } from './utils/userSettings';
 
@@ -149,10 +148,7 @@ async function init() {
     } else if (getUrlParam('result') !== null) {
         await navigation.showScreen(ResultScreen);
     } else if (getUrlParam('modal') !== null) {
-        navigation.presentPopup<FreeSpinPopupData>(FreeSpinPopup, {
-            totalFreeSpins: 1,
-            callback: () => () => {},
-        });
+        //
     } else {
         await navigation.showScreen(LoadScreen);
     }

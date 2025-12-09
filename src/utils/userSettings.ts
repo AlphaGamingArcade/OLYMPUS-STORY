@@ -6,7 +6,7 @@ const KEY_VOLUME_MASTER = 'volume-master';
 const KEY_VOLUME_BGM = 'volume-bgm';
 const KEY_VOLUME_SFX = 'volume-sfx';
 
-type SpinMode = 'quick-spin' | 'turbo-spin' | 'normal-spin';
+export type SpinMode = 'quick-spin' | 'turbo-spin' | 'normal-spin';
 
 export enum BetAction {
     INCREASE = 'increase',
