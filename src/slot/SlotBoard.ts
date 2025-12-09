@@ -11,7 +11,6 @@ import {
     SlotType,
 } from './SlotUtility';
 import { SlotSymbol } from './SlotSymbol';
-import { BetAPI } from '../api/betApi';
 import { Slot } from './Slot';
 
 /**
@@ -130,89 +129,6 @@ export class SlotBoard {
         // return to false when interruption is used or even if not use
         this.slot.requireSpinInterrupt = false;
 
-        await Promise.all(animPromises);
-    }
-
-    /**
-     *
-     * @param bet - {number} bet amount
-     * @param feature - {number | undefined} 0 for normal spin, 1 for buy feature
-     */
-    public async fillGrid(bet: number, feature?: number) {
-        const result = await BetAPI.spin({
-            game: this.slot.game,
-            bet,
-            feature,
-        });
-        this.slot.board.grid = result.reels;
-
-        // Add win free spins
-        if (result.freeSpins) {
-            this.slot.freeSpinsStats.reset();
-            const winFreeSpinsData = { freeSpins: result.freeSpins };
-            this.slot.freeSpinsStats.registerWinFreeSpins(winFreeSpinsData);
-        }
-
-        // Get all positions from the grid
-        const positions: SlotPosition[] = [];
-        for (let col = 0; col < this.slot.board.columns; col++) {
-            for (let row = 0; row < this.slot.board.rows; row++) {
-                if (this.slot.board.grid[row][col] !== 0) {
-                    positions.push({ row, column: col });
-                }
-            }
-        }
-
-        // Group pieces by column
-        const piecesByColumn: Record<number, Array<{ piece: SlotSymbol; x: number; y: number }>> = {};
-        const piecesPerColumn: Record<number, number> = {};
-
-        for (const position of positions) {
-            const pieceType = slotGetPieceType(this.slot.board.grid, position);
-            const piece = this.slot.board.createPiece(position, pieceType);
-
-            // Count pieces per column so new pieces can be stacked up accordingly
-            if (!piecesPerColumn[piece.column]) {
-                piecesPerColumn[piece.column] = 0;
-                piecesByColumn[piece.column] = [];
-            }
-            piecesPerColumn[piece.column] += 1;
-
-            const x = piece.x;
-            const y = piece.y;
-            const columnCount = piecesPerColumn[piece.column];
-            const height = this.slot.board.getHeight();
-            piece.y = -height * 0.5 - columnCount * this.slot.config.tileSize;
-
-            piecesByColumn[piece.column].push({ piece, x, y });
-        }
-
-        // Animate each column with a small delay between them
-        const animPromises: Promise<void>[] = [];
-
-        for (const column in piecesByColumn) {
-            const columnPieces = piecesByColumn[column];
-
-            // Start all animations in this column
-            for (const { piece, x, y } of columnPieces) {
-                animPromises.push(piece.animateFall(x, y));
-            }
-
-            // Wait before starting next column
-            let delay = slotGetSpinModeDelay(this.slot.spinMode);
-
-            // if interrupted change delay to 0
-            if (this.slot.requireSpinInterrupt) {
-                delay = 0;
-            }
-
-            await new Promise((resolve) => setTimeout(resolve, delay));
-        }
-
-        // Always cancel interuption
-        this.slot.requireSpinInterrupt = false;
-
-        // Wait for all animations to complete
         await Promise.all(animPromises);
     }
 
