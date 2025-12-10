@@ -3,7 +3,6 @@ import { randomRange } from '../utils/random';
 import gsap from 'gsap';
 import { GameScreen } from '../screens/GameScreen';
 import { getDistance } from '../utils/maths';
-import { pool } from '../utils/pool';
 import { sfx } from '../utils/audio';
 import { SlotSymbol } from '../slot/SlotSymbol';
 import { SlotOnJackpotMatchData, SlotOnNextFreeSpinData } from '../slot/Slot';
@@ -48,52 +47,35 @@ export class GameEffects extends Container {
     /** Fired when a match is detected */
     public async onJackpotMatch(data: SlotOnJackpotMatchData) {
         sfx.play('common/sfx-match.wav');
-        let pieces = []; // Store pieces to clean up later
         const animPromise: Promise<void>[] = [];
 
         // Process each group sequentially
         for (let i = 0; i < data.symbols.length; i++) {
             const position = this.toLocal(data.symbols[i].getGlobalPosition());
-            const piece = pool.get(SlotSymbol);
-            piece.setup({
-                name: data.symbols[i].name,
-                type: data.symbols[i].type,
-                size: this.game.slot.board.tileSize,
-                interactive: false,
-            });
-            piece.position.copyFrom(position);
-            this.addChild(piece);
 
-            pieces.push(piece); // Store for cleanup
-
-            let x = 0;
-            let y = 0;
+            const from = { x: position.x, y: position.y };
+            const to = { x: 0, y: 0 };
 
             // IDENTIFY PIECE WHERE THEY FLY TO
-            if (piece.type == 11 && this.game.grandJackpotTier) {
-                x = this.game.grandJackpotTier.x + randomRange(-20, 20);
-                y = this.game.grandJackpotTier.y;
-            } else if (piece.type == 12 && this.game.angelicJackpotTier) {
-                x = this.game.angelicJackpotTier.x + randomRange(-20, 20);
-                y = this.game.angelicJackpotTier.y;
-            } else if (piece.type == 13 && this.game.blessedJackpotTier) {
-                x = this.game.blessedJackpotTier.x + randomRange(-20, 20);
-                y = this.game.blessedJackpotTier.y;
-            } else if (piece.type == 14 && this.game.divineJackpotTier) {
-                x = this.game.divineJackpotTier.x + randomRange(-20, 20);
-                y = this.game.divineJackpotTier.y;
+            const type = data.symbols[i].type;
+            if (type == 11 && this.game.grandJackpotTier) {
+                to.x = this.game.grandJackpotTier.x + randomRange(-20, 20);
+                to.y = this.game.grandJackpotTier.y;
+            } else if (type == 12 && this.game.angelicJackpotTier) {
+                to.x = this.game.angelicJackpotTier.x + randomRange(-20, 20);
+                to.y = this.game.angelicJackpotTier.y;
+            } else if (type == 13 && this.game.blessedJackpotTier) {
+                to.x = this.game.blessedJackpotTier.x + randomRange(-20, 20);
+                to.y = this.game.blessedJackpotTier.y;
+            } else if (type == 14 && this.game.divineJackpotTier) {
+                to.x = this.game.divineJackpotTier.x + randomRange(-20, 20);
+                to.y = this.game.divineJackpotTier.y;
             }
 
-            animPromise.push(this.playFlyToJackpotTier(piece, { x, y }));
+            animPromise.push(this.playFlyToJackpotTier(data.symbols[i], from, to));
         }
 
         await Promise.all(animPromise);
-
-        // Now clean up after animations are done
-        for (const piece of pieces) {
-            this.removeChild(piece);
-            pool.giveBack(piece);
-        }
     }
 
     /** Make the piece fly to cauldron with a copy of the original piece created in its place */
@@ -154,8 +136,12 @@ export class GameEffects extends Container {
         sfx.play('common/sfx-bubble.wav');
     }
 
-    public async playFlyToJackpotTier(piece: SlotSymbol, to: { x: number; y: number }) {
-        const distance = getDistance(piece.x, piece.y, to.x, to.y);
+    public async playFlyToJackpotTier(
+        symbol: SlotSymbol,
+        from: { x: number; y: number },
+        to: { x: number; y: number },
+    ) {
+        const distance = getDistance(from.x, from.y, to.x, to.y);
         const duration = distance * 0.0008 + randomRange(0.3, 0.6);
 
         const historyX: number[] = [];
@@ -165,8 +151,8 @@ export class GameEffects extends Container {
         const points: Point[] = [];
 
         // Store starting position
-        const startX = piece.x;
-        const startY = piece.y + 20;
+        const startX = from.x;
+        const startY = from.y + 20;
 
         // Initialize history with starting position
         for (let i = 0; i < historySize; i++) {
@@ -234,13 +220,13 @@ export class GameEffects extends Container {
             ease: 'power1.inOut',
             onComplete: () => {
                 // Update jackpot tier
-                if (piece.type == 11) {
+                if (symbol.type == 11) {
                     this.game.grandJackpotTier.addActiveDot();
-                } else if (piece.type == 12) {
+                } else if (symbol.type == 12) {
                     this.game.angelicJackpotTier.addActiveDot();
-                } else if (piece.type == 13) {
+                } else if (symbol.type == 13) {
                     this.game.blessedJackpotTier.addActiveDot();
-                } else if (piece.type == 14) {
+                } else if (symbol.type == 14) {
                     this.game.divineJackpotTier.addActiveDot();
                 }
 

@@ -89,7 +89,7 @@ export class SlotJackpot {
         // Process winning groups one at a time
         for (const symbols of winPieces) {
             const positions: SlotPosition[] = symbols.map((symbol) => ({ row: symbol.row, column: symbol.column }));
-            await this.slot.board.playPieces(positions);
+            this.slot.board.playPieces(positions);
             await this.slot.onJackpotMatch?.({
                 symbols,
             });
@@ -101,7 +101,7 @@ export class SlotJackpot {
                 row: symbol.row,
                 column: symbol.column,
             }));
-            await this.slot.board.playPieces(positions);
+            this.slot.board.playPieces(positions);
             await this.slot.onJackpotMatch?.({
                 symbols: nonWinPieces,
             });
