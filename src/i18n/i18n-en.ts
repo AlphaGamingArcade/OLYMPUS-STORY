@@ -58,4 +58,12 @@ export const i18nDict = {
     backButtonDesc: 'Go back to the previous information section',
     nextButtonDesc: 'Go to the next information section',
     closeButtonDesc: 'Close the popup',
+    balanceNotEnough: 'Balance not enough',
+    moreJackpots: 'MORE JACKPOTS',
+    unexpectedErrorOccured: 'Unexpected error occured!',
+    error: 'Error',
+    congratulations: 'CONGRATULATIONS',
+    youHaveWon: 'YOU HAVE WON',
+    clickAnywhereToContinue: 'Click anywhere to continue.',
+    inFreeSpins: 'IN {spins} FREE SPIN',
 };

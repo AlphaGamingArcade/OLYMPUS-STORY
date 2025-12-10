@@ -2,6 +2,7 @@ import { Container, Sprite, Texture } from 'pixi.js';
 import { Label } from '../ui/Label';
 import { IconButton } from '../ui/IconButton2';
 import { navigation } from '../utils/navigation';
+import { i18n } from '../i18n/i18n';
 
 export type ErrorPopupData = {
     message: string;
@@ -48,14 +49,14 @@ export class ErrorPopup extends Container {
         this.panelBg.height = this.panelHeight;
         this.panelBase.addChild(this.panelBg);
 
-        this.title = new Label('Error', {
+        this.title = new Label(i18n.t('error'), {
             fill: '#FCC100',
         });
         this.title.anchor.set(0.5);
         this.title.style.fontSize = 32;
         this.panelBase.addChild(this.title);
 
-        this.messageLabel = new Label('Unexpected error occured', {
+        this.messageLabel = new Label(i18n.t('unexpectedErrorOccured'), {
             fill: '#FFFFFF',
         });
         this.messageLabel.anchor.set(0.5);

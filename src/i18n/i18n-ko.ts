@@ -55,4 +55,12 @@ export const i18nDict = {
     backButtonDesc: '이전 정보로 돌아가기',
     nextButtonDesc: '다음 정보 보기',
     closeButtonDesc: '팝업 닫기',
+    balanceNotEnough: '잔액이 부족합니다',
+    moreJackpots: '더 많은 잭팟!',
+    unexpectedErrorOccured: '예기치 않은 오류가 발생했습니다!',
+    error: '오류',
+    congratulations: '축하합니다',
+    youHaveWon: '당첨되었습니다',
+    clickAnywhereToContinue: '아무 곳이나 클릭하여 계속하세요.',
+    inFreeSpins: '{spins}번의 무료 스핀 중',
 };

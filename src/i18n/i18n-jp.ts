@@ -57,4 +57,12 @@ export const i18nDict = {
     backButtonDesc: '前の情報セクションに戻る',
     nextButtonDesc: '次の情報セクションへ進む',
     closeButtonDesc: 'ポップアップを閉じる',
+    balanceNotEnough: '残高が不足しています',
+    moreJackpots: 'さらに多くのジャックポット！',
+    unexpectedErrorOccured: '予期しないエラーが発生しました！',
+    error: 'エラー',
+    congratulations: 'おめでとうございます',
+    youHaveWon: 'あなたは当選しました',
+    clickAnywhereToContinue: 'クリックして続行してください。',
+    inFreeSpins: '{spins} 回のフリースピン中',
 };

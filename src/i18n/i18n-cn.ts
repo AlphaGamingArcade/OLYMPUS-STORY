@@ -53,4 +53,12 @@ export const i18nDict = {
     backButtonDesc: '返回上一部分',
     nextButtonDesc: '前往下一部分',
     closeButtonDesc: '关闭弹窗',
+    balanceNotEnough: '余额不足',
+    moreJackpots: '更多大奖！',
+    unexpectedErrorOccured: '发生意外错误！',
+    error: '错误',
+    congratulations: '恭喜您',
+    youHaveWon: '您中奖了',
+    clickAnywhereToContinue: '点击任意位置继续。',
+    inFreeSpins: '第 {spins} 次免费旋转中',
 };

@@ -136,7 +136,7 @@ export class BuyFreeSpinPopup extends Container {
 
         // YOU HAVE WON
         this.moreJackpotLabel = new ShadowLabel({
-            text: 'MORE JACKPOTS',
+            text: i18n.t('moreJackpots'),
             style: {
                 fill: verticalGradient3,
                 fontFamily: 'Spartanmb Extra Bold',

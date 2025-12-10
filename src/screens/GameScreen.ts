@@ -318,7 +318,7 @@ export class GameScreen extends Container {
 
         if (balance < toPayAmount) {
             return navigation.presentPopup<ErrorPopupData>(ErrorPopup, {
-                message: 'Balance not enough!',
+                message: i18n.t('balanceNotEnough'),
             });
         }
 

@@ -5,6 +5,7 @@ import { ShadowLabel } from '../ui/ShadowLabel';
 import { registerCustomEase, resolveAndKillTweens } from '../utils/animation';
 import { randomRange } from '../utils/random';
 import { formatCurrency } from '../utils/formatter';
+import { i18n } from '../i18n/i18n';
 
 /** Custom ease curve for y animation of falling pieces - minimal bounce */
 const easeSingleBounce = registerCustomEase(
@@ -144,7 +145,7 @@ export class FreeSpinWinPopup extends Container {
 
         // CONGRATULATIONS
         this.congratulations = new ShadowLabel({
-            text: 'CONGRATULATIONS',
+            text: i18n.t('congratulations'),
             style: {
                 fill: verticalGradient3,
                 fontFamily: 'Spartanmb Extra Bold',
@@ -164,7 +165,7 @@ export class FreeSpinWinPopup extends Container {
 
         // YOU HAVE WON
         this.youHaveWon = new ShadowLabel({
-            text: 'YOU HAVE WON',
+            text: i18n.t('youHaveWon'),
             style: {
                 fill: verticalGradient1,
                 fontFamily: 'Spartanmb Extra Bold',
@@ -210,7 +211,7 @@ export class FreeSpinWinPopup extends Container {
 
         // BOTTOM TEXT (IN X FREE SPINS)
         this.bottomText = new ShadowLabel({
-            text: `IN ${this.spinsCount} FREE SPINS`,
+            text: i18n.t('inFreeSpins', { spins: this.spinsCount }),
             style: {
                 fill: verticalGradient1,
                 fontFamily: 'Spartanmb Extra Bold',
@@ -230,7 +231,7 @@ export class FreeSpinWinPopup extends Container {
 
         // CLICK ANYWHERE
         this.clickAnywhere = new ShadowLabel({
-            text: 'Click anywhere to continue.',
+            text: i18n.t('clickAnywhereToContinue'),
             style: {
                 fill: verticalGradient1,
                 fontFamily: 'Spartanmb Extra Bold',

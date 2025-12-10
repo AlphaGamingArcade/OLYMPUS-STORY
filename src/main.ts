@@ -14,6 +14,11 @@ import { BetAPI } from './api/betApi';
 import { userSettings } from './utils/userSettings';
 import { initDevtools } from '@pixi/devtools';
 import { InfoPopup } from './popups/InfoPopup';
+import { BigWinPopup, BigWinPopupData } from './popups/BigWinPopup';
+import { BuyFreeSpinPopup } from './popups/BuyFreeSpinPopup';
+import { ErrorPopup } from './popups/ErrorPopup';
+import { FreeSpinPopup } from './popups/FreeSpinPopup';
+import { FreeSpinWinPopup } from './popups/FreeSpinWinPopup';
 
 /** The PixiJS app Application instance, shared across the project */
 export const app = new Application();
@@ -151,7 +156,7 @@ async function init() {
     } else if (getUrlParam('load') !== null) {
         await navigation.showScreen(LoadScreen);
     } else if (getUrlParam('modal') !== null) {
-        await navigation.showScreen(InfoPopup);
+        navigation.presentPopup(FreeSpinWinPopup);
     } else {
         await navigation.showScreen(LoadScreen);
     }
