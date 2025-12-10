@@ -8,7 +8,6 @@ import { sound } from '@pixi/sound';
 import { CloudBackground } from './ui/CloudBackground';
 import { getUrlParam } from './utils/getUrlParams';
 import { GameScreen } from './screens/GameScreen';
-import { ResultScreen } from './screens/ResultScreen';
 import { ConfigAPI } from './api/configApi';
 import { gameConfig } from './utils/gameConfig';
 import { BetAPI } from './api/betApi';
@@ -150,8 +149,6 @@ async function init() {
         await navigation.showScreen(GameScreen);
     } else if (getUrlParam('load') !== null) {
         await navigation.showScreen(LoadScreen);
-    } else if (getUrlParam('result') !== null) {
-        await navigation.showScreen(ResultScreen);
     } else if (getUrlParam('modal') !== null) {
         //
     } else {

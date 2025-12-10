@@ -1,6 +1,5 @@
 import { Container, FillGradient, Text } from 'pixi.js';
 import gsap from 'gsap';
-import { i18n } from '../utils/i18n';
 import { SlotPreview } from '../slot/preview/SlotPreview';
 import { slotGetConfig } from '../slot/SlotConfig';
 import { Pillar } from '../ui/Pillar';
@@ -199,7 +198,6 @@ export class PreviewScreen extends Container {
         this.stopMessageRotation();
 
         // Change then hide the loading message
-        this.message.text = i18n.loadingDone;
         gsap.killTweensOf(this.message);
         gsap.to(this.message, {
             alpha: 0,

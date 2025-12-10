@@ -1,6 +1,5 @@
 import { Container, FillGradient, Sprite, Text } from 'pixi.js';
 import gsap from 'gsap';
-import { i18n } from '../utils/i18n';
 import { IconButton } from '../ui/IconButton';
 import { bgm, sfx } from '../utils/audio';
 import { navigation } from '../utils/navigation';
@@ -123,7 +122,6 @@ export class LoadScreen extends Container {
     /** Hide screen with animations */
     public async hide() {
         // Change then hide the loading message
-        this.message.text = i18n.loadingDone;
         gsap.killTweensOf(this.message);
         gsap.to(this.message, {
             alpha: 0,
