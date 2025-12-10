@@ -5,6 +5,7 @@ import { MatchPattern } from './MatchPattern';
 import { AudioButton } from './AudioButton';
 import { SpinButton, SpinButtonState } from './SpinButton';
 import { LabelValue } from './LabelValue';
+import { i18n } from '../i18n/i18n';
 
 export interface WinMatchPattern {
     times: number;
@@ -61,7 +62,7 @@ export class ControlPanel extends Container {
 
         // Credit display
         this.creditDisplay = new LabelValue({
-            labelText: 'CREDIT',
+            labelText: i18n.t('credit'),
             fontSize: 22,
             align: 'left',
         });
@@ -70,7 +71,7 @@ export class ControlPanel extends Container {
 
         // Bet display
         this.betDisplay = new LabelValue({
-            labelText: 'BET',
+            labelText: i18n.t('bet'),
             fontSize: 22,
             align: 'left',
         });

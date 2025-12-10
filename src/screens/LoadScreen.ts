@@ -4,6 +4,7 @@ import { IconButton } from '../ui/IconButton';
 import { bgm, sfx } from '../utils/audio';
 import { navigation } from '../utils/navigation';
 import { PreviewScreen } from './PreviewScreen';
+import { i18n } from '../i18n/i18n';
 
 /** Screen shown while loading assets */
 export class LoadScreen extends Container {
@@ -63,7 +64,7 @@ export class LoadScreen extends Container {
         });
 
         this.message = new Text({
-            text: 'Do you want to play with sound?',
+            text: i18n.t('doYouWantToPlayWithSound'),
             style: {
                 fill: verticalGradient1,
                 fontFamily: 'Spartanmb Extra Bold',

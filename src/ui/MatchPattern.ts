@@ -5,6 +5,7 @@ import { formatCurrency } from '../utils/formatter';
 import { waitFor } from '../utils/asyncUtils';
 import { resolveAndKillTweens } from '../utils/animation';
 import gsap from 'gsap';
+import { i18n } from '../i18n/i18n';
 
 const defaultMatchPatternOptions = {
     image: 'symbol-0',
@@ -46,7 +47,7 @@ export class MatchPattern extends Container {
         this.layout.addChild(this.image);
 
         this.text = new Text({
-            text: `PAYS ${formatCurrency(opts.amount, opts.currency)}`,
+            text: i18n.t('pays', { amount: formatCurrency(opts.amount, opts.currency) }),
             style: {
                 fill: 0xffffff,
                 fontSize: 32,
@@ -67,7 +68,7 @@ export class MatchPattern extends Container {
         // Update times
         this.xTimes.text = `${times}x`;
         this.image.texture = Sprite.from(symbol).texture;
-        this.text.text = `PAYS ${formatCurrency(amount, this.currency)}`;
+        this.text.text = i18n.t('pays', { amount: formatCurrency(amount, this.currency) });
 
         this.layout.elementsMargin = 10;
         this.layout.type = 'horizontal';

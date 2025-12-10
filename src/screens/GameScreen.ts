@@ -39,6 +39,7 @@ import { BigWinPopup, BigWinPopupData } from '../popups/BigWinPopup';
 import { BetAPI } from '../api/betApi';
 import { ErrorPopup, ErrorPopupData } from '../popups/ErrorPopup';
 import { SlotOnWinExtraFreeSpinData } from '../slot/SlotFreeSpinsStats';
+import { i18n } from '../i18n/i18n';
 
 /** The screen tha holds the Slot game */
 export class GameScreen extends Container {
@@ -76,9 +77,9 @@ export class GameScreen extends Container {
     /** Currency */
     public currency: string;
     /** Greetings */
-    public preBetGreetings = ['HOLD SPACE FOR TURBO SPIN', 'PLACE YOUR BETS'];
+    public preBetGreetings = [i18n.t('holdSpaceForTurboSpin'), i18n.t('placeYourBets')];
     /** Index */
-    public betGreetings = ['HOLD SPACE FOR TURBO SPIN', 'GOOD LUCK!'];
+    public betGreetings = [i18n.t('holdSpaceForTurboSpin'), i18n.t('goodluck')];
 
     constructor() {
         super();
@@ -491,13 +492,13 @@ export class GameScreen extends Container {
     /** Fires if player wins */
     private onWin(amount: number) {
         if (this.slot.isFreeSpinPlaying()) {
-            this.controlPanel.setWinTitle(`WIN ${formatCurrency(amount, this.currency)}`);
+            this.controlPanel.setWinTitle(i18n.t('win', { amount: formatCurrency(amount, this.currency) }));
             return;
         }
 
         if (this.slot.isPlaying()) {
             if (amount > 0) {
-                this.controlPanel.setWinTitle(`WIN ${formatCurrency(amount, this.currency)}`);
+                this.controlPanel.setWinTitle(i18n.t('win', { amount: formatCurrency(amount, this.currency) }));
             } else {
                 this.controlPanel.setTitle(
                     this.preBetGreetings[Math.floor(Math.random() * this.preBetGreetings.length)],

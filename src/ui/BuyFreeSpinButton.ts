@@ -3,6 +3,7 @@ import { Container, FillGradient, Sprite, TextStyle, Texture } from 'pixi.js';
 import gsap from 'gsap';
 import { Label } from './Label';
 import { sfx } from '../utils/audio';
+import { i18n } from '../i18n/i18n';
 
 /**
  * Buy Free Spin button with hover and press effects
@@ -65,12 +66,12 @@ export class BuyFreeSpinButton extends FancyButton {
                 color: '#6D3000',
             },
         });
-        this.messageLabel1 = new Label(`BUY FREE`, style1);
+        this.messageLabel1 = new Label(i18n.t('buyFree'), style1);
         this.messageLabel1.style.fill = verticalGradient1;
         this.messageLabel1.y = -this.messageLabel1.height * 0.9;
         this.container.addChild(this.messageLabel1);
 
-        this.messageLabel2 = new Label(`SPIN`, style1);
+        this.messageLabel2 = new Label(i18n.t('spin'), style1);
         this.messageLabel2.style.fontSize = 50;
         this.messageLabel2.style.fill = verticalGradient1;
         this.container.addChild(this.messageLabel2);

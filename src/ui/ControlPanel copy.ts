@@ -5,6 +5,7 @@ import { MatchPattern } from './MatchPattern';
 import { AudioButton } from './AudioButton';
 import { formatCurrency } from '../utils/formatter';
 import { SpinButton, SpinButtonState } from './SpinButton';
+import { i18n } from '../i18n/i18n';
 
 export interface WinMatchPattern {
     times: number;
@@ -62,7 +63,7 @@ export class ControlPanel extends Container {
 
         // Credit display (bottom left)
         this.creditLabel = new Text({
-            text: 'CREDIT',
+            text: i18n.t('credit'),
             style: {
                 fontSize: 18,
                 fill: 0xffffff,

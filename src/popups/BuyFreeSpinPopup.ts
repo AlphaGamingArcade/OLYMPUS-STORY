@@ -5,6 +5,7 @@ import { ShadowLabel } from '../ui/ShadowLabel';
 import { registerCustomEase, resolveAndKillTweens } from '../utils/animation';
 import { IconButton } from '../ui/IconButton';
 import { formatCurrency } from '../utils/formatter';
+import { i18n } from '../i18n/i18n';
 
 /** Custom ease curve for y animation of falling pieces - minimal bounce */
 const easeSingleBounce = registerCustomEase(
@@ -181,7 +182,7 @@ export class BuyFreeSpinPopup extends Container {
 
         // BOTTOM TEXT (IN X FREE SPINS)
         this.topText = new ShadowLabel({
-            text: 'BUY FREE SPINS',
+            text: i18n.t('buyFreeSpins'),
             style: {
                 fill: verticalGradient3,
                 fontFamily: 'Spartanmb Extra Bold',

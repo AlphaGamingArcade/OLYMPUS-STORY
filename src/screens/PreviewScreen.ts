@@ -8,6 +8,7 @@ import { navigation } from '../utils/navigation';
 import { GameScreen } from './GameScreen';
 import { GameLogo } from '../ui/GameLogo';
 import { MessagePagination } from '../ui/MessagePagination';
+import { i18n } from '../i18n/i18n';
 
 /** Screen shown while loading assets */
 export class PreviewScreen extends Container {
@@ -53,8 +54,14 @@ export class PreviewScreen extends Container {
             textureSpace: 'local',
         });
 
+        this.messageList = [
+            i18n.t('winUpToXBet', { bet: 250 }),
+            i18n.t('jackpotChanceIncrease'),
+            i18n.t('bigWinsComing'),
+        ];
+
         this.message = new Text({
-            text: 'Win up to 250x bet',
+            text: this.messageList[0],
             style: {
                 fill: verticalGradient1,
                 fontFamily: 'Spartanmb Extra Bold',
@@ -76,8 +83,6 @@ export class PreviewScreen extends Container {
         this.gameLogo = new GameLogo();
         this.gameLogo.scale.set(1.5);
         this.addChild(this.gameLogo);
-
-        this.messageList = ['Win up to 250x bet', 'Jackpot chance increased!', 'Big Wins are coming!'];
 
         // Create pagination component
         this.messagePagination = new MessagePagination(this.messageList.length, 80);
