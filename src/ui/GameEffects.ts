@@ -78,64 +78,6 @@ export class GameEffects extends Container {
         await Promise.all(animPromise);
     }
 
-    /** Make the piece fly to cauldron with a copy of the original piece created in its place */
-    public async playFlyToJackpotTierOld(piece: SlotSymbol, to: { x: number; y: number }) {
-        const distance = getDistance(piece.x, piece.y, to.x, to.y);
-        const duration = distance * 0.0008 + randomRange(0.3, 0.6);
-
-        gsap.killTweensOf(piece);
-        gsap.killTweensOf(piece.scale);
-        gsap.killTweensOf(piece, 'rotation');
-
-        const tl = gsap.timeline();
-
-        tl.to(
-            piece,
-            {
-                x: to.x,
-                y: to.y,
-                duration: duration,
-                ease: 'power1.inOut',
-            },
-            0,
-        );
-
-        tl.to(
-            piece.scale,
-            {
-                x: 0.5,
-                y: 0.5,
-                duration: duration,
-                ease: 'power1.in',
-            },
-            0,
-        );
-
-        tl.to(
-            piece,
-            {
-                alpha: 0,
-                duration: duration * 0.5,
-                ease: 'power1.in',
-            },
-            duration * 0.5,
-        );
-
-        await tl;
-
-        if (piece.type == 11) {
-            this.game.grandJackpotTier.addActiveDot();
-        } else if (piece.type == 12) {
-            this.game.angelicJackpotTier.addActiveDot();
-        } else if (piece.type == 13) {
-            this.game.blessedJackpotTier.addActiveDot();
-        } else if (piece.type == 14) {
-            this.game.divineJackpotTier.addActiveDot();
-        }
-
-        sfx.play('common/sfx-bubble.wav');
-    }
-
     public async playFlyToJackpotTier(
         symbol: SlotSymbol,
         from: { x: number; y: number },
@@ -243,7 +185,34 @@ export class GameEffects extends Container {
         });
 
         // Clean up rope
-        rope.destroy();
+        gsap.killTweensOf(rope);
+        gsap.killTweensOf(animatedPos);
+
+        // Clean up rope and its geometry
+        if (rope && !rope.destroyed) {
+            // Destroy geometry first (contains the points buffer)
+            if (rope.geometry) {
+                rope.geometry.destroy();
+            }
+
+            // Remove from parent
+            if (rope.parent) {
+                rope.parent.removeChild(rope);
+            }
+
+            // Destroy rope (don't destroy shared textures)
+            rope.destroy({
+                children: true,
+                texture: false,
+            });
+        }
+
+        // Clear points array
+        points.length = 0;
+
+        // Clear history arrays
+        historyX.length = 0;
+        historyY.length = 0;
     }
 
     public async playHideJackpotTimes(jackpot: Jackpot) {

@@ -13,9 +13,12 @@ import { ConfigAPI } from './api/configApi';
 import { gameConfig } from './utils/gameConfig';
 import { BetAPI } from './api/betApi';
 import { userSettings } from './utils/userSettings';
+import { initDevtools } from '@pixi/devtools';
 
 /** The PixiJS app Application instance, shared across the project */
 export const app = new Application();
+
+initDevtools({ app });
 
 /** Set up a resize function for the app */
 function resize() {
@@ -107,8 +110,6 @@ async function init() {
     // Load game config
     await loadGameConfig();
 
-    // @ts-ignore
-    globalThis.__PIXI_APP__ = app;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     if (isMobile) {

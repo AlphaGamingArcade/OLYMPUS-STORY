@@ -112,7 +112,7 @@ export class SlotJackpot {
         const jackpotWinsByType = slotGetJackpotWinsByType(this.jackpots, this.configJackpots);
 
         // Display modals for each winning jackpot
-        for (const [_, jackpotWinData] of Object.entries(jackpotWinsByType)) {
+        for (const [, jackpotWinData] of Object.entries(jackpotWinsByType)) {
             await waitFor(0.5);
 
             const amount = jackpotWinData.times * (this.betAmount * jackpotWinData.jackpot.multiplier);
@@ -138,7 +138,7 @@ export class SlotJackpot {
         const jackpotWinsByType = slotGetJackpotWinsByType(this.jackpots, this.configJackpots);
 
         // Display modals for each winning jackpot
-        for (const [_, jackpotWinData] of Object.entries(jackpotWinsByType)) {
+        for (const [, jackpotWinData] of Object.entries(jackpotWinsByType)) {
             await waitFor(0.5);
 
             const amount = jackpotWinData.times * (this.betAmount * jackpotWinData.jackpot.multiplier);

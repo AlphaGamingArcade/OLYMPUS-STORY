@@ -245,7 +245,7 @@ export class InfoPopup extends Container {
     }
 
     /** Set things up just before showing the popup */
-    public prepare(_data: InfoPopup) {}
+    public prepare() {}
 
     public update() {}
 

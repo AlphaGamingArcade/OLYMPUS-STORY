@@ -283,19 +283,6 @@ export class SlotBoard {
      * @param positions List of positions to be popped out
      * @param causedBySpecial If this was caused by special effects
      */
-    public async playSpecialPieces(positions: SlotPosition[]) {
-        const animPromises = [];
-        for (const position of positions) {
-            animPromises.push(this.playSpecialPiece(position));
-        }
-        await Promise.all(animPromises);
-    }
-
-    /**
-     * Pop a list of pieces all together
-     * @param positions List of positions to be popped out
-     * @param causedBySpecial If this was caused by special effects
-     */
     public async popPieces(positions: SlotPosition[]) {
         const animPromises = [];
         for (const position of positions) {
@@ -346,7 +333,7 @@ export class SlotBoard {
      * @returns The type of the piece
      */
     public getTypesByPositions(positions: SlotPosition[]) {
-        let types = [];
+        const types = [];
         for (const position of positions) {
             types.push(this.getTypeByPosition(position));
         }

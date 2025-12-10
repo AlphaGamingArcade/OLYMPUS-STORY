@@ -150,7 +150,7 @@ export class RoundResult extends Container {
 
     /** Clear all result items */
     public async clearResults() {
-        let animPromise = [];
+        const animPromise = [];
         for (const resultItem of this.resultItems) {
             animPromise.push(resultItem.hide());
         }

@@ -39,12 +39,12 @@ export class SlotSymbol extends Container {
 
     constructor() {
         super();
+
         // Create new spine animation
         this.spine = Spine.from({
             skeleton: `game/symbol-placeholder.json`,
             atlas: `game/symbol-placeholder.atlas`,
         });
-
         // Center the spine
         this.spine.x = 0;
         this.spine.y = 0;

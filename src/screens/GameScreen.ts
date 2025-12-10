@@ -1,4 +1,4 @@
-import { Container, Ticker } from 'pixi.js';
+import { Container } from 'pixi.js';
 import {
     Slot,
     SlotFreeSpinStartData,
@@ -346,8 +346,8 @@ export class GameScreen extends Container {
     }
 
     /** Update the screen */
-    public update(time: Ticker) {
-        this.slot.update(time.deltaMS);
+    public update() {
+        this.slot.update();
         // console.log('[FREE SPINS]', this.slot.freeSpinsStats.getAvailableFreeSpins());
         // console.log('[FREE SPINS], IS FREE SPIN PLAYING', this.slot.isFreeSpinPlaying());
         // console.log('[FREE SPINS], IS PLAYING', this.slot.isPlaying());

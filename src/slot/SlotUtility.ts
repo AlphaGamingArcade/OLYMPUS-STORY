@@ -231,7 +231,7 @@ export function slotGetMatches(grid: SlotGrid) {
         }
     }
 
-    let allMatches: SlotPosition[][] = [];
+    const allMatches: SlotPosition[][] = [];
 
     for (let i = 0; i < paytable.length; i++) {
         const symbolType = paytable[i].type;
@@ -362,7 +362,7 @@ export function slotGetMismatches(grid: SlotGrid, refillGrid: SlotGrid) {
 
     for (let r = rows - 1; r >= 0; r--) {
         for (let c = 0; c < columns; c++) {
-            let position = { row: r, column: c };
+            const position = { row: r, column: c };
             const type = slotGetPieceType(grid, position);
             if (type != refillGrid[r][c]) {
                 mismatches.push({ row: r, column: c });
@@ -569,7 +569,7 @@ export function slotGetJackpotWinsByType(
 export function slotGetNextFreeSpinJackpots(
     jackpots: Record<string, { type: number; active: number; required: number }>,
 ): Record<string, { type: number; active: number; required: number }> {
-    for (const [_, jackpot] of Object.entries(jackpots)) {
+    for (const [, jackpot] of Object.entries(jackpots)) {
         const remainder = jackpot.active % jackpot.required;
         jackpot.active = remainder;
     }

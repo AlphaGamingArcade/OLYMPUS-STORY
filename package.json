@@ -11,7 +11,7 @@
         "types": "tsc",
         "prepreview": "run-s build",
         "preview": "vite preview --open",
-        "clean": "rimraf public/assets/* dist/* .assetpack/*",
+        "clean": "del-cli public/assets/* dist/* .assetpack/*",
         "lint": "eslint src",
         "lint:fix": "eslint src --fix",
         "format": "prettier --write src",
@@ -19,9 +19,11 @@
     },
     "dependencies": {
         "@esotericsoftware/spine-pixi-v8": "^4.2.95",
+        "@pixi/devtools": "^2.0.1",
         "@pixi/sound": "^6.0.1",
         "@pixi/ui": "^2.2.7",
         "axios": "^1.13.2",
+        "del-cli": "^7.0.0",
         "gsap": "^3.13.0",
         "pixi.js": "^8.14.1"
     },

@@ -1,4 +1,4 @@
-import { Container, Sprite } from 'pixi.js';
+import { Container } from 'pixi.js';
 import gsap from 'gsap';
 import { Spine } from '@esotericsoftware/spine-pixi-v8';
 
