@@ -5,6 +5,7 @@ import { Paytable } from '../slot/SlotConfig';
 import { List } from '@pixi/ui';
 import { gameConfig } from '../utils/gameConfig';
 import { PaytableCard } from './PaytableCard';
+import { i18n } from '../i18n/i18n';
 
 export class PayTableSection extends Container {
     private symbolsDescriptionLabel: Label;
@@ -27,17 +28,14 @@ export class PayTableSection extends Container {
         this.mainLayout = new List({ type: 'vertical', elementsMargin: 20 });
         this.addChild(this.mainLayout);
 
-        this.symbolsDescriptionLabel = new Label(
-            'Symbols pay regardless of their position. Your payout is based on how many identical symbols appear when the spin ends.',
-            {
-                fill: '#ffffff',
-                fontSize: 18,
-                fontWeight: '200',
-                wordWrap: true,
-                wordWrapWidth: 800,
-                align: 'center',
-            },
-        );
+        this.symbolsDescriptionLabel = new Label(i18n.t('paytableDesc'), {
+            fill: '#ffffff',
+            fontSize: 18,
+            fontWeight: '200',
+            wordWrap: true,
+            wordWrapWidth: 800,
+            align: 'center',
+        });
         this.symbolsDescriptionLabel.anchor.set(0.5);
         this.mainLayout.addChild(this.symbolsDescriptionLabel);
 

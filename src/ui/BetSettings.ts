@@ -2,6 +2,7 @@ import { List } from '@pixi/ui';
 import { Container, Sprite } from 'pixi.js';
 import { Label } from './Label';
 import { IconButton } from './IconButton2';
+import { i18n } from '../i18n/i18n';
 
 export class BetSettings extends Container {
     private layout: List;
@@ -22,7 +23,7 @@ export class BetSettings extends Container {
         this.layout = new List({ type: 'vertical', elementsMargin: 10 });
         this.addChild(this.layout);
 
-        this.title = new Label('Total bet', {
+        this.title = new Label(i18n.t('totalBet'), {
             fill: '#FCC100',
             align: 'center',
         });

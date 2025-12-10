@@ -58,7 +58,7 @@ export class Slider extends PIXISlider {
         // Set pivot to center the slider
         this.pivot.set(width / 2, -20);
 
-        this.messageLabel = new Label(`${opts.text} (${this.value || 0})`, {
+        this.messageLabel = new Label(opts.text, {
             align: 'left',
             fill: 0xffffff,
             fontSize: 18,

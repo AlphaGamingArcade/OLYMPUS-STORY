@@ -6,6 +6,7 @@ import { IconButton } from '../ui/IconButton2';
 import { Button } from '../ui/Button';
 import { Slider } from '../ui/Slider';
 import { SlotSpinMode } from '../slot/SlotConfig';
+import { i18n } from '../i18n/i18n';
 
 export type AutoplayPopupData = {
     spinMode: SlotSpinMode;
@@ -84,7 +85,7 @@ export class AutoplayPopup extends Container {
         this.panelBase.addChild(this.closeButton);
 
         this.title = new Text({
-            text: 'Autoplay Settings',
+            text: i18n.t('autoplaySettings'),
             style: {
                 fill: '#FCC100',
                 fontSize: 32,
@@ -96,7 +97,7 @@ export class AutoplayPopup extends Container {
 
         // Quick Spin
         this.quickSpinCheckbox = new CheckboxWithLabel({
-            label: 'Quick spin',
+            label: i18n.t('quickSpin'),
             isChecked: false,
         });
         this.quickSpinCheckbox.onSwitch(() => {
@@ -106,7 +107,7 @@ export class AutoplayPopup extends Container {
         this.layout.addChild(this.quickSpinCheckbox);
 
         this.turboSpinCheckbox = new CheckboxWithLabel({
-            label: 'Turbo Spin',
+            label: i18n.t('turboSpin'),
             isChecked: false,
         });
         this.turboSpinCheckbox.onSwitch(() => {
@@ -117,21 +118,21 @@ export class AutoplayPopup extends Container {
 
         // Autoplay slider
         this.autoplaySlider = new Slider({
-            text: 'Number of Auto spins',
+            text: i18n.t('numberOfAutoSpins', { autospins: this.autoplayCount }),
             min: 10,
             max: 1000000,
             value: 10,
         });
         this.autoplaySlider.onUpdate.connect((value: number) => {
             this.autoplayCount = Math.round(value / 10) * 10; // Round to nearest 10
-            this.autoplaySlider.text = `Number of Auto Spins (${this.autoplayCount})`;
-            this.autoplayButton.setText(`Autoplay (${this.autoplayCount})`);
+            this.autoplaySlider.text = i18n.t('numberOfAutoSpins', { autospins: this.autoplayCount });
+            this.autoplayButton.setText(i18n.t('autoplay', { autospins: this.autoplayCount }));
         });
         this.layout.addChild(this.autoplaySlider);
 
         // Autoplay start button
         this.autoplayButton = new Button({
-            text: `Autoplay (${this.autoplayCount})`,
+            text: i18n.t('autoplay', { autospins: this.autoplayCount }),
         });
         this.autoplayButton.onPress.connect(() => this.onAutoplayPress?.(this.autoplayCount));
         this.autoplayButton.anchor.set(0.5);

@@ -13,6 +13,7 @@ import { gameConfig } from './utils/gameConfig';
 import { BetAPI } from './api/betApi';
 import { userSettings } from './utils/userSettings';
 import { initDevtools } from '@pixi/devtools';
+import { InfoPopup } from './popups/InfoPopup';
 
 /** The PixiJS app Application instance, shared across the project */
 export const app = new Application();
@@ -150,7 +151,7 @@ async function init() {
     } else if (getUrlParam('load') !== null) {
         await navigation.showScreen(LoadScreen);
     } else if (getUrlParam('modal') !== null) {
-        //
+        await navigation.showScreen(InfoPopup);
     } else {
         await navigation.showScreen(LoadScreen);
     }

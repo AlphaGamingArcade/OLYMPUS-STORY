@@ -3,6 +3,7 @@ import { List } from '@pixi/ui';
 import { Label } from './Label';
 import { Jackpot } from '../slot/SlotConfig';
 import { gameConfig } from '../utils/gameConfig';
+import { i18n } from '../i18n/i18n';
 
 export class FeatureSection extends Container {
     private descriptionLabel: Label;
@@ -20,18 +21,15 @@ export class FeatureSection extends Container {
         this.mainLayout = new List({ type: 'vertical', elementsMargin: 40 });
         this.addChild(this.mainLayout);
 
-        this.descriptionLabel = new Label(
-            'After every spin, winning symbols are paid and removed. Remaining symbols drop down and new ones fall from above to fill the gaps. CASCADE FEATURE continue as long as new wins appear, with no limit to how many can occur. All wins are added after the final cascade.\n\nSpecial award symbols and SCATTER symbols do not disappear and stay on the reels until all cascades from the spin are finished.',
-            {
-                fill: 0xffffff,
-                fontSize: 18,
-                fontWeight: '200',
-                wordWrap: true, // Enable word wrapping
-                align: 'center', // Optional: alignment for the wrapped text
-                wordWrapWidth: 1000,
-                lineHeight: 24,
-            },
-        );
+        this.descriptionLabel = new Label(i18n.t('cascadeFeatureDesc1'), {
+            fill: 0xffffff,
+            fontSize: 18,
+            fontWeight: '200',
+            wordWrap: true, // Enable word wrapping
+            align: 'center', // Optional: alignment for the wrapped text
+            wordWrapWidth: 1000,
+            lineHeight: 24,
+        });
 
         this.mainLayout.addChild(this.descriptionLabel);
 
@@ -49,18 +47,15 @@ export class FeatureSection extends Container {
         // Center the symbols container after adding all symbols
         this.symbolsContainer.pivot.x = this.symbolsContainer.width / 2;
 
-        this.descriptionLabel2 = new Label(
-            'JACKPOT AWARD symbols appear as GRAND, ANGELIC, BLESSED, and DIVINE, each collected during winning spins or cascades toward their respective JACKPOT AWARD meters, awarding the GRAND with 2 symbols, ANGELIC with 3, BLESSED with 4, and DIVINE with 5, with any extra symbols added after the meter resets, and all collected symbols cleared once the spin and its cascades end.',
-            {
-                fill: 0xffffff,
-                fontSize: 18,
-                lineHeight: 24,
-                fontWeight: '200',
-                wordWrap: true,
-                wordWrapWidth: 1000,
-                align: 'center',
-            },
-        );
+        this.descriptionLabel2 = new Label(i18n.t('cascadeFeatureDesc2'), {
+            fill: 0xffffff,
+            fontSize: 18,
+            lineHeight: 24,
+            fontWeight: '200',
+            wordWrap: true,
+            wordWrapWidth: 1000,
+            align: 'center',
+        });
 
         this.mainLayout.addChild(this.descriptionLabel2);
     }

@@ -6,6 +6,7 @@ import { AudioSettings } from '../ui/AudioSettings';
 import { BetSettings } from '../ui/BetSettings';
 import { BetAction, userSettings } from '../utils/userSettings';
 import { bgm, sfx } from '../utils/audio';
+import { i18n } from '../i18n/i18n';
 
 export type SettingsPopupData = {
     finished: boolean;
@@ -56,7 +57,7 @@ export class SettingsPopup extends Container {
         this.panelBg.height = this.panelHeight;
         this.panelBase.addChild(this.panelBg);
 
-        this.title = new Label('System Settings', {
+        this.title = new Label(i18n.t('systemSettings'), {
             fill: '#FCC100',
         });
         this.title.anchor.set(0.5);

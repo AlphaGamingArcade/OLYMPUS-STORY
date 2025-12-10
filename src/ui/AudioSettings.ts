@@ -1,5 +1,6 @@
 import { Container } from 'pixi.js';
 import { AudioSwitcher } from './AudioSwitcher';
+import { i18n } from '../i18n/i18n';
 
 export interface AudioSettingsOptions {
     gap?: number;
@@ -29,8 +30,8 @@ export class AudioSettings extends Container {
 
         /** Ambient music Switcher */
         this.ambientMusicSwitcher = new AudioSwitcher({
-            title: 'Ambient music',
-            description: 'Ambient music sub text',
+            title: i18n.t('ambientMusicSwitch'),
+            description: i18n.t('ambientMusicSwitchDesc'),
             width,
         });
         this.ambientMusicSwitcher.onPress(() => this.onAmbientMusicToggleCallback?.());
@@ -53,8 +54,8 @@ export class AudioSettings extends Container {
 
         /** Sound FX */
         this.soundFXSwitcher = new AudioSwitcher({
-            title: 'Sound FX',
-            description: 'Sound FX Description',
+            title: i18n.t('soundFXSwitch'),
+            description: i18n.t('soundFXSwitchDesc'),
             width,
         });
         this.soundFXSwitcher.onPress(() => this.onSoundFXToggleCallback?.());
