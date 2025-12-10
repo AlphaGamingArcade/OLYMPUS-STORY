@@ -90,18 +90,21 @@ export class CloudBackground extends Container {
             // Move cloud horizontally
             cloud.sprite.x += cloud.speed * cloud.direction * this.speed * delta;
 
-            // Wrap around when cloud goes off screen
+            // Calculate cloud width based on its scale
+            const cloudWidth = cloud.sprite.width;
+
+            // Wrap around when cloud is COMPLETELY off screen
             if (cloud.direction > 0) {
-                // Moving right
-                if (cloud.sprite.x > this.screenWidth + 200) {
-                    cloud.sprite.x = -200;
+                // Moving right - wrap when left edge exceeds right screen edge
+                if (cloud.sprite.x - cloudWidth / 2 > this.screenWidth) {
+                    cloud.sprite.x = -cloudWidth / 2;
                     // Randomize Y position when wrapping
                     cloud.sprite.y = Math.random() * this.screenHeight * 0.65;
                 }
             } else {
-                // Moving left
-                if (cloud.sprite.x < -200) {
-                    cloud.sprite.x = this.screenWidth + 200;
+                // Moving left - wrap when right edge is past left screen edge
+                if (cloud.sprite.x + cloudWidth / 2 < 0) {
+                    cloud.sprite.x = this.screenWidth + cloudWidth / 2;
                     // Randomize Y position when wrapping
                     cloud.sprite.y = Math.random() * this.screenHeight * 0.65;
                 }
