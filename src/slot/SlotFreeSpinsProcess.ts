@@ -18,6 +18,7 @@ import {
 } from './SlotUtility';
 import { gameConfig } from '../utils/gameConfig';
 import { SlotSymbol } from './SlotSymbol';
+import { slotGetSpinModeDelay } from './SlotConfig';
 
 /**
  * Controls the entire free-spin resolution flow for the Slot board.
@@ -216,8 +217,20 @@ export class SlotFreeSpinsProcess {
                 animPromises.push(piece.animateFall(x, y));
             }
 
-            await new Promise((resolve) => setTimeout(resolve, 50));
+            // Wait before starting next column
+            let delay = slotGetSpinModeDelay(this.slot.spinMode);
+
+            // if interrupted change delay to 0
+            if (this.slot.requireSpinInterrupt) {
+                delay = 0;
+            }
+
+            this.slot.onColumnMoveStart?.({});
+            await new Promise((resolve) => setTimeout(resolve, delay));
+            this.slot.onColumnMoveComplete?.({});
         }
+
+        this.slot.requireSpinInterrupt = false;
 
         await Promise.all(animPromises);
     }
@@ -365,11 +378,11 @@ export class SlotFreeSpinsProcess {
             winMatches.push({ amount: winAmount, types });
         }
 
-        await Promise.all(animePlayPieces);
-
         this.slot.onMatch?.({
             wins: winMatches,
         });
+
+        await Promise.all(animePlayPieces);
 
         // register in free spin stats
         const winTotal = winMatches.reduce((acc, value) => (acc = acc + value.amount), 0);
@@ -430,7 +443,11 @@ export class SlotFreeSpinsProcess {
             animPromises.push(piece.animateFall(newPos.x, newPos.y));
         }
 
-        await Promise.all(animPromises);
+        if (animPromises.length > 0) {
+            this.slot.onColumnMoveStart?.({});
+            await Promise.all(animPromises);
+            this.slot.onColumnMoveComplete?.({});
+        }
     }
 
     /** Refill all empty cells with brand-new pieces falling from above */
@@ -465,7 +482,11 @@ export class SlotFreeSpinsProcess {
             animPromises.push(piece.animateFall(x, y));
         }
 
-        await Promise.all(animPromises);
+        if (animPromises.length > 0) {
+            this.slot.onColumnMoveStart?.({});
+            await Promise.all(animPromises);
+            this.slot.onColumnMoveComplete?.({});
+        }
 
         return result.reels;
     }

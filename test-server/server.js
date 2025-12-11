@@ -89,21 +89,21 @@ app.post('/spin', async (req, res) => {
     balance = balance - req.body.bet;
 
     // Generate 5 reels, each with 5 random symbols from the symbols array
-    // let symbolsByReel = [
-    //     [1, 2, 9, 9, 4, 9, 9, 2, 4, 3, 4, 5, 6, 7, 8, 9], // Reel 0 symbols
-    //     [1, 2, 2, 9, 4, 8, 9, 2, 3, 9, 9, 2, 5, 6, 7, 8, 9, 11, 13, 14], // Reel 1 symbols
-    //     [1, 2, 8, 8, 4, 8, 8, 3, 4, 2, 5, 6, 7, 8, 9, 11, 13, 14], // Reel 2 symbols
-    //     [2, 3, 4, 5, 2, 2, 8, 8, 9, 9, 4, 6, 7, 8, 9, 11], // Reel 3 symbols
-    //     [3, 4, 5, 2, 6, 7, 8, 9, 11, 12], // Reel 4 symbols
-    // ];
-
     let symbolsByReel = [
         [1, 2, 9, 9, 4, 9, 9, 2, 4, 3, 4, 5, 6, 7, 8, 9], // Reel 0 symbols
-        [1, 2, 2, 9, 4, 8, 9, 2, 3, 9, 9, 2, 5, 6, 7, 8, 9], // Reel 1 symbols
-        [1, 2, 8, 8, 4, 8, 8, 3, 4, 2, 5, 6, 7, 8, 9], // Reel 2 symbols
-        [2, 3, 4, 5, 2, 2, 8, 8, 9, 9, 4, 6, 7, 8, 9], // Reel 3 symbols
-        [3, 4, 5, 2, 6, 7, 8, 9], // Reel 4 symbols
+        [1, 2, 2, 9, 4, 8, 9, 2, 3, 9, 9, 2, 5, 6, 7, 8, 9, 11, 13, 14], // Reel 1 symbols
+        [1, 2, 8, 8, 4, 8, 8, 3, 4, 2, 5, 6, 7, 8, 9, 11, 13, 14], // Reel 2 symbols
+        [2, 3, 4, 5, 2, 2, 8, 8, 9, 9, 4, 6, 7, 8, 9, 11], // Reel 3 symbols
+        [3, 4, 5, 2, 6, 7, 8, 9, 11, 12], // Reel 4 symbols
     ];
+
+    // let symbolsByReel = [
+    //     [1, 2, 9, 9, 4, 9, 9, 2, 4, 3, 4, 5, 6, 7, 8, 9], // Reel 0 symbols
+    //     [1, 2, 2, 9, 4, 8, 9, 2, 3, 9, 9, 2, 5, 6, 7, 8, 9], // Reel 1 symbols
+    //     [1, 2, 8, 8, 4, 8, 8, 3, 4, 2, 5, 6, 7, 8, 9], // Reel 2 symbols
+    //     [2, 3, 4, 5, 2, 2, 8, 8, 9, 9, 4, 6, 7, 8, 9], // Reel 3 symbols
+    //     [3, 4, 5, 2, 6, 7, 8, 9], // Reel 4 symbols
+    // ];
 
     const reels = Array.from({ length: 5 }, (_, reelIndex) =>
         Array.from({ length: 6 }, () => {

@@ -263,8 +263,9 @@ export class SlotProcess {
                 delay = 0;
             }
 
+            this.slot.onColumnMoveStart?.({});
             await new Promise((resolve) => setTimeout(resolve, delay));
-            this.slot.onColumnFillComplete?.({});
+            this.slot.onColumnMoveComplete?.({});
         }
 
         // Always cancel interuption
@@ -300,11 +301,11 @@ export class SlotProcess {
             winMatches.push({ amount: winAmount, types });
         }
 
-        await Promise.all(animePlayPieces);
-
         this.slot.onMatch?.({
             wins: winMatches,
         });
+
+        await Promise.all(animePlayPieces);
 
         const winTotal = winMatches.reduce((acc, value) => (acc = acc + value.amount), 0);
         this.winAmount = this.winAmount + winTotal;
@@ -371,10 +372,10 @@ export class SlotProcess {
             animPromises.push(piece.animateFall(newPosition.x, newPosition.y));
         }
 
-        await Promise.all(animPromises);
-
         if (animPromises.length > 0) {
-            this.slot.onColumnFillComplete?.({});
+            this.slot.onColumnMoveStart?.({});
+            await Promise.all(animPromises);
+            this.slot.onColumnMoveComplete?.({});
         }
     }
 
@@ -409,10 +410,10 @@ export class SlotProcess {
             animPromises.push(piece.animateFall(x, y));
         }
 
-        await Promise.all(animPromises);
-
         if (animPromises.length > 0) {
-            this.slot.onColumnRefillComplete?.({});
+            this.slot.onColumnMoveStart?.({});
+            await Promise.all(animPromises);
+            this.slot.onColumnMoveComplete?.({});
         }
 
         return result.reels as SlotGrid;
@@ -426,13 +427,11 @@ export class SlotProcess {
         const hasScatterTrigger = scatterMatches.some((group) => group.length >= scatterTrigger);
 
         if (hasScatterTrigger) {
+            await waitFor(0.75);
             this.slot.onScatterMatch?.({ symbols: [] });
-            for (let i = 0; i < 3; i++) {
-                const animatePlayPieces = scatterMatches.map((m) => this.slot.board.playPieces(m));
-                await Promise.all(animatePlayPieces);
-                if (i < 2) await waitFor(1);
-            }
-
+            const animatePlayPieces = scatterMatches.map((m) => this.slot.board.playPieces(m));
+            await Promise.all(animatePlayPieces);
+            await waitFor(1);
             const freeSpinCount = this.slot.freeSpinsStats.getAvailableFreeSpins();
             const freeSpinTriggerData = { totalFreeSpins: freeSpinCount };
             await this.slot.onWinFreeSpinTrigger?.(freeSpinTriggerData);

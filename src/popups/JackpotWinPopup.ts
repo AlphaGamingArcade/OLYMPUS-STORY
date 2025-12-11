@@ -5,6 +5,8 @@ import { ShadowLabel } from '../ui/ShadowLabel';
 import { registerCustomEase, resolveAndKillTweens } from '../utils/animation';
 import { waitFor } from '../utils/asyncUtils';
 import { formatCurrency } from '../utils/formatter';
+import { throttle } from '../utils/throttle';
+import { sfx } from '../utils/audio';
 
 /** Custom ease curve for y animation of falling pieces - minimal bounce */
 const easeSingleBounce = registerCustomEase(
@@ -64,6 +66,7 @@ export class JackpotWinPopup extends Container {
     private screenHeight = 0;
     /** Flag to track if this popup instance is currently active */
     private isActive = false;
+    private intensity = 0;
 
     constructor() {
         super();
@@ -218,8 +221,15 @@ export class JackpotWinPopup extends Container {
             duration: this.countAnimationDuration,
             ease: 'power2.out',
             onUpdate: () => {
-                // const formatted = `${this.currency}${this.currentWinAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
                 this.winAmount.text = formatCurrency(this.currentWinAmount, this.currency);
+                if (this.currentWinAmount >= 10) {
+                    const speed = Math.min(0.8 + this.intensity * 0.001, 1);
+                    // Throttle sfx to a minimum interval, otherwise too many sounds instances
+                    // will be played at the same time, making it very noisy
+                    throttle('score', 100, () => {
+                        sfx.play('common/sfx-coin.wav', { speed, volume: 0.2 });
+                    });
+                }
             },
             onComplete: () => {
                 gsap.killTweensOf(this.winAmount.scale);
@@ -261,7 +271,6 @@ export class JackpotWinPopup extends Container {
 
         // Set final amount
         this.currentWinAmount = this.targetWinAmount;
-        // const formatted = `${this.currency}${this.currentWinAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
         this.winAmount.text = formatCurrency(this.currentWinAmount, this.currency);
 
         // Do the final bounce
@@ -384,7 +393,7 @@ export class JackpotWinPopup extends Container {
             this.targetWinAmount = data.amount;
             this.onPressConfirm = data.callback;
 
-            this.panelArc.texture = Texture.from(`modal-${data.name}-jackpot`);
+            this.panelArc.texture = Texture.from(`modal-${data.name.toLocaleLowerCase()}-jackpot`);
             this.topText.text = `${this.times > 1 ? `${this.times}X ` : ''} ${data.name.toUpperCase()}`;
         }
 
@@ -439,6 +448,9 @@ export class JackpotWinPopup extends Container {
 
         const entranceTl = gsap.timeline();
 
+        sfx.play('common/sfx-slide.wav');
+        sfx.play('common/sfx-ring-short.wav');
+
         entranceTl.to(
             this.panelArc,
             {
@@ -447,6 +459,9 @@ export class JackpotWinPopup extends Container {
                 rotation: 0,
                 duration: 0.7,
                 ease: easeSingleBounce,
+                onComplete: () => {
+                    sfx.play('common/sfx-impact.wav');
+                },
             },
             0.1,
         );

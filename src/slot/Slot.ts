@@ -61,10 +61,10 @@ export interface SlotOnJackpotTriggerData {
 }
 
 /** Interface for onMatch event data */
-export interface SlotOnColumnRefillCompleteData {}
+export interface SlotOnColumnMoveStartData {}
 
 /** Interface for onMatch event data */
-export interface SlotOnColumnFillCompleteData {}
+export interface SlotOnColumnMoveCompleteData {}
 
 export interface SlotFreeSpinStartData {
     currentSpin: number;
@@ -154,10 +154,11 @@ export class Slot extends Container {
     public onJackpotMatch?: (data: SlotOnJackpotMatchData) => Promise<void>;
     /** Fires when multiplier jackpot triggered */
     public onJackpotTrigger?: (data: SlotOnJackpotTriggerData) => Promise<void>;
+
     /** Fires when multiplier jackpot triggered */
-    public onColumnRefillComplete?: (data: SlotOnColumnRefillCompleteData) => Promise<void>;
+    public onColumnMoveStart?: (data: SlotOnColumnMoveStartData) => Promise<void>;
     /** Fires when multiplier jackpot triggered */
-    public onColumnFillComplete?: (data: SlotOnColumnRefillCompleteData) => Promise<void>;
+    public onColumnMoveComplete?: (data: SlotOnColumnMoveCompleteData) => Promise<void>;
     /** Fires when the game start auto-processing the grid */
     public onFreeSpinStart?: (data: SlotFreeSpinStartData) => void;
     /** Fires when the game start auto-processing the grid */
@@ -234,8 +235,8 @@ export class Slot extends Container {
      **/
     public async startSpin(bet: number, spinMode: SlotSpinMode, feature?: number) {
         this.playing = true;
-        this.requireSpinInterrupt = false;
         this.spinMode = spinMode;
+        this.requireSpinInterrupt = false;
         await this.actions.actionSpin(bet, feature);
     }
 
@@ -250,8 +251,10 @@ export class Slot extends Container {
     }
 
     /** Start the spin and disable interaction */
-    public async startFreeSpin(bet: number) {
+    public async startFreeSpin(bet: number, spinMode: SlotSpinMode) {
         this.freeSpinPlaying = true;
+        this.spinMode = spinMode;
+        this.requireSpinInterrupt = false;
         await this.actions.actionFreeSpin(bet);
     }
 

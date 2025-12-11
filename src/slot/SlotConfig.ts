@@ -19,7 +19,7 @@ export type SlotSpinMode = 'quick-spin' | 'turbo-spin' | 'normal-spin';
 
 export function slotGetSpinModeDelay(mode: SlotSpinMode): number {
     if (mode == 'normal-spin') {
-        return 90;
+        return 120;
     }
     if (mode == 'quick-spin') {
         return 50;
@@ -48,7 +48,6 @@ export function slotGetBlocks(): Block[] {
 
 /** Default special block tier configuration */
 const defaultJackpot = {
-    id: 'grand',
     name: 'GRAND',
     type: 9,
     multiplier: 100,

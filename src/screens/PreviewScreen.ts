@@ -9,6 +9,7 @@ import { GameScreen } from './GameScreen';
 import { MessagePagination } from '../ui/MessagePagination';
 import { i18n } from '../i18n/i18n';
 import { OlympusStory } from '../ui/OlympusStory';
+import { bgm } from '../utils/audio';
 
 /** Screen shown while loading assets */
 export class PreviewScreen extends Container {
@@ -188,6 +189,7 @@ export class PreviewScreen extends Container {
         gsap.killTweensOf(this.message);
         this.message.alpha = 1;
         this.startMessageRotation();
+        bgm.play('common/bgm-main.mp3', { volume: 0.75 });
     }
 
     /** Prepare the screen just before showing */

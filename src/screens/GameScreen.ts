@@ -6,8 +6,8 @@ import {
     SlotOnAutoplaySpinStartData,
     SlotOnAutoplayStartData,
     SlotOnBigWinTriggerData,
-    SlotOnColumnFillCompleteData,
-    SlotOnColumnRefillCompleteData,
+    SlotOnColumnMoveCompleteData,
+    SlotOnColumnMoveStartData,
     SlotOnFreeSpinCompleteData,
     SlotOnJackpotMatchData,
     SlotOnJackpotTriggerData,
@@ -174,8 +174,8 @@ export class GameScreen extends Container {
         this.slot.onJackpotMatch = this.onJackpotMatch.bind(this);
         this.slot.onJackpotTrigger = this.onJackpotTrigger.bind(this);
 
-        this.slot.onColumnRefillComplete = this.onColumnRefillComplete.bind(this);
-        this.slot.onColumnFillComplete = this.onColumnFillComplete.bind(this);
+        this.slot.onColumnMoveStart = this.onColumnMoveStart.bind(this);
+        this.slot.onColumnMoveComplete = this.onColumnMoveComplete.bind(this);
 
         this.slot.onWinFreeSpinTrigger = this.onWinFreeSpinTrigger.bind(this);
         this.slot.onWinExtraFreeSpinTrigger = this.onWinExtraFreeSpinTrigger.bind(this);
@@ -289,13 +289,14 @@ export class GameScreen extends Container {
         for (let index = 0; index < multipliers.length; index++) {
             const multiplier = multipliers[index];
             const amount = userSettings.getBet() * multiplier.multiplier;
-            if (multiplier.id == 'grand') {
+            const name = multiplier.name.toLowerCase();
+            if (name == 'grand') {
                 this.grandJackpotTier.amount = amount;
-            } else if (multiplier.id == 'angelic') {
+            } else if (name == 'angelic') {
                 this.angelicJackpotTier.amount = amount;
-            } else if (multiplier.id == 'blessed') {
+            } else if (name == 'blessed') {
                 this.blessedJackpotTier.amount = amount;
-            } else if (multiplier.id == 'divine') {
+            } else if (name == 'divine') {
                 this.divineJackpotTier.amount = amount;
             }
         }
@@ -471,7 +472,7 @@ export class GameScreen extends Container {
 
     /** Show screen with animations */
     public async show() {
-        bgm.play('common/bgm-game.mp3', { volume: 0.5 });
+        bgm.play('common/bgm-game.mp3', { volume: 0.75 });
     }
 
     /** Hide screen with animations */
@@ -482,6 +483,9 @@ export class GameScreen extends Container {
     /** Fires when there are match */
     private async onMatch(data: SlotOnMatchData) {
         if (data.wins.length > 0) {
+            sfx.play('common/sfx-combo.wav');
+            await waitFor(1);
+            sfx.play('common/sfx-explode.wav');
             sfx.play('common/sfx-win.wav');
             // stop control panel matches animation
             this.controlPanel.stopMatchMessages();
@@ -548,7 +552,7 @@ export class GameScreen extends Container {
     private async onJackpotTrigger(data: SlotOnJackpotTriggerData): Promise<void> {
         return new Promise((resolve) => {
             navigation.presentPopup<JackpotWinPopupData>(JackpotWinPopup, {
-                name: data.jackpot.id,
+                name: data.jackpot.name,
                 times: data.times,
                 amount: data.amount,
                 callback: async () => {
@@ -560,15 +564,15 @@ export class GameScreen extends Container {
         });
     }
 
-    private async onColumnRefillComplete(data: SlotOnColumnRefillCompleteData) {
+    private async onColumnMoveStart(data: SlotOnColumnMoveStartData) {
         if (data) {
-            sfx.play('common/sfx-fall.wav');
+            sfx.play('common/sfx-fall-swoosh.wav');
         }
     }
 
-    private async onColumnFillComplete(data: SlotOnColumnFillCompleteData) {
+    private async onColumnMoveComplete(data: SlotOnColumnMoveCompleteData) {
         if (data) {
-            sfx.play('common/sfx-fall.wav');
+            sfx.play('common/sfx-impact.wav');
         }
     }
 
@@ -581,10 +585,12 @@ export class GameScreen extends Container {
                 totalFreeSpins: data.totalFreeSpins,
                 callback: async () => {
                     await navigation.dismissPopup();
-                    await waitFor(1);
 
+                    bgm.play('common/bgm-free-spins.mp3', { volume: 1 });
+                    await waitFor(1);
                     const bet = userSettings.getBet();
-                    this.slot.startFreeSpin(bet);
+                    const spinMode = userSettings.getSpinMode();
+                    this.slot.startFreeSpin(bet, spinMode);
                     resolve();
                 },
             });
@@ -639,6 +645,9 @@ export class GameScreen extends Container {
                     this.controlPanel.setCredit(userSettings.getBalance());
 
                     await navigation.dismissPopup();
+
+                    bgm.play('common/bgm-game.mp3', { volume: 0.75 });
+
                     await waitFor(1);
                     if (
                         !this.slot.process.isProcessing() &&

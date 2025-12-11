@@ -124,6 +124,7 @@ export class SlotBoard {
                 delay = 0;
             }
             await new Promise((resolve) => setTimeout(resolve, delay)); // 50ms delay, adjust as needed
+            this.slot.onColumnMoveStart?.({});
         }
 
         // return to false when interruption is used or even if not use

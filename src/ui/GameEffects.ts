@@ -46,7 +46,7 @@ export class GameEffects extends Container {
 
     /** Fired when a match is detected */
     public async onJackpotMatch(data: SlotOnJackpotMatchData) {
-        sfx.play('common/sfx-match.wav');
+        sfx.play('common/sfx-sparkling.wav');
         const animPromise: Promise<void>[] = [];
 
         // Process each group sequentially
@@ -172,7 +172,7 @@ export class GameEffects extends Container {
                     this.game.divineJackpotTier.addActiveDot();
                 }
 
-                sfx.play('common/sfx-bubble.wav');
+                sfx.play('common/sfx-shine-sparkling.wav');
             },
         });
 

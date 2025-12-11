@@ -6,6 +6,8 @@ import { registerCustomEase, resolveAndKillTweens } from '../utils/animation';
 import { randomRange } from '../utils/random';
 import { formatCurrency } from '../utils/formatter';
 import { i18n } from '../i18n/i18n';
+import { sfx } from '../utils/audio';
+import { throttle } from '../utils/throttle';
 
 /** Custom ease curve for y animation of falling pieces - minimal bounce */
 const easeSingleBounce = registerCustomEase(
@@ -70,6 +72,8 @@ export class FreeSpinWinPopup extends Container {
     private isSkippable = false;
     /** Screen height for calculating off-screen positions */
     private screenHeight = 0;
+    /** Increases with the frequence that score is updated, for changing the sfx playback pitch */
+    private intensity = 0;
 
     constructor() {
         super();
@@ -374,6 +378,7 @@ export class FreeSpinWinPopup extends Container {
                 },
             });
         }
+
         this.addChild(this.coinContainer);
     }
 
@@ -381,12 +386,23 @@ export class FreeSpinWinPopup extends Container {
     private animateWinAmount() {
         this.currentWinAmount = 0;
 
+        sfx.play('common/sfx-coin.wav');
+
         const countTween = gsap.to(this, {
             currentWinAmount: this.targetWinAmount,
             duration: this.countAnimationDuration,
             ease: 'power2.out',
             onUpdate: () => {
                 this.winAmount.text = formatCurrency(this.currentWinAmount, this.currency);
+
+                if (this.currentWinAmount >= 10) {
+                    const speed = Math.min(0.8 + this.intensity * 0.001, 1);
+                    // Throttle sfx to a minimum interval, otherwise too many sounds instances
+                    // will be played at the same time, making it very noisy
+                    throttle('score', 100, () => {
+                        sfx.play('common/sfx-coin.wav', { speed, volume: 0.2 });
+                    });
+                }
             },
             onComplete: () => {
                 gsap.killTweensOf(this.winAmount.scale);
@@ -625,6 +641,9 @@ export class FreeSpinWinPopup extends Container {
 
         const entranceTl = gsap.timeline();
 
+        sfx.play('common/sfx-slide.wav');
+        sfx.play('common/sfx-congratulations.wav');
+
         entranceTl.to(
             this.panelArc,
             {
@@ -633,6 +652,9 @@ export class FreeSpinWinPopup extends Container {
                 rotation: 0,
                 duration: 0.7,
                 ease: easeSingleBounce,
+                onComplete: () => {
+                    sfx.play('common/sfx-impact.wav');
+                },
             },
             0.1,
         );

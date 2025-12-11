@@ -19,6 +19,7 @@ import { BuyFreeSpinPopup } from './popups/BuyFreeSpinPopup';
 import { ErrorPopup } from './popups/ErrorPopup';
 import { FreeSpinPopup } from './popups/FreeSpinPopup';
 import { FreeSpinWinPopup } from './popups/FreeSpinWinPopup';
+import { JackpotWinPopup, JackpotWinPopupData } from './popups/JackpotWinPopup';
 
 /** The PixiJS app Application instance, shared across the project */
 export const app = new Application();
@@ -156,7 +157,14 @@ async function init() {
     } else if (getUrlParam('load') !== null) {
         await navigation.showScreen(LoadScreen);
     } else if (getUrlParam('modal') !== null) {
-        navigation.presentPopup(FreeSpinWinPopup);
+        navigation.presentPopup<JackpotWinPopupData>(JackpotWinPopup, {
+            name: 'angelic',
+            times: 2,
+            amount: 1000,
+            callback: async () => {
+                await navigation.dismissPopup();
+            },
+        });
     } else {
         await navigation.showScreen(LoadScreen);
     }

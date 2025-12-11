@@ -7,6 +7,8 @@ import { formatCurrency } from '../utils/formatter';
 import { SlotBigWinCategory } from '../slot/SlotUtility';
 import { Label } from '../ui/Label';
 import { waitFor } from '../utils/asyncUtils';
+import { sfx } from '../utils/audio';
+import { throttle } from '../utils/throttle';
 
 /** Custom ease curve for y animation of falling pieces - minimal bounce */
 const easeSingleBounce = registerCustomEase(
@@ -65,6 +67,8 @@ export class BigWinPopup extends Container {
     private screenHeight = 0;
     /** Flag to track if this popup instance is currently active */
     private isActive = false;
+    /***  */
+    private intensity = 0;
 
     constructor() {
         super();
@@ -192,8 +196,15 @@ export class BigWinPopup extends Container {
             duration: this.countAnimationDuration,
             ease: 'power2.out',
             onUpdate: () => {
-                // const formatted = `${this.currency}${this.currentWinAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
                 this.winAmount.text = formatCurrency(this.currentWinAmount, this.currency);
+                if (this.currentWinAmount >= 10) {
+                    const speed = Math.min(0.8 + this.intensity * 0.001, 1);
+                    // Throttle sfx to a minimum interval, otherwise too many sounds instances
+                    // will be played at the same time, making it very noisy
+                    throttle('score', 100, () => {
+                        sfx.play('common/sfx-coin.wav', { speed, volume: 0.2 });
+                    });
+                }
             },
             onComplete: () => {
                 gsap.killTweensOf(this.winAmount.scale);
@@ -456,6 +467,8 @@ export class BigWinPopup extends Container {
 
         const entranceTl = gsap.timeline();
 
+        sfx.play('common/sfx-slide.wav');
+
         entranceTl.to(
             this.panelArc,
             {
@@ -464,6 +477,10 @@ export class BigWinPopup extends Container {
                 rotation: 0,
                 duration: 0.7,
                 ease: easeSingleBounce,
+                onComplete: () => {
+                    sfx.play('common/sfx-impact.wav');
+                    sfx.play(`common/sfx-${this.category}.wav`);
+                },
             },
             0.1,
         );

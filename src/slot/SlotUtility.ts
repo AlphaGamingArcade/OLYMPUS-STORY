@@ -22,6 +22,9 @@ export type SlotOrientation = 'horizontal' | 'vertical';
 /** Orientation for match checks */
 export type SlotBigWinCategory = 'astounding' | 'remarkable' | 'elegant';
 
+/** Orientation for match checks */
+export type SlotJackpotName = 'divine' | 'blessed' | 'angelic' | 'grand';
+
 /**
  * Create a 2D grid matrix filled up with given types
  * Example:

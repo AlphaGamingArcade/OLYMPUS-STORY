@@ -4,6 +4,7 @@ import { navigation } from '../utils/navigation';
 import { ShadowLabel } from '../ui/ShadowLabel';
 import { registerCustomEase, resolveAndKillTweens } from '../utils/animation';
 import { i18n } from '../i18n/i18n';
+import { sfx } from '../utils/audio';
 
 /** Custom ease curve for y animation of falling pieces - minimal bounce */
 const easeSingleBounce = registerCustomEase(
@@ -238,6 +239,9 @@ export class FreeSpinPopup extends Container {
 
         this.animationTimeline = gsap.timeline({ repeat: -1 });
 
+        sfx.play('common/sfx-slide.wav');
+        // sfx.play('common/sfx-congratulations.wav');
+
         // Glow 1 rotation and scale
         this.animationTimeline.to(
             this.glow1,
@@ -247,6 +251,9 @@ export class FreeSpinPopup extends Container {
                 ease: 'sine.inOut',
                 yoyo: true,
                 repeat: 1,
+                onComplete: () => {
+                    sfx.play('common/sfx-impact.wav');
+                },
             },
             0,
         );
