@@ -535,7 +535,7 @@ export class GameScreen extends Container {
     /** Fires when the match3 grid finishes auto-processing */
     private async onScatterMatch(data: SlotOnScatterMatch) {
         if (data) {
-            sfx.play('common/sfx-free-spin-trigger.wav');
+            sfx.play('common/sfx-ring.wav');
         }
     }
 

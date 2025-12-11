@@ -6,6 +6,7 @@ import { registerCustomEase, resolveAndKillTweens } from '../utils/animation';
 import { IconButton } from '../ui/IconButton';
 import { formatCurrency } from '../utils/formatter';
 import { i18n } from '../i18n/i18n';
+import { sfx } from '../utils/audio';
 
 /** Custom ease curve for y animation of falling pieces - minimal bounce */
 const easeSingleBounce = registerCustomEase(
@@ -387,6 +388,8 @@ export class BuyFreeSpinPopup extends Container {
 
         this.startContinuousAnimations();
 
+        sfx.play('common/sfx-slide.wav');
+
         entranceTl.to(
             this.panelArc,
             {
@@ -395,6 +398,9 @@ export class BuyFreeSpinPopup extends Container {
                 rotation: 0,
                 duration: 0.7,
                 ease: easeSingleBounce,
+                onComplete: () => {
+                    sfx.play('common/sfx-impact.wav');
+                },
             },
             0.1,
         );
@@ -491,6 +497,7 @@ export class BuyFreeSpinPopup extends Container {
         }
 
         const exitTl = gsap.timeline();
+        sfx.play('common/sfx-hide.wav');
         exitTl.to(this.bg, { alpha: 0, duration: 0.2, ease: 'power2.in' }, 0);
         exitTl.to(this.panel, { alpha: 0, duration: 0.2, ease: 'power2.in' }, 0);
         exitTl.to(this.panel.scale, { x: 0.5, y: 0.5, duration: 0.3, ease: 'back.in(1.7)' }, 0);
