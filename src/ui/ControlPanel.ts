@@ -233,7 +233,7 @@ export class ControlPanel extends Container {
 
             // Message
             this.titleText.x = this.contentWidth / 2;
-            this.titleText.y = -this.panelHeight - 80;
+            this.titleText.y = -this.panelHeight - 120;
             this.titleText.style.fontSize = 42;
         }
         // === MOBILE LANDSCAPE ===

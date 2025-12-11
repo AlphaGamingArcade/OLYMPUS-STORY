@@ -1,10 +1,11 @@
-import { Container, FillGradient, Sprite, Text } from 'pixi.js';
+import { Container, FillGradient, Text } from 'pixi.js';
 import gsap from 'gsap';
 import { IconButton } from '../ui/IconButton';
 import { bgm, sfx } from '../utils/audio';
 import { navigation } from '../utils/navigation';
 import { PreviewScreen } from './PreviewScreen';
 import { i18n } from '../i18n/i18n';
+import { OlympusStory } from '../ui/OlympusStory';
 
 /** Screen shown while loading assets */
 export class LoadScreen extends Container {
@@ -13,7 +14,7 @@ export class LoadScreen extends Container {
     /** LThe loading message display */
     private message: Text;
     /** The logo */
-    private logo: Sprite;
+    private olympusStory: OlympusStory;
     /** Yes Button */
     private yesButton: IconButton;
     /** No button */
@@ -79,10 +80,8 @@ export class LoadScreen extends Container {
         this.message.anchor.set(0.5);
         this.addChild(this.message);
 
-        this.logo = Sprite.from('slot-logo');
-        this.logo.anchor.set(0.5);
-        this.logo.scale.set(0.5);
-        this.addChild(this.logo);
+        this.olympusStory = new OlympusStory();
+        this.addChild(this.olympusStory);
     }
 
     /** Resize the screen, fired whenever window size changes  */
@@ -91,8 +90,8 @@ export class LoadScreen extends Container {
             this.message.x = width * 0.5;
             this.message.y = height * 0.65;
 
-            this.logo.x = width * 0.5;
-            this.logo.y = height * 0.35;
+            this.olympusStory.x = width * 0.5;
+            this.olympusStory.y = height * 0.35;
 
             this.yesButton.x = width * 0.5 - 200;
             this.yesButton.y = height * 0.8;
@@ -103,8 +102,8 @@ export class LoadScreen extends Container {
             this.message.x = width * 0.5;
             this.message.y = height * 0.55;
 
-            this.logo.x = width * 0.5;
-            this.logo.y = height * 0.35;
+            this.olympusStory.x = width * 0.5;
+            this.olympusStory.y = height * 0.35;
 
             this.yesButton.x = width * 0.5 - 150;
             this.yesButton.y = height * 0.75;

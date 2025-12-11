@@ -115,7 +115,7 @@ export class SlotBoard {
         for (const column in piecesByColumn) {
             const columnPieces = piecesByColumn[column];
             for (const { piece, x, y } of columnPieces) {
-                animPromises.push(piece.animateFall(x, y));
+                animPromises.push(piece.animateFall(x, y, false));
             }
 
             let delay = slotGetSpinModeDelay(this.slot.spinMode);

@@ -6,9 +6,9 @@ import { Pillar } from '../ui/Pillar';
 import { PlayButton } from '../ui/PlayButton';
 import { navigation } from '../utils/navigation';
 import { GameScreen } from './GameScreen';
-import { GameLogo } from '../ui/GameLogo';
 import { MessagePagination } from '../ui/MessagePagination';
 import { i18n } from '../i18n/i18n';
+import { OlympusStory } from '../ui/OlympusStory';
 
 /** Screen shown while loading assets */
 export class PreviewScreen extends Container {
@@ -30,7 +30,7 @@ export class PreviewScreen extends Container {
     /** Play button */
     private playButton: PlayButton;
     /** The game logo */
-    public readonly gameLogo: GameLogo;
+    public readonly olympusStory: OlympusStory;
 
     constructor() {
         super();
@@ -80,9 +80,9 @@ export class PreviewScreen extends Container {
         this.addChild(this.playButton);
         this.playButton.onClick(() => navigation.showScreen(GameScreen));
 
-        this.gameLogo = new GameLogo();
-        this.gameLogo.scale.set(1.5);
-        this.addChild(this.gameLogo);
+        this.olympusStory = new OlympusStory();
+        this.olympusStory.scale.set(0.75);
+        this.addChild(this.olympusStory);
 
         // Create pagination component
         this.messagePagination = new MessagePagination(this.messageList.length, 80);
@@ -155,8 +155,8 @@ export class PreviewScreen extends Container {
             this.playButton.x = width * 0.8;
             this.playButton.y = height * 0.75;
 
-            this.gameLogo.x = width * 0.8;
-            this.gameLogo.y = height * 0.35;
+            this.olympusStory.x = width * 0.8;
+            this.olympusStory.y = height * 0.35;
 
             // Position pagination below message
             this.messagePagination.x = width * 0.35;
@@ -174,8 +174,8 @@ export class PreviewScreen extends Container {
             this.playButton.x = width * 0.5;
             this.playButton.y = height * 0.85;
 
-            this.gameLogo.x = width * 0.5;
-            this.gameLogo.y = height * 0.1;
+            this.olympusStory.x = width * 0.5;
+            this.olympusStory.y = height * 0.12;
 
             // Position pagination below message
             this.messagePagination.x = width * 0.5;

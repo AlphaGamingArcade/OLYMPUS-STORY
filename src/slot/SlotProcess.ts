@@ -264,6 +264,7 @@ export class SlotProcess {
             }
 
             await new Promise((resolve) => setTimeout(resolve, delay));
+            this.slot.onColumnFillComplete?.({});
         }
 
         // Always cancel interuption
@@ -371,6 +372,10 @@ export class SlotProcess {
         }
 
         await Promise.all(animPromises);
+
+        if (animPromises.length > 0) {
+            this.slot.onColumnFillComplete?.({});
+        }
     }
 
     /** Create brand-new symbols in empty spaces and animate them falling in */
@@ -401,11 +406,14 @@ export class SlotProcess {
 
             // Spawn piece above the board, stacked by column
             piece.y = -height * 0.5 - columnIndex * this.slot.config.tileSize;
-
             animPromises.push(piece.animateFall(x, y));
         }
 
         await Promise.all(animPromises);
+
+        if (animPromises.length > 0) {
+            this.slot.onColumnRefillComplete?.({});
+        }
 
         return result.reels as SlotGrid;
     }
@@ -418,10 +426,10 @@ export class SlotProcess {
         const hasScatterTrigger = scatterMatches.some((group) => group.length >= scatterTrigger);
 
         if (hasScatterTrigger) {
+            this.slot.onScatterMatch?.({ symbols: [] });
             for (let i = 0; i < 3; i++) {
                 const animatePlayPieces = scatterMatches.map((m) => this.slot.board.playPieces(m));
                 await Promise.all(animatePlayPieces);
-
                 if (i < 2) await waitFor(1);
             }
 

@@ -20,7 +20,6 @@ export class SlotActions {
      **/
     public async actionSpin(bet: number, feature?: number) {
         // Check balance here
-
         this.slot.process.start(bet, feature);
     }
 

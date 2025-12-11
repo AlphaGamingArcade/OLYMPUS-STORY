@@ -148,6 +148,7 @@ export class SlotSymbol extends Container {
             duration,
             ease: easeSingleBounce,
         });
+
         this.unlock();
     }
 

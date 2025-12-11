@@ -23,6 +23,12 @@ export interface SlotOnMatchData {
 }
 
 /** Interface for onMatch event data */
+export interface SlotOnScatterMatch {
+    /** List of all matches detected in the grid */
+    symbols: SlotSymbol[];
+}
+
+/** Interface for onMatch event data */
 export interface SlotOnJackpotMatchData {
     /** List of all matches detected in the grid */
     symbols: SlotSymbol[];
@@ -53,6 +59,12 @@ export interface SlotOnJackpotTriggerData {
     /** Occurance */
     amount: number;
 }
+
+/** Interface for onMatch event data */
+export interface SlotOnColumnRefillCompleteData {}
+
+/** Interface for onMatch event data */
+export interface SlotOnColumnFillCompleteData {}
 
 export interface SlotFreeSpinStartData {
     currentSpin: number;
@@ -137,9 +149,15 @@ export class Slot extends Container {
     /** Fire when free spin triggered */
     public onWinFreeSpinTrigger?: (data: SlotOnWinFreeSpinTriggerData) => void;
     /** Fires when special triggered */
+    public onScatterMatch?: (data: SlotOnJackpotMatchData) => Promise<void>;
+    /** Fires when special triggered */
     public onJackpotMatch?: (data: SlotOnJackpotMatchData) => Promise<void>;
     /** Fires when multiplier jackpot triggered */
     public onJackpotTrigger?: (data: SlotOnJackpotTriggerData) => Promise<void>;
+    /** Fires when multiplier jackpot triggered */
+    public onColumnRefillComplete?: (data: SlotOnColumnRefillCompleteData) => Promise<void>;
+    /** Fires when multiplier jackpot triggered */
+    public onColumnFillComplete?: (data: SlotOnColumnRefillCompleteData) => Promise<void>;
     /** Fires when the game start auto-processing the grid */
     public onFreeSpinStart?: (data: SlotFreeSpinStartData) => void;
     /** Fires when the game start auto-processing the grid */
@@ -216,6 +234,7 @@ export class Slot extends Container {
      **/
     public async startSpin(bet: number, spinMode: SlotSpinMode, feature?: number) {
         this.playing = true;
+        this.requireSpinInterrupt = false;
         this.spinMode = spinMode;
         await this.actions.actionSpin(bet, feature);
     }
@@ -288,12 +307,14 @@ export class Slot extends Container {
     public pause() {
         this.board.pause();
         this.process.pause();
+        this.freeSpinsProcess.pause();
     }
 
     /** Resume the game */
     public resume() {
         this.board.resume();
         this.process.resume();
+        this.freeSpinsProcess.resume();
     }
 
     /** Update the timer */

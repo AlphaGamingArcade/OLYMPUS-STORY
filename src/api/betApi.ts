@@ -1,4 +1,4 @@
-const BASE_URL = 'http://192.168.68.111:3000';
+const BASE_URL = 'http://192.168.68.106:3000';
 
 export class BetAPI {
     /**

@@ -6,17 +6,20 @@ import {
     SlotOnAutoplaySpinStartData,
     SlotOnAutoplayStartData,
     SlotOnBigWinTriggerData,
+    SlotOnColumnFillCompleteData,
+    SlotOnColumnRefillCompleteData,
     SlotOnFreeSpinCompleteData,
     SlotOnJackpotMatchData,
     SlotOnJackpotTriggerData,
     SlotOnMatchData,
     SlotOnNextFreeSpinData,
+    SlotOnScatterMatch,
     SlotOnWinFreeSpinTriggerData,
 } from '../slot/Slot';
 import { Pillar } from '../ui/Pillar';
 import { navigation } from '../utils/navigation';
 import { GameEffects } from '../ui/GameEffects';
-import { bgm } from '../utils/audio';
+import { bgm, sfx } from '../utils/audio';
 import { waitFor } from '../utils/asyncUtils';
 import { slotGetConfig } from '../slot/SlotConfig';
 import { JackpotTier } from '../ui/JackpotTier';
@@ -167,8 +170,12 @@ export class GameScreen extends Container {
         this.slot.onWin = this.onWin.bind(this);
         this.slot.onBigWinTrigger = this.onBigWinTrigger.bind(this);
         this.slot.onSpinStart = this.onSpinStart.bind(this);
+        this.slot.onScatterMatch = this.onScatterMatch.bind(this);
         this.slot.onJackpotMatch = this.onJackpotMatch.bind(this);
         this.slot.onJackpotTrigger = this.onJackpotTrigger.bind(this);
+
+        this.slot.onColumnRefillComplete = this.onColumnRefillComplete.bind(this);
+        this.slot.onColumnFillComplete = this.onColumnFillComplete.bind(this);
 
         this.slot.onWinFreeSpinTrigger = this.onWinFreeSpinTrigger.bind(this);
         this.slot.onWinExtraFreeSpinTrigger = this.onWinExtraFreeSpinTrigger.bind(this);
@@ -379,6 +386,7 @@ export class GameScreen extends Container {
         const centerY = height * 0.5;
 
         if (width > height) {
+            this.gameContainer.scale.set(1);
             this.gameContainer.x = centerX;
             this.gameContainer.y = this.gameContainer.height * 0.5;
 
@@ -418,8 +426,9 @@ export class GameScreen extends Container {
             this.babyZeus.y = height - this.babyZeus.height * 0.5 - 100;
         } else {
             const divY = 220;
+            this.gameContainer.scale.set(0.8);
             this.gameContainer.x = centerX;
-            this.gameContainer.y = this.gameContainer.height * 0.5 - 100;
+            this.gameContainer.y = this.gameContainer.height * 0.5;
 
             this.buyFreeSpinButton.scale.set(0.65);
             this.buyFreeSpinButton.x = 220;
@@ -453,7 +462,7 @@ export class GameScreen extends Container {
             this.roundResult.y = height - this.roundResult.height - 360;
 
             this.babyZeus.x = 160;
-            this.babyZeus.y = centerY - 120;
+            this.babyZeus.y = centerY - 200;
         }
 
         const isMobile = document.documentElement.id === 'isMobile';
@@ -473,6 +482,7 @@ export class GameScreen extends Container {
     /** Fires when there are match */
     private async onMatch(data: SlotOnMatchData) {
         if (data.wins.length > 0) {
+            sfx.play('common/sfx-win.wav');
             // stop control panel matches animation
             this.controlPanel.stopMatchMessages();
 
@@ -523,6 +533,13 @@ export class GameScreen extends Container {
     }
 
     /** Fires when the match3 grid finishes auto-processing */
+    private async onScatterMatch(data: SlotOnScatterMatch) {
+        if (data) {
+            sfx.play('common/sfx-free-spin-trigger.wav');
+        }
+    }
+
+    /** Fires when the match3 grid finishes auto-processing */
     private async onJackpotMatch(data: SlotOnJackpotMatchData) {
         await this.vfx?.onJackpotMatch(data);
     }
@@ -541,6 +558,18 @@ export class GameScreen extends Container {
                 },
             });
         });
+    }
+
+    private async onColumnRefillComplete(data: SlotOnColumnRefillCompleteData) {
+        if (data) {
+            sfx.play('common/sfx-fall.wav');
+        }
+    }
+
+    private async onColumnFillComplete(data: SlotOnColumnFillCompleteData) {
+        if (data) {
+            sfx.play('common/sfx-fall.wav');
+        }
     }
 
     /** Fires when the match3 grid finishes auto-processing */
