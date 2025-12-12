@@ -19,7 +19,7 @@ export type SlotSpinMode = 'quick-spin' | 'turbo-spin' | 'normal-spin';
 
 export function slotGetSpinModeDelay(mode: SlotSpinMode): number {
     if (mode == 'normal-spin') {
-        return 120;
+        return 100;
     }
     if (mode == 'quick-spin') {
         return 50;

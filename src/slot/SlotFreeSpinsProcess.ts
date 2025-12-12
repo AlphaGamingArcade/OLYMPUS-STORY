@@ -241,6 +241,53 @@ export class SlotFreeSpinsProcess {
         await Promise.all(animPromises);
     }
 
+    public async fallGrid() {
+        // Group pieces by column
+        const piecesByColumn: Record<number, Array<{ piece: any; x: number; y: number }>> = {};
+        const piecesPerColumn: Record<number, number> = {};
+
+        // Use existing pieces from the board
+        for (const piece of this.slot.board.pieces) {
+            if (!piecesPerColumn[piece.column]) {
+                piecesPerColumn[piece.column] = 0;
+                piecesByColumn[piece.column] = [];
+            }
+            piecesPerColumn[piece.column] += 1;
+
+            const viewPosition = this.slot.board.getViewPositionByGridPosition({
+                row: piece.row,
+                column: piece.column,
+            });
+
+            piecesByColumn[piece.column].push({
+                piece,
+                x: viewPosition.x,
+                y: viewPosition.y,
+            });
+        }
+
+        const animPromises = [];
+        const height = this.slot.board.getHeight();
+
+        // Animate each column with a small delay between them
+        for (const column in piecesByColumn) {
+            const columnPieces = piecesByColumn[column];
+            const columnIndex = Number(column);
+
+            for (const { piece, x, y } of columnPieces) {
+                const targetY = y + height + this.slot.config.tileSize * columnIndex + 20;
+                animPromises.push(piece.animateFall(x, targetY));
+            }
+
+            const delay = this.slot.requireSpinInterrupt ? 0 : slotGetSpinModeDelay(this.slot.spinMode);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+            this.slot.onColumnMoveStart?.({});
+        }
+
+        this.slot.requireSpinInterrupt = false;
+        await Promise.all(animPromises);
+    }
+
     /** Start the next free-spin round, or end the sequence if none remain */
     private async runNextFreeSpin() {
         if (this.remainingFreeSpins <= 0) {
@@ -270,7 +317,7 @@ export class SlotFreeSpinsProcess {
         this.slot.onNextFreeSpinStart?.(data);
 
         // Animate the previous grid falling away, then clear board
-        await this.slot.board.fallToBottomGrid();
+        await this.fallGrid();
         this.slot.board.reset();
 
         // Reset the free spin win

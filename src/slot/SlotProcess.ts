@@ -98,7 +98,7 @@ export class SlotProcess {
         this.processing = true;
 
         this.slot.onSpinStart?.();
-        await this.slot.board.fallToBottomGrid();
+        await this.fallGrid();
 
         // Clean up
         this.slot.board.reset();
@@ -245,19 +245,31 @@ export class SlotProcess {
         }
 
         // Animate each column with a small delay between them
-        const animPromises: Promise<void>[] = [];
+        const allColumnPromises: Promise<void>[] = [];
 
         for (const column in piecesByColumn) {
             const columnPieces = piecesByColumn[column];
             let hasScatter = false;
 
+            // Collect promises for this column only
+            const columnAnimPromises: Promise<void>[] = [];
+
             // Start all animations in this column
             for (const { piece, x, y } of columnPieces) {
-                animPromises.push(piece.animateFall(x, y));
+                columnAnimPromises.push(piece.animateFall(x, y));
                 if (!hasScatter && piece.type == 10) {
                     hasScatter = true;
                 }
             }
+
+            // Create a promise that waits for this column to complete, then fires the callback
+            const columnCompletePromise = Promise.all(columnAnimPromises).then(() => {
+                this.slot.onColumnMoveComplete?.({
+                    hasScatter,
+                });
+            });
+
+            allColumnPromises.push(columnCompletePromise);
 
             // Wait before starting next column
             let delay = slotGetSpinModeDelay(this.slot.spinMode);
@@ -269,17 +281,19 @@ export class SlotProcess {
 
             this.slot.onColumnMoveStart?.({});
             await new Promise((resolve) => setTimeout(resolve, delay));
-            this.slot.onColumnMoveComplete?.({
-                hasScatter,
-            });
         }
 
-        // Always cancel interuption
+        // Always cancel interruption
         this.slot.requireSpinInterrupt = false;
 
-        // Wait for all animations to complete
-        await Promise.all(animPromises);
+        // Wait for all columns to complete
+        await Promise.all(allColumnPromises);
     }
+
+    //     this.slot.onColumnMoveComplete?.({
+    //     hasScatter,
+    // });
+    // console.log('[PIECES] MOVEE');
 
     /** Update internal gameplay stats for any matches found */
     private async updateStats() {
@@ -390,6 +404,99 @@ export class SlotProcess {
             });
         }
     }
+
+    public async fallGrid() {
+        // Group pieces by column
+        const piecesByColumn: Record<number, Array<{ piece: any; x: number; y: number }>> = {};
+        const piecesPerColumn: Record<number, number> = {};
+
+        // Use existing pieces from the board
+        for (const piece of this.slot.board.pieces) {
+            if (!piecesPerColumn[piece.column]) {
+                piecesPerColumn[piece.column] = 0;
+                piecesByColumn[piece.column] = [];
+            }
+            piecesPerColumn[piece.column] += 1;
+
+            const viewPosition = this.slot.board.getViewPositionByGridPosition({
+                row: piece.row,
+                column: piece.column,
+            });
+
+            piecesByColumn[piece.column].push({
+                piece,
+                x: viewPosition.x,
+                y: viewPosition.y,
+            });
+        }
+
+        const animPromises = [];
+        const height = this.slot.board.getHeight();
+
+        // Animate each column with a small delay between them
+        for (const column in piecesByColumn) {
+            const columnPieces = piecesByColumn[column];
+            const columnIndex = Number(column) + 1;
+
+            for (const { piece, x, y } of columnPieces) {
+                const targetY = y + height + this.slot.config.tileSize * columnIndex + 20;
+                animPromises.push(piece.animateFall(x, targetY));
+            }
+
+            const delay = this.slot.requireSpinInterrupt ? 0 : slotGetSpinModeDelay(this.slot.spinMode);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+            this.slot.onColumnMoveStart?.({});
+        }
+
+        this.slot.requireSpinInterrupt = false;
+        await Promise.all(animPromises);
+    }
+
+    // public async fallGrid() {
+    //     // Group pieces by column
+    //     const piecesByColumn: Record<number, Array<{ piece: any; x: number; y: number }>> = {};
+    //     const piecesPerColumn: Record<number, number> = {};
+    //     // Use existing pieces from the board
+    //     for (const piece of this.slot.board.pieces) {
+    //         // Count pieces per column so new pieces can be stacked up accordingly
+    //         if (!piecesPerColumn[piece.column]) {
+    //             piecesPerColumn[piece.column] = 0;
+    //             piecesByColumn[piece.column] = [];
+    //         }
+
+    //         piecesPerColumn[piece.column] += 1;
+    //         const x = piece.x;
+    //         const height = this.slot.board.getHeight();
+    //         const targetY = height * 0.5 + piecesPerColumn[piece.column] * this.slot.config.tileSize;
+
+    //         console.log('[PIECES]', piece.position);
+
+    //         piecesByColumn[piece.column].push({ piece, x, y: targetY });
+    //     }
+
+    //     console.log('[PIECES] FALL', {
+    //         piecesByColumn,
+    //     });
+
+    //     const animPromises = [];
+    //     // Animate each column with a small delay between them
+    //     for (const column in piecesByColumn) {
+    //         const columnPieces = piecesByColumn[column];
+    //         for (const { piece, x, y } of columnPieces) {
+    //             animPromises.push(piece.animateFall(x, y, false));
+    //         }
+    //         let delay = slotGetSpinModeDelay(this.slot.spinMode);
+    //         // Change delay to 0 when interrupted
+    //         if (this.slot.requireSpinInterrupt) {
+    //             delay = 0;
+    //         }
+    //         await new Promise((resolve) => setTimeout(resolve, delay)); // 50ms delay, adjust as needed
+    //         this.slot.onColumnMoveStart?.({});
+    //     }
+    //     // return to false when interruption is used or even if not use
+    //     this.slot.requireSpinInterrupt = false;
+    //     await Promise.all(animPromises);
+    // }
 
     /** Create brand-new symbols in empty spaces and animate them falling in */
     private async refillGrid() {
