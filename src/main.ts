@@ -165,6 +165,12 @@ async function init() {
                 await navigation.dismissPopup();
             },
         });
+    } else if (getUrlParam('modal2') !== null) {
+        navigation.presentPopup<BigWinPopupData>(BigWinPopup, {
+            category: 'remarkable',
+            amount: 1000,
+            callback: () => {},
+        });
     } else {
         await navigation.showScreen(LoadScreen);
     }

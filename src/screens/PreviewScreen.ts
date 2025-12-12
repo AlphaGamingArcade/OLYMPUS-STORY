@@ -189,7 +189,7 @@ export class PreviewScreen extends Container {
         gsap.killTweensOf(this.message);
         this.message.alpha = 1;
         this.startMessageRotation();
-        bgm.play('common/bgm-main.mp3', { volume: 0.75 });
+        bgm.play('common/bgm-main.mp3', { volume: 0.5 });
     }
 
     /** Prepare the screen just before showing */

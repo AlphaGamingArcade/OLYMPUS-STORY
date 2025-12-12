@@ -249,10 +249,14 @@ export class SlotProcess {
 
         for (const column in piecesByColumn) {
             const columnPieces = piecesByColumn[column];
+            let hasScatter = false;
 
             // Start all animations in this column
             for (const { piece, x, y } of columnPieces) {
                 animPromises.push(piece.animateFall(x, y));
+                if (!hasScatter && piece.type == 10) {
+                    hasScatter = true;
+                }
             }
 
             // Wait before starting next column
@@ -265,7 +269,9 @@ export class SlotProcess {
 
             this.slot.onColumnMoveStart?.({});
             await new Promise((resolve) => setTimeout(resolve, delay));
-            this.slot.onColumnMoveComplete?.({});
+            this.slot.onColumnMoveComplete?.({
+                hasScatter,
+            });
         }
 
         // Always cancel interuption
@@ -358,6 +364,7 @@ export class SlotProcess {
         console.log('[Slot] Apply gravity - moved pieces:', changes.length);
 
         const animPromises = [];
+        let hasScatter = false;
 
         for (const change of changes) {
             const from = change[0];
@@ -370,12 +377,17 @@ export class SlotProcess {
 
             const newPosition = this.slot.board.getViewPositionByGridPosition(to);
             animPromises.push(piece.animateFall(newPosition.x, newPosition.y));
+            if (!hasScatter && piece.type == 10) {
+                hasScatter = true;
+            }
         }
 
         if (animPromises.length > 0) {
             this.slot.onColumnMoveStart?.({});
             await Promise.all(animPromises);
-            this.slot.onColumnMoveComplete?.({});
+            this.slot.onColumnMoveComplete?.({
+                hasScatter,
+            });
         }
     }
 
@@ -391,6 +403,7 @@ export class SlotProcess {
 
         const animPromises = [];
         const piecesPerColumn: Record<number, number> = {};
+        let hasScatter = false;
 
         for (const position of newPieces) {
             const pieceType = slotGetPieceType(this.slot.board.grid, position);
@@ -408,12 +421,17 @@ export class SlotProcess {
             // Spawn piece above the board, stacked by column
             piece.y = -height * 0.5 - columnIndex * this.slot.config.tileSize;
             animPromises.push(piece.animateFall(x, y));
+            if (!hasScatter && piece.type == 10) {
+                hasScatter = true;
+            }
         }
 
         if (animPromises.length > 0) {
             this.slot.onColumnMoveStart?.({});
             await Promise.all(animPromises);
-            this.slot.onColumnMoveComplete?.({});
+            this.slot.onColumnMoveComplete?.({
+                hasScatter,
+            });
         }
 
         return result.reels as SlotGrid;

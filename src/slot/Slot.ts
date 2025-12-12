@@ -64,7 +64,9 @@ export interface SlotOnJackpotTriggerData {
 export interface SlotOnColumnMoveStartData {}
 
 /** Interface for onMatch event data */
-export interface SlotOnColumnMoveCompleteData {}
+export interface SlotOnColumnMoveCompleteData {
+    hasScatter: boolean;
+}
 
 export interface SlotFreeSpinStartData {
     currentSpin: number;

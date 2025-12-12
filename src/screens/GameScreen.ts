@@ -427,7 +427,7 @@ export class GameScreen extends Container {
             this.babyZeus.y = height - this.babyZeus.height * 0.5 - 100;
         } else {
             const divY = 220;
-            this.gameContainer.scale.set(0.8);
+            this.gameContainer.scale.set(0.9);
             this.gameContainer.x = centerX;
             this.gameContainer.y = this.gameContainer.height * 0.5;
 
@@ -472,7 +472,7 @@ export class GameScreen extends Container {
 
     /** Show screen with animations */
     public async show() {
-        bgm.play('common/bgm-game.mp3', { volume: 0.75 });
+        // bgm.play('common/bgm-game.mp3', { volume: 0.75 });
     }
 
     /** Hide screen with animations */
@@ -573,6 +573,9 @@ export class GameScreen extends Container {
     private async onColumnMoveComplete(data: SlotOnColumnMoveCompleteData) {
         if (data) {
             sfx.play('common/sfx-impact.wav');
+            if (data.hasScatter) {
+                sfx.play('common/sfx-scatter.wav');
+            }
         }
     }
 
@@ -586,7 +589,7 @@ export class GameScreen extends Container {
                 callback: async () => {
                     await navigation.dismissPopup();
 
-                    bgm.play('common/bgm-free-spins.mp3', { volume: 1 });
+                    bgm.play('common/bgm-free-spins.mp3', { volume: 0.5 });
                     await waitFor(1);
                     const bet = userSettings.getBet();
                     const spinMode = userSettings.getSpinMode();
@@ -646,7 +649,7 @@ export class GameScreen extends Container {
 
                     await navigation.dismissPopup();
 
-                    bgm.play('common/bgm-game.mp3', { volume: 0.75 });
+                    bgm.play('common/bgm-game.mp3', { volume: 0.5 });
 
                     await waitFor(1);
                     if (

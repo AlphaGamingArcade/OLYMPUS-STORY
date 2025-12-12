@@ -212,9 +212,13 @@ export class SlotFreeSpinsProcess {
         const animPromises: Promise<void>[] = [];
         for (const column in piecesByColumn) {
             const columnPieces = piecesByColumn[column];
+            let hasScatter = false;
 
             for (const { piece, x, y } of columnPieces) {
                 animPromises.push(piece.animateFall(x, y));
+                if (!hasScatter && piece.type == 10) {
+                    hasScatter = true;
+                }
             }
 
             // Wait before starting next column
@@ -227,7 +231,9 @@ export class SlotFreeSpinsProcess {
 
             this.slot.onColumnMoveStart?.({});
             await new Promise((resolve) => setTimeout(resolve, delay));
-            this.slot.onColumnMoveComplete?.({});
+            this.slot.onColumnMoveComplete?.({
+                hasScatter,
+            });
         }
 
         this.slot.requireSpinInterrupt = false;
@@ -429,6 +435,7 @@ export class SlotFreeSpinsProcess {
         console.log('[Slot] Apply gravity (free spin) - moved pieces:', changes.length);
 
         const animPromises = [];
+        let hasScatter = false;
 
         for (const change of changes) {
             const from = change[0];
@@ -441,12 +448,17 @@ export class SlotFreeSpinsProcess {
 
             const newPos = this.slot.board.getViewPositionByGridPosition(to);
             animPromises.push(piece.animateFall(newPos.x, newPos.y));
+            if (!hasScatter && piece.type == 10) {
+                hasScatter = true;
+            }
         }
 
         if (animPromises.length > 0) {
             this.slot.onColumnMoveStart?.({});
             await Promise.all(animPromises);
-            this.slot.onColumnMoveComplete?.({});
+            this.slot.onColumnMoveComplete?.({
+                hasScatter,
+            });
         }
     }
 
@@ -463,6 +475,7 @@ export class SlotFreeSpinsProcess {
 
         const animPromises = [];
         const piecesPerColumn: Record<number, number> = {};
+        let hasScatter = false;
 
         for (const pos of newPieces) {
             const pieceType = slotGetPieceType(this.slot.board.grid, pos);
@@ -480,12 +493,17 @@ export class SlotFreeSpinsProcess {
             piece.y = -height * 0.5 - countInColumn * this.slot.config.tileSize;
 
             animPromises.push(piece.animateFall(x, y));
+            if (!hasScatter && piece.type == 10) {
+                hasScatter = true;
+            }
         }
 
         if (animPromises.length > 0) {
             this.slot.onColumnMoveStart?.({});
             await Promise.all(animPromises);
-            this.slot.onColumnMoveComplete?.({});
+            this.slot.onColumnMoveComplete?.({
+                hasScatter,
+            });
         }
 
         return result.reels;
@@ -499,13 +517,11 @@ export class SlotFreeSpinsProcess {
         const hasScatterTrigger = scatterMatches.some((group) => group.length >= scatterTrigger);
 
         if (hasScatterTrigger) {
-            for (let i = 0; i < 3; i++) {
-                const animatePlayPieces = scatterMatches.map((m) => this.slot.board.playPieces(m));
-                await Promise.all(animatePlayPieces);
-
-                if (i < 2) await waitFor(1);
-            }
-
+            await waitFor(0.75);
+            this.slot.onScatterMatch?.({ symbols: [] });
+            const animatePlayPieces = scatterMatches.map((m) => this.slot.board.playPieces(m));
+            await Promise.all(animatePlayPieces);
+            await waitFor(1);
             const freeSpinTriggerData = { extraFreeSpins: this.extraFreeSpins };
             await this.slot.onWinExtraFreeSpinTrigger?.(freeSpinTriggerData);
             this.remainingFreeSpins += this.extraFreeSpins;
