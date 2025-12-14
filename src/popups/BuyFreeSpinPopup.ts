@@ -399,7 +399,7 @@ export class BuyFreeSpinPopup extends Container {
                 duration: 0.7,
                 ease: easeSingleBounce,
                 onComplete: () => {
-                    sfx.play('common/sfx-impact.wav');
+                    // sfx.play('common/sfx-impact.wav');
                 },
             },
             0.1,

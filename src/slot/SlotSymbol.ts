@@ -140,7 +140,7 @@ export class SlotSymbol extends Container {
     public async animateFall(x: number, y: number) {
         this.lock();
         resolveAndKillTweens(this.position);
-        const duration = 0.7;
+        const duration = 0.5;
 
         await gsap.to(this.position, {
             x,

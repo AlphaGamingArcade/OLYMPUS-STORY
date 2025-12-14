@@ -222,7 +222,7 @@ export class JackpotWinPopup extends Container {
             ease: 'power2.out',
             onUpdate: () => {
                 this.winAmount.text = formatCurrency(this.currentWinAmount, this.currency);
-                if (this.currentWinAmount >= 10) {
+                if (this.currentWinAmount >= 1) {
                     const speed = Math.min(0.8 + this.intensity * 0.001, 1);
                     // Throttle sfx to a minimum interval, otherwise too many sounds instances
                     // will be played at the same time, making it very noisy
@@ -460,7 +460,7 @@ export class JackpotWinPopup extends Container {
                 duration: 0.7,
                 ease: easeSingleBounce,
                 onComplete: () => {
-                    sfx.play('common/sfx-impact.wav');
+                    // sfx.play('common/sfx-impact.wav');
                 },
             },
             0.1,

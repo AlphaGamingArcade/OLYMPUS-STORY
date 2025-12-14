@@ -74,3 +74,33 @@ export class AsyncQueue {
         this.paused = false;
     }
 }
+
+type CancelToken = {
+    cancelled: boolean;
+    wake?: () => void;
+    timeoutId?: any;
+};
+
+export function sleepCancellable(ms: number, token: CancelToken) {
+    if (ms <= 0 || token.cancelled) return Promise.resolve();
+
+    return new Promise<void>((resolve) => {
+        const id = setTimeout(() => {
+            token.timeoutId = undefined;
+            token.wake = undefined;
+            resolve();
+        }, ms);
+
+        token.timeoutId = id;
+
+        token.wake = () => {
+            if (token.timeoutId) clearTimeout(token.timeoutId);
+            token.timeoutId = undefined;
+            token.wake = undefined;
+            resolve();
+        };
+
+        // if cancelled right after setting up
+        if (token.cancelled) token.wake();
+    });
+}

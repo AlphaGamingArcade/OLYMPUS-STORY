@@ -306,6 +306,7 @@ export class SlotProcess {
     /** Resolve and clear all standard pattern matches */
     private async processRegularMatches() {
         console.log('[Slot] Process regular matches');
+        await waitFor(0.5);
         const matches = slotGetMatches(this.slot.board.grid);
         if (matches.length > 0) this.hasRoundWin = true;
 
@@ -443,60 +444,20 @@ export class SlotProcess {
                 animPromises.push(piece.animateFall(x, targetY));
             }
 
-            const delay = this.slot.requireSpinInterrupt ? 0 : slotGetSpinModeDelay(this.slot.spinMode);
+            let delay = slotGetSpinModeDelay(this.slot.spinMode);
+            if (this.slot.requireSpinInterrupt) {
+                delay = 0;
+            }
+
             await new Promise((resolve) => setTimeout(resolve, delay));
             this.slot.onColumnMoveStart?.({});
         }
 
+        // Always cancel interruption
         this.slot.requireSpinInterrupt = false;
+
         await Promise.all(animPromises);
     }
-
-    // public async fallGrid() {
-    //     // Group pieces by column
-    //     const piecesByColumn: Record<number, Array<{ piece: any; x: number; y: number }>> = {};
-    //     const piecesPerColumn: Record<number, number> = {};
-    //     // Use existing pieces from the board
-    //     for (const piece of this.slot.board.pieces) {
-    //         // Count pieces per column so new pieces can be stacked up accordingly
-    //         if (!piecesPerColumn[piece.column]) {
-    //             piecesPerColumn[piece.column] = 0;
-    //             piecesByColumn[piece.column] = [];
-    //         }
-
-    //         piecesPerColumn[piece.column] += 1;
-    //         const x = piece.x;
-    //         const height = this.slot.board.getHeight();
-    //         const targetY = height * 0.5 + piecesPerColumn[piece.column] * this.slot.config.tileSize;
-
-    //         console.log('[PIECES]', piece.position);
-
-    //         piecesByColumn[piece.column].push({ piece, x, y: targetY });
-    //     }
-
-    //     console.log('[PIECES] FALL', {
-    //         piecesByColumn,
-    //     });
-
-    //     const animPromises = [];
-    //     // Animate each column with a small delay between them
-    //     for (const column in piecesByColumn) {
-    //         const columnPieces = piecesByColumn[column];
-    //         for (const { piece, x, y } of columnPieces) {
-    //             animPromises.push(piece.animateFall(x, y, false));
-    //         }
-    //         let delay = slotGetSpinModeDelay(this.slot.spinMode);
-    //         // Change delay to 0 when interrupted
-    //         if (this.slot.requireSpinInterrupt) {
-    //             delay = 0;
-    //         }
-    //         await new Promise((resolve) => setTimeout(resolve, delay)); // 50ms delay, adjust as needed
-    //         this.slot.onColumnMoveStart?.({});
-    //     }
-    //     // return to false when interruption is used or even if not use
-    //     this.slot.requireSpinInterrupt = false;
-    //     await Promise.all(animPromises);
-    // }
 
     /** Create brand-new symbols in empty spaces and animate them falling in */
     private async refillGrid() {

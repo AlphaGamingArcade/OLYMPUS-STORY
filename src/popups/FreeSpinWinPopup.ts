@@ -27,7 +27,9 @@ export class FreeSpinWinPopup extends Container {
     /** Container for the popup UI components */
     private panel: Container;
     /** Container for coin effects */
-    private coinContainer: Container;
+    private flyingCoinsContainer: Container;
+    /** Container for coin effects */
+    private fallingCoinsContainer: Container;
     /** Left flying coin animation */
     private leftCoinAnimation: gsap.core.Tween;
     /** Right flying coin animation */
@@ -88,8 +90,11 @@ export class FreeSpinWinPopup extends Container {
         this.addChild(this.panel);
 
         // Coin container - behind panel content but in front of glows
-        this.coinContainer = new Container();
-        this.panel.addChild(this.coinContainer);
+        this.flyingCoinsContainer = new Container();
+        this.panel.addChild(this.flyingCoinsContainer);
+
+        this.fallingCoinsContainer = new Container();
+        this.panel.addChild(this.fallingCoinsContainer);
 
         // First glow effect - behind everything
         this.glow1 = Sprite.from('glow');
@@ -275,7 +280,7 @@ export class FreeSpinWinPopup extends Container {
     }
 
     private createFlyingCoins() {
-        this.coinContainer.children.forEach((coin) => {
+        this.flyingCoinsContainer.children.forEach((coin) => {
             resolveAndKillTweens(coin);
             resolveAndKillTweens(coin.scale);
         });
@@ -305,7 +310,7 @@ export class FreeSpinWinPopup extends Container {
             coin.x = -coin.width;
             coin.y = this.bg.height - randomRange(100, 550);
 
-            this.coinContainer.addChild(coin);
+            this.flyingCoinsContainer.addChild(coin);
 
             this.leftCoinAnimation = gsap.to(coin, {
                 rotation: Math.random() * 20,
@@ -348,7 +353,7 @@ export class FreeSpinWinPopup extends Container {
             coin.x = this.bg.width + coin.width;
             coin.y = this.bg.height - randomRange(100, 550);
 
-            this.coinContainer.addChild(coin);
+            this.flyingCoinsContainer.addChild(coin);
 
             this.rightCoinAnimation = gsap.to(coin, {
                 rotation: Math.random() * 20,
@@ -379,7 +384,108 @@ export class FreeSpinWinPopup extends Container {
             });
         }
 
-        this.addChild(this.coinContainer);
+        this.addChild(this.flyingCoinsContainer);
+    }
+
+    private createFallingCoins() {
+        // Clear any existing coins and their animations
+        this.fallingCoinsContainer.children.forEach((coin) => {
+            resolveAndKillTweens(coin);
+            resolveAndKillTweens(coin.scale);
+        });
+        this.fallingCoinsContainer.removeChildren();
+
+        // Create textures array for the coin animation frames
+        const coinTextures = [
+            Texture.from('coin-01'),
+            Texture.from('coin-02'),
+            Texture.from('coin-03'),
+            Texture.from('coin-04'),
+            Texture.from('coin-05'),
+            Texture.from('coin-06'),
+            Texture.from('coin-07'),
+            Texture.from('coin-08'),
+            Texture.from('coin-09'),
+        ];
+
+        // Create falling coins - more coins for better visual effect
+        for (let count = 0; count < 30; count++) {
+            const coin = new AnimatedSprite(coinTextures);
+
+            // Each coin has its own physics properties
+            let velocityY = randomRange(3, 6); // Initial falling speed
+            let velocityX = randomRange(-0.5, 0.5); // Horizontal drift
+            const gravity = 0.2; // Acceleration downward
+            const airResistance = 0.98; // Slight horizontal slowdown
+            let hasPlayedSound = false;
+
+            // Randomize appearance
+            coin.scale.set(randomRange(0.4, 1.2));
+            coin.anchor.set(0.5);
+            coin.animationSpeed = randomRange(0.25, 0.6);
+
+            // Start position - spread across screen width, staggered vertically
+            coin.x = randomRange(0, this.bg.width);
+            coin.y = -coin.height - randomRange(0, 800);
+
+            // Random rotation direction and speed
+            const rotationSpeed = randomRange(-0.1, 0.1);
+
+            this.fallingCoinsContainer.addChild(coin);
+
+            gsap.to(coin, {
+                duration: 0.1, // Very short duration, animation driven by onUpdate
+                repeat: -1,
+                delay: randomRange(0, 4), // Stagger start times
+                onStart: () => {
+                    coin.play();
+                },
+                onUpdate: () => {
+                    // Physics simulation
+                    velocityY += gravity;
+                    velocityX *= airResistance;
+
+                    // Update position
+                    coin.y += velocityY;
+                    coin.x += velocityX;
+
+                    // Rotate coin
+                    coin.rotation += rotationSpeed;
+
+                    // Bounce off side walls
+                    if (coin.x < 0 || coin.x > this.bg.width) {
+                        velocityX *= -0.8; // Reverse and dampen
+                        coin.x = Math.max(0, Math.min(this.bg.width, coin.x));
+                    }
+
+                    // Play impact sound when approaching bottom
+                    if (!hasPlayedSound && coin.y > this.bg.height - 100) {
+                        throttle('score', 150, () => {
+                            sfx.play('common/sfx-coin-fall.wav', {
+                                volume: randomRange(0.08, 0.2),
+                                speed: randomRange(0.85, 1.15),
+                            });
+                        });
+                        hasPlayedSound = true;
+                    }
+
+                    // Reset coin when it goes off screen
+                    if (coin.y > this.bg.height + coin.height * 2) {
+                        velocityY = randomRange(3, 6);
+                        velocityX = randomRange(-0.5, 0.5);
+                        coin.y = -coin.height - randomRange(0, 800);
+                        coin.x = randomRange(0, this.bg.width);
+                        coin.scale.set(randomRange(0.4, 1.2));
+                        coin.rotation = randomRange(0, Math.PI * 2);
+                        hasPlayedSound = false;
+                    }
+                },
+            });
+        }
+
+        // Add coin container right after the background (so coins appear behind panel)
+        const bgIndex = this.getChildIndex(this.bg);
+        this.addChildAt(this.fallingCoinsContainer, bgIndex + 1);
     }
 
     /** Animate counting up the win amount */
@@ -395,7 +501,7 @@ export class FreeSpinWinPopup extends Container {
             onUpdate: () => {
                 this.winAmount.text = formatCurrency(this.currentWinAmount, this.currency);
 
-                if (this.currentWinAmount >= 10) {
+                if (this.currentWinAmount >= 1) {
                     const speed = Math.min(0.8 + this.intensity * 0.001, 1);
                     // Throttle sfx to a minimum interval, otherwise too many sounds instances
                     // will be played at the same time, making it very noisy
@@ -605,7 +711,7 @@ export class FreeSpinWinPopup extends Container {
         resolveAndKillTweens(this.bottomText);
         resolveAndKillTweens(this.clickAnywhere);
         resolveAndKillTweens(this);
-        this.coinContainer.removeChildren();
+        this.flyingCoinsContainer.removeChildren();
 
         this.panel.alpha = 1;
         this.clickAnywhere.alpha = 0;
@@ -636,6 +742,7 @@ export class FreeSpinWinPopup extends Container {
         this.bottomText.alpha = 0;
         this.bottomText.y = 220;
 
+        this.createFallingCoins();
         this.createFlyingCoins();
         this.startContinuousAnimations();
 
@@ -653,7 +760,7 @@ export class FreeSpinWinPopup extends Container {
                 duration: 0.7,
                 ease: easeSingleBounce,
                 onComplete: () => {
-                    sfx.play('common/sfx-impact.wav');
+                    // sfx.play('common/sfx-impact.wav');
                 },
             },
             0.1,
@@ -770,7 +877,7 @@ export class FreeSpinWinPopup extends Container {
 
         await exitTl;
 
-        this.coinContainer.removeChildren();
+        this.flyingCoinsContainer.removeChildren();
     }
 
     /** Clean up animations */
@@ -778,7 +885,7 @@ export class FreeSpinWinPopup extends Container {
         if (this.animationTimeline) {
             this.animationTimeline.kill();
         }
-        this.coinContainer.removeChildren();
+        this.flyingCoinsContainer.removeChildren();
         super.destroy();
     }
 }

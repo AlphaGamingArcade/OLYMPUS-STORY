@@ -572,7 +572,7 @@ export class GameScreen extends Container {
 
     private async onColumnMoveComplete(data: SlotOnColumnMoveCompleteData) {
         if (data) {
-            sfx.play('common/sfx-impact.wav');
+            sfx.play('common/sfx-impact.wav', { volume: 0.75 });
             if (data.hasScatter) {
                 sfx.play('common/sfx-scatter.wav');
             }

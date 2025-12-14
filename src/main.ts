@@ -18,7 +18,7 @@ import { BigWinPopup, BigWinPopupData } from './popups/BigWinPopup';
 import { BuyFreeSpinPopup } from './popups/BuyFreeSpinPopup';
 import { ErrorPopup } from './popups/ErrorPopup';
 import { FreeSpinPopup } from './popups/FreeSpinPopup';
-import { FreeSpinWinPopup } from './popups/FreeSpinWinPopup';
+import { FreeSpinWinPopup, FreeSpinWinPopupData } from './popups/FreeSpinWinPopup';
 import { JackpotWinPopup, JackpotWinPopupData } from './popups/JackpotWinPopup';
 
 /** The PixiJS app Application instance, shared across the project */
@@ -167,9 +167,15 @@ async function init() {
         });
     } else if (getUrlParam('modal2') !== null) {
         navigation.presentPopup<BigWinPopupData>(BigWinPopup, {
-            category: 'remarkable',
+            category: 'astounding',
             amount: 1000,
             callback: () => {},
+        });
+    } else if (getUrlParam('modal3') != null) {
+        navigation.presentPopup<FreeSpinWinPopupData>(FreeSpinWinPopup, {
+            amount: 1000,
+            spins: 10,
+            callback: async () => {},
         });
     } else {
         await navigation.showScreen(LoadScreen);

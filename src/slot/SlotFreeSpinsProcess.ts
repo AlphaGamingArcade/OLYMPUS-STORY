@@ -235,14 +235,12 @@ export class SlotFreeSpinsProcess {
                 hasScatter,
             });
         }
-
-        this.slot.requireSpinInterrupt = false;
-
         await Promise.all(animPromises);
     }
 
     public async fallGrid() {
         // Group pieces by column
+        this.slot.requireSpinInterrupt = false;
         const piecesByColumn: Record<number, Array<{ piece: any; x: number; y: number }>> = {};
         const piecesPerColumn: Record<number, number> = {};
 
@@ -279,12 +277,18 @@ export class SlotFreeSpinsProcess {
                 animPromises.push(piece.animateFall(x, targetY));
             }
 
-            const delay = this.slot.requireSpinInterrupt ? 0 : slotGetSpinModeDelay(this.slot.spinMode);
+            let delay = slotGetSpinModeDelay(this.slot.spinMode);
+            if (this.slot.requireSpinInterrupt) {
+                delay = 0;
+            }
+
             await new Promise((resolve) => setTimeout(resolve, delay));
             this.slot.onColumnMoveStart?.({});
         }
 
+        // Always cancel interruption
         this.slot.requireSpinInterrupt = false;
+
         await Promise.all(animPromises);
     }
 
@@ -416,6 +420,7 @@ export class SlotFreeSpinsProcess {
     /** Handle all standard (non-jackpot) matches */
     private async processRegularMatches() {
         console.log('[Slot] Process regular matches (free spin)');
+        await waitFor(0.5);
         const matches = slotGetMatches(this.slot.board.grid);
         if (matches.length > 0) this.hasRoundWin = true;
 

@@ -1,4 +1,4 @@
-import { Container, FillGradient, Sprite, Texture } from 'pixi.js';
+import { AnimatedSprite, Container, FillGradient, Sprite, Texture } from 'pixi.js';
 import gsap from 'gsap';
 import { navigation } from '../utils/navigation';
 import { ShadowLabel } from '../ui/ShadowLabel';
@@ -9,6 +9,7 @@ import { Label } from '../ui/Label';
 import { waitFor } from '../utils/asyncUtils';
 import { sfx } from '../utils/audio';
 import { throttle } from '../utils/throttle';
+import { randomRange } from '../utils/random';
 
 /** Custom ease curve for y animation of falling pieces - minimal bounce */
 const easeSingleBounce = registerCustomEase(
@@ -197,7 +198,7 @@ export class BigWinPopup extends Container {
             ease: 'power2.out',
             onUpdate: () => {
                 this.winAmount.text = formatCurrency(this.currentWinAmount, this.currency);
-                if (this.currentWinAmount >= 10) {
+                if (this.currentWinAmount >= 1) {
                     const speed = Math.min(0.8 + this.intensity * 0.001, 1);
                     // Throttle sfx to a minimum interval, otherwise too many sounds instances
                     // will be played at the same time, making it very noisy
@@ -426,6 +427,205 @@ export class BigWinPopup extends Container {
         );
     }
 
+    private createFallingCoins() {
+        this.coinContainer.children.forEach((coin) => {
+            resolveAndKillTweens(coin);
+            resolveAndKillTweens(coin.scale);
+        });
+
+        // Create textures array for the coin animation frames
+        const coinTextures = [
+            Texture.from('coin-01'),
+            Texture.from('coin-02'),
+            Texture.from('coin-03'),
+            Texture.from('coin-04'),
+            Texture.from('coin-05'),
+            Texture.from('coin-06'),
+            Texture.from('coin-07'),
+            Texture.from('coin-08'),
+            Texture.from('coin-09'),
+        ];
+
+        // Create falling coins
+        let totalCoins = 10;
+        if (this.category == 'remarkable') {
+            totalCoins = 10;
+        } else if (this.category == 'elegant') {
+            totalCoins = 15;
+        } else {
+            totalCoins = 25;
+        }
+
+        for (let count = 0; count < totalCoins; count++) {
+            const coin = new AnimatedSprite(coinTextures);
+            let coinSpeed = randomRange(2, 4); // Falling speed
+            const gravity = 0.15; // Acceleration
+            const sway = randomRange(-1, 1); // Horizontal drift
+            let hasPlayedSound = false; // Track if impact sound has been played
+
+            coin.scale.set(randomRange(0.5, 1));
+            coin.anchor.set(0.5);
+            coin.animationSpeed = randomRange(0.3, 0.5);
+            coin.x = randomRange(0, this.bg.width); // Random horizontal position
+            coin.y = -coin.height - randomRange(0, 500); // Start above screen
+
+            this.coinContainer.addChild(coin);
+
+            gsap.to(coin, {
+                rotation: randomRange(-Math.PI * 2, Math.PI * 2),
+                duration: randomRange(2, 4),
+                ease: 'none',
+                repeat: -1,
+                delay: randomRange(0, 3),
+                onStart: () => {
+                    coin.play();
+                },
+                onUpdate: () => {
+                    // Apply gravity
+                    coinSpeed += gravity;
+                    coin.y += coinSpeed;
+
+                    // Add horizontal sway
+                    coin.x += sway;
+
+                    // Play impact sound when coin reaches bottom (before reset)
+                    if (!hasPlayedSound && coin.y > this.bg.height - 50) {
+                        // Throttle sfx to a minimum interval, otherwise too many sounds instances
+                        // will be played at the same time, making it very noisy
+                        throttle('score', 500, () => {
+                            sfx.play('common/sfx-coin-fall.wav', {
+                                volume: randomRange(0.1, 0.3),
+                                speed: randomRange(0.9, 1.1),
+                            });
+                        });
+                        hasPlayedSound = true;
+                    }
+
+                    // Reset when coin goes below screen
+                    if (coin.y > this.bg.height + coin.height) {
+                        coinSpeed = randomRange(2, 4);
+                        coin.y = -coin.height - randomRange(0, 500);
+                        coin.x = randomRange(0, this.bg.width);
+                        coin.scale.set(randomRange(0.5, 1));
+                        hasPlayedSound = false; // Reset sound flag
+                    }
+                },
+            });
+        }
+
+        // Add coin container right after the background (so coins appear behind other elements)
+        const bgIndex = this.getChildIndex(this.bg);
+        this.addChildAt(this.coinContainer, bgIndex + 1);
+    }
+
+    // private createFlyingCoins() {
+    //     this.coinContainer.children.forEach((coin) => {
+    //         resolveAndKillTweens(coin);
+    //         resolveAndKillTweens(coin.scale);
+    //     });
+
+    //     // Create textures array for the 12 explosion frames
+    //     const coinTextures = [
+    //         Texture.from('coin-01'),
+    //         Texture.from('coin-02'),
+    //         Texture.from('coin-03'),
+    //         Texture.from('coin-04'),
+    //         Texture.from('coin-05'),
+    //         Texture.from('coin-06'),
+    //         Texture.from('coin-07'),
+    //         Texture.from('coin-08'),
+    //         Texture.from('coin-09'),
+    //     ];
+
+    //     // LEFTCOINS
+    //     for (let count = 0; count < 10; count++) {
+    //         const coin = new AnimatedSprite(coinTextures);
+    //         let accelX = randomRange(12, 18); // Increased from 7.5-11.5
+    //         let coinSpeed = 0.25; // Increased from 0.15
+    //         const gravity = 0.25; // Increased from 0.15
+    //         coin.scale.set(randomRange(0.75, 1));
+    //         coin.anchor.set(0.5);
+    //         coin.animationSpeed = randomRange(0.3, 0.5);
+    //         coin.x = -coin.width;
+    //         coin.y = this.bg.height - randomRange(100, 550);
+
+    //         this.coinContainer.addChild(coin);
+
+    //         this.leftCoinAnimation = gsap.to(coin, {
+    //             rotation: Math.random() * 20,
+    //             duration: 3,
+    //             ease: 'sine.in',
+    //             repeat: -1,
+    //             delay: randomRange(0, 5),
+    //             onStart: () => {
+    //                 coin.play();
+    //             },
+    //             onUpdate: () => {
+    //                 coin.y += coinSpeed;
+    //                 coin.x += accelX;
+    //                 coinSpeed += gravity;
+
+    //                 if (accelX > 0) accelX -= gravity / 3;
+    //                 if (accelX < 0) accelX = 0;
+
+    //                 if (coin.y > this.bg.height) {
+    //                     coinSpeed = 0.25; // Reset to faster speed
+    //                     accelX = randomRange(12, 18); // Reset to faster speed
+    //                     coin.y = this.bg.height - randomRange(100, 550);
+    //                     coin.scale.set(randomRange(0.75, 1));
+    //                     coin.x = -coin.width;
+    //                     this.leftCoinAnimation?.repeat();
+    //                 }
+    //             },
+    //         });
+    //     }
+
+    //     // RIGHTCOINS
+    //     for (let count = 0; count < 10; count++) {
+    //         const coin = new AnimatedSprite(coinTextures);
+    //         let accelX = randomRange(12, 18); // Increased from 7.5-11.5
+    //         let coinSpeed = 0.25; // Increased from 0.15
+    //         const gravity = 0.25; // Increased from 0.15
+    //         coin.scale.set(randomRange(0.75, 1));
+    //         coin.anchor.set(0.5);
+    //         coin.animationSpeed = randomRange(0.3, 0.5);
+    //         coin.x = this.bg.width + coin.width;
+    //         coin.y = this.bg.height - randomRange(100, 550);
+
+    //         this.coinContainer.addChild(coin);
+
+    //         this.rightCoinAnimation = gsap.to(coin, {
+    //             rotation: Math.random() * 20,
+    //             duration: 3,
+    //             ease: 'sine.in',
+    //             repeat: -1,
+    //             delay: randomRange(0, 5),
+    //             onStart: () => {
+    //                 coin.play();
+    //             },
+    //             onUpdate: () => {
+    //                 coin.y += coinSpeed;
+    //                 coin.x -= accelX;
+    //                 coinSpeed += gravity;
+
+    //                 if (accelX > 0) accelX -= gravity / 3;
+    //                 if (accelX < 0) accelX = 0;
+
+    //                 if (coin.y > this.bg.height) {
+    //                     coinSpeed = 0.25; // Reset to faster speed
+    //                     accelX = randomRange(12, 18); // Reset to faster speed
+    //                     coin.y = this.bg.height - randomRange(100, 550);
+    //                     coin.scale.set(randomRange(0.75, 1));
+    //                     coin.x = this.bg.width + coin.width;
+    //                     this.rightCoinAnimation?.repeat();
+    //                 }
+    //             },
+    //         });
+    //     }
+
+    //     this.addChild(this.coinContainer);
+    // }
+
     /** Present the popup with improved entrance animation */
     public async show() {
         // Mark as active when showing
@@ -445,6 +645,7 @@ export class BigWinPopup extends Container {
         this.coinContainer.removeChildren();
 
         this.startContinuousAnimations();
+        this.createFallingCoins();
 
         this.panel.alpha = 1;
 
@@ -478,7 +679,6 @@ export class BigWinPopup extends Container {
                 duration: 0.7,
                 ease: easeSingleBounce,
                 onComplete: () => {
-                    sfx.play('common/sfx-impact.wav');
                     sfx.play(`common/sfx-${this.category}.wav`);
                 },
             },
@@ -564,6 +764,14 @@ export class BigWinPopup extends Container {
         exitTl.to(this.panel.scale, { x: 0.5, y: 0.5, duration: 0.3, ease: 'back.in(1.7)' }, 0);
 
         await exitTl;
+
+        // Kill all coin animations
+        this.coinContainer.children.forEach((coin) => {
+            const coinTween = (coin as any).coinTween;
+            if (coinTween) coinTween.kill();
+            resolveAndKillTweens(coin);
+            resolveAndKillTweens(coin.scale);
+        });
 
         if (this.animationTimeline) this.animationTimeline.kill();
         if (this.topTextIdleTimeline) this.topTextIdleTimeline.kill();

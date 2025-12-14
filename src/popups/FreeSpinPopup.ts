@@ -252,7 +252,7 @@ export class FreeSpinPopup extends Container {
                 yoyo: true,
                 repeat: 1,
                 onComplete: () => {
-                    sfx.play('common/sfx-impact.wav');
+                    // sfx.play('common/sfx-impact.wav');
                 },
             },
             0,
