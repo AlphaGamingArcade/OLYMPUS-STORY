@@ -210,7 +210,7 @@ export function match3IncludesPosition(positions: SlotPosition[], position: Slot
  */
 export function slotGetMatches(grid: SlotGrid) {
     const paytable = gameConfig.getPaytables();
-    const specialBlocks = gameConfig.getSpecialBlocks();
+    const specialBlocks = gameConfig.getJackpots();
     const specialTypes = specialBlocks.map((sb) => sb.type);
 
     const gridMap: Record<string, { positions: SlotPosition[] }> = {};
@@ -315,9 +315,8 @@ export function slotGetJackpotMatches(grid: SlotGrid, configJackpots: Jackpot[])
  * @returns An array of position groups, where each group contains positions of the same special type
  */
 export function slotGetScatterMatches(grid: SlotGrid): SlotPosition[][] {
-    const scatterBlocksTrigger = gameConfig.getScatterBlocksTrigger();
-    const scatterBlocks = gameConfig.getScatterBlocks();
-    const scatterTypes = scatterBlocks.map((sb) => sb.type);
+    const scatterTriggers = gameConfig.getScatterTriggers();
+    const scatterType = gameConfig.getScatterType();
 
     // Use Map to efficiently group by type
     const matchesByType = new Map<number, SlotPosition[]>();
@@ -326,7 +325,7 @@ export function slotGetScatterMatches(grid: SlotGrid): SlotPosition[][] {
         for (let col = 0; col < grid[0].length; col++) {
             const cellType = grid[row][col];
 
-            if (scatterTypes.includes(cellType)) {
+            if (scatterType == cellType) {
                 // Get or create group for this type
                 let group = matchesByType.get(cellType);
                 if (!group) {
@@ -344,7 +343,7 @@ export function slotGetScatterMatches(grid: SlotGrid): SlotPosition[][] {
     const allMatches = Array.from(matchesByType.values());
 
     // Check if any group meets the trigger requirement
-    const hasTriggered = allMatches.some((group) => group.length >= scatterBlocksTrigger);
+    const hasTriggered = allMatches.some((group) => scatterTriggers.includes(group.length));
     if (!hasTriggered) {
         return [];
     }

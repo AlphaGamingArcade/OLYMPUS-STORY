@@ -43,10 +43,6 @@ export class SlotFreeSpinsStats {
     public registerWinFreeSpins(data: SlotOnWinFreeSpinData) {
         this.data.totalFreeSpinsWon += data.freeSpins; // Accumulate, don't replace!
         this.data.availableFreeSpins += data.freeSpins;
-
-        console.log(
-            `[SlotFreeSpinStats] Won ${data.freeSpins} free spins! Total won: ${this.data.totalFreeSpinsWon} ${this.slot.board.grid}`,
-        );
     }
 
     /**
@@ -64,8 +60,6 @@ export class SlotFreeSpinsStats {
         if (this.data.availableFreeSpins > 0) {
             this.data.availableFreeSpins--;
             this.data.totalFreeSpinsPlayed++;
-
-            console.log(`[SlotFreeSpinStats] Free spin consumed. Remaining: ${this.data.availableFreeSpins}`);
         }
     }
 

@@ -89,7 +89,6 @@ export class HowToPlaySection extends Container {
         });
 
         this.mainLayout.addChild(this.bottomLayout);
-        console.log(this.mainLayout.elementsMargin);
     }
 
     public resize(width: number, height: number) {

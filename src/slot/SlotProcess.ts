@@ -8,7 +8,6 @@ import {
     slotGetEmptyPositions,
     slotFillUp,
     slotGetPieceType,
-    slotGridToString,
     slotGetMatches,
     slotGetScatterMatches,
     slotGetRegularMatchesWinAmount,
@@ -112,7 +111,6 @@ export class SlotProcess {
         this.round = 0;
 
         this.slot.onProcessStart?.();
-        console.log('[Slot] ======= PROCESSING START ==========');
         this.runProcessRound();
     }
 
@@ -121,11 +119,6 @@ export class SlotProcess {
         if (!this.processing) return;
         this.processing = false;
         this.queue.clear();
-
-        console.log('[Slot] Sequence rounds:', this.round);
-        console.log('[Slot] Board pieces:', this.slot.board.pieces.length);
-        console.log('[Slot] Grid:\n' + slotGridToString(this.slot.board.grid));
-        console.log('[Slot] ======= PROCESSING COMPLETE =======');
 
         this.slot.onProcessComplete?.();
     }
@@ -145,7 +138,6 @@ export class SlotProcess {
         // Step #1 – Start new round and analyze matches
         this.queue.add(async () => {
             this.round += 1;
-            console.log(`[Slot] -- SEQUENCE ROUND #${this.round} START`);
             this.updateStats();
         });
 
@@ -185,7 +177,6 @@ export class SlotProcess {
 
         // Step #7 – Finalize round and decide if another is needed
         this.queue.add(async () => {
-            console.log(`[Slot] -- SEQUENCE ROUND #${this.round} FINISH`);
             this.processCheckpoint();
         });
     }
@@ -290,22 +281,14 @@ export class SlotProcess {
         await Promise.all(allColumnPromises);
     }
 
-    //     this.slot.onColumnMoveComplete?.({
-    //     hasScatter,
-    // });
-    // console.log('[PIECES] MOVEE');
-
     /** Update internal gameplay stats for any matches found */
     private async updateStats() {
         const matches = slotGetMatches(this.slot.board.grid);
         if (!matches.length) return;
-
-        console.log('[Slot] Update stats');
     }
 
     /** Resolve and clear all standard pattern matches */
     private async processRegularMatches() {
-        console.log('[Slot] Process regular matches');
         await waitFor(0.5);
         const matches = slotGetMatches(this.slot.board.grid);
         if (matches.length > 0) this.hasRoundWin = true;
@@ -376,7 +359,6 @@ export class SlotProcess {
     /** Move all existing pieces downward to fill empty cells */
     private async applyGravity() {
         const changes = slotApplyGravity(this.slot.board.grid);
-        console.log('[Slot] Apply gravity - moved pieces:', changes.length);
 
         const animPromises = [];
         let hasScatter = false;
@@ -408,7 +390,7 @@ export class SlotProcess {
 
     public async fallGrid() {
         // Group pieces by column
-        const piecesByColumn: Record<number, Array<{ piece: any; x: number; y: number }>> = {};
+        const piecesByColumn: Record<number, Array<{ piece: SlotSymbol; x: number; y: number }>> = {};
         const piecesPerColumn: Record<number, number> = {};
 
         // Use existing pieces from the board
@@ -448,7 +430,6 @@ export class SlotProcess {
             if (this.slot.requireSpinInterrupt) {
                 delay = 0;
             }
-
             await new Promise((resolve) => setTimeout(resolve, delay));
             this.slot.onColumnMoveStart?.({});
         }
@@ -466,8 +447,6 @@ export class SlotProcess {
             bet: this.betAmount,
         });
         const newPieces = slotFillUp(this.slot.board.grid, this.slot.board.commonTypes, result.reels);
-
-        console.log('[Slot] Refill grid - new pieces:', newPieces.length);
 
         const animPromises = [];
         const piecesPerColumn: Record<number, number> = {};
@@ -508,9 +487,9 @@ export class SlotProcess {
     /** Detect scatter symbols and trigger free spins if requirements are met */
     private async processFreeSpinCheckpoint() {
         const scatterMatches = slotGetScatterMatches(this.slot.board.grid);
-        const scatterTrigger = gameConfig.getScatterBlocksTrigger();
+        const scatterTriggers = gameConfig.getScatterTriggers();
 
-        const hasScatterTrigger = scatterMatches.some((group) => group.length >= scatterTrigger);
+        const hasScatterTrigger = scatterMatches.some((matches) => scatterTriggers.includes(matches.length));
 
         if (hasScatterTrigger) {
             await waitFor(0.75);
@@ -532,14 +511,9 @@ export class SlotProcess {
         const newMatches = slotGetMatches(this.slot.board.grid);
         const emptySpaces = slotGetEmptyPositions(this.slot.board.grid);
 
-        console.log('[Slot] Checkpoint - New matches:', newMatches.length);
-        console.log('[Slot] Checkpoint - Empty spaces:', emptySpaces.length);
-
         if (newMatches.length || emptySpaces.length) {
-            console.log('[Slot] Checkpoint - Another sequence run is needed');
             await this.runProcessRound();
         } else {
-            console.log('[Slot] Checkpoint - Check for jackpot wins then check free spin wins');
             await this.slot.jackpot.displayJackpotWins();
             await this.displayBigWins();
             await this.processFreeSpinCheckpoint();

@@ -7,10 +7,10 @@ import { Button } from '../ui/Button';
 import { Slider } from '../ui/Slider';
 import { SlotSpinMode } from '../slot/SlotConfig';
 import { i18n } from '../i18n/i18n';
+import { userSettings } from '../utils/userSettings';
 
 export type AutoplayPopupData = {
     spinMode: SlotSpinMode;
-    onSpinModeChanged: (spinMode: SlotSpinMode) => void;
     callback: (spins: number) => void;
 };
 
@@ -41,8 +41,6 @@ export class AutoplayPopup extends Container {
     /** Panel dimensions */
     private panelWidth = 540;
     private panelHeight = 570;
-
-    private onSpinModeCallback?: (spinMode: SlotSpinMode) => void;
     private onAutoplayPress?: (spins: number) => void;
 
     constructor() {
@@ -100,9 +98,10 @@ export class AutoplayPopup extends Container {
             label: i18n.t('quickSpin'),
             isChecked: false,
         });
-        this.quickSpinCheckbox.onSwitch(() => {
-            this.onSpinModeCallback?.(this.quickSpinCheckbox.check ? 'quick-spin' : 'normal-spin');
-            this.turboSpinCheckbox.check = false;
+        this.quickSpinCheckbox.checkbox.switcher.onChange.connect((state: number | boolean) => {
+            const spinMode = state == 1 ? 'quick-spin' : 'normal-spin';
+            userSettings.setSpinMode(spinMode);
+            this.turboSpinCheckbox.checkbox.switcher.forceSwitch(0);
         });
         this.layout.addChild(this.quickSpinCheckbox);
 
@@ -110,9 +109,11 @@ export class AutoplayPopup extends Container {
             label: i18n.t('turboSpin'),
             isChecked: false,
         });
-        this.turboSpinCheckbox.onSwitch(() => {
-            this.onSpinModeCallback?.(this.turboSpinCheckbox.check ? 'turbo-spin' : 'normal-spin');
-            this.quickSpinCheckbox.check = false;
+
+        this.turboSpinCheckbox.checkbox.switcher.onChange.connect((state: number | boolean) => {
+            const spinMode = state == 1 ? 'turbo-spin' : 'normal-spin';
+            userSettings.setSpinMode(spinMode);
+            this.quickSpinCheckbox.checkbox.switcher.forceSwitch(0);
         });
         this.layout.addChild(this.turboSpinCheckbox);
 
@@ -161,9 +162,8 @@ export class AutoplayPopup extends Container {
     /** Set things up just before showing the popup */
     public prepare(data: AutoplayPopupData) {
         if (data) {
-            this.quickSpinCheckbox.check = data.spinMode == 'quick-spin';
-            this.turboSpinCheckbox.check = data.spinMode == 'turbo-spin';
-            this.onSpinModeCallback = data.onSpinModeChanged;
+            this.quickSpinCheckbox.checkbox.switcher.forceSwitch(data.spinMode == 'quick-spin' ? 1 : 0);
+            this.turboSpinCheckbox.checkbox.switcher.forceSwitch(data.spinMode == 'turbo-spin' ? 1 : 0);
             this.onAutoplayPress = data.callback;
         }
     }

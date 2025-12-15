@@ -69,7 +69,6 @@ export class SlotPreview extends Container {
     /** Stop the timer and disable interaction */
     public stopPlaying() {
         this.interactiveChildren = false;
-        console.log('Stop playing');
     }
 
     /** Check if the game is still playing */

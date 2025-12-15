@@ -1,6 +1,5 @@
 import { AsyncQueue, waitFor } from '../utils/asyncUtils';
 import { Slot } from './Slot';
-import { slotGridToString } from './SlotUtility';
 
 /**
  * Controls autoplay flow - automatically plays multiple spins in sequence
@@ -40,7 +39,6 @@ export class SlotAutoplayProcess {
     /** Request autoplay to stop after current spin completes */
     public stopAutoplay(): void {
         this.stopRequired = true;
-        console.log('[Autoplay] Stop requested');
     }
 
     /** Whether autoplay is active */
@@ -79,19 +77,13 @@ export class SlotAutoplayProcess {
 
     /** Start autoplay with specified number of spins */
     public async start(bet: number, autoplaySpins: number): Promise<void> {
-        if (this.processing) {
-            console.warn('[Autoplay] Already processing');
-            return;
-        }
+        if (this.processing) return;
 
         this.processing = true;
         this.remainingAutoplaySpins = autoplaySpins;
         this.currentAutoplaySpin = 0;
         this.betAmount = bet;
         this.stopRequired = false;
-
-        console.log('[Autoplay] ======= START ==========');
-        console.log('[Autoplay] Total spins:', this.remainingAutoplaySpins);
 
         // Notify start
         const autoplayStartData = {
@@ -111,10 +103,6 @@ export class SlotAutoplayProcess {
         this.processing = false;
         this.queue.clear();
 
-        console.log('[Autoplay] Board pieces:', this.slot.board.pieces.length);
-        console.log('[Autoplay] Grid:\n' + slotGridToString(this.slot.board.grid));
-        console.log('[Autoplay] ======= COMPLETE =======');
-
         // mark autoplay as stop
         this.slot.stopAutoplaySpin();
 
@@ -128,19 +116,15 @@ export class SlotAutoplayProcess {
     private async runNextAutoplaySpin(): Promise<void> {
         // Check stop conditions
         if (this.stopRequired) {
-            console.log('[Autoplay] Stop requested - ending');
             await this.stop();
             return;
         }
 
         if (this.remainingAutoplaySpins <= 0) {
-            console.log('[Autoplay] All spins complete');
             await waitFor(0.5);
             await this.stop();
             return;
         }
-
-        console.log('[Autoplay] ======= NEXT SPIN START =======');
 
         this.currentAutoplaySpin += 1;
         this.remainingAutoplaySpins -= 1;
@@ -158,14 +142,12 @@ export class SlotAutoplayProcess {
     private async runProcessRound(): Promise<void> {
         // Step 1: Start the normal spin process
         this.queue.add(async () => {
-            console.log(`[Autoplay] Starting spin ${this.currentAutoplaySpin}`);
             await this.slot.process.start(this.betAmount);
         });
 
         // Step 2: Wait for normal process to complete
         this.queue.add(async () => {
             if (this.slot.process.isProcessing()) {
-                console.log('[Autoplay] Normal spin processing, waiting...');
                 await this.waitForProcessComplete();
             }
         });
@@ -173,7 +155,6 @@ export class SlotAutoplayProcess {
         // Step 3: If free spins were triggered, wait for them too
         this.queue.add(async () => {
             if (this.slot.freeSpinsProcess.isProcessing()) {
-                console.log('[Autoplay] Free spins processing, waiting...');
                 await this.waitForFreeSpinsComplete();
             }
         });
@@ -185,7 +166,6 @@ export class SlotAutoplayProcess {
 
         // Step 5: Move to checkpoint
         this.queue.add(async () => {
-            console.log(`[Autoplay] Spin ${this.currentAutoplaySpin} complete`);
             await this.processCheckpoint();
         });
     }
@@ -244,13 +224,10 @@ export class SlotAutoplayProcess {
     private async processCheckpoint(): Promise<void> {
         // Check if we should continue
         if (this.stopRequired) {
-            console.log('[Autoplay] Stop requested at checkpoint');
             await this.stop();
         } else if (this.remainingAutoplaySpins > 0) {
-            console.log('[Autoplay] Moving to next spin');
             this.runNextAutoplaySpin();
         } else {
-            console.log('[Autoplay] No more spins remaining');
             await this.stop();
         }
     }

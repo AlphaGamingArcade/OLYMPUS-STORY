@@ -8,18 +8,11 @@ import { sound } from '@pixi/sound';
 import { CloudBackground } from './ui/CloudBackground';
 import { getUrlParam } from './utils/getUrlParams';
 import { GameScreen } from './screens/GameScreen';
-import { ConfigAPI } from './api/configApi';
-import { gameConfig } from './utils/gameConfig';
-import { BetAPI } from './api/betApi';
-import { userSettings } from './utils/userSettings';
 import { initDevtools } from '@pixi/devtools';
-import { InfoPopup } from './popups/InfoPopup';
 import { BigWinPopup, BigWinPopupData } from './popups/BigWinPopup';
-import { BuyFreeSpinPopup } from './popups/BuyFreeSpinPopup';
-import { ErrorPopup } from './popups/ErrorPopup';
-import { FreeSpinPopup } from './popups/FreeSpinPopup';
 import { FreeSpinWinPopup, FreeSpinWinPopupData } from './popups/FreeSpinWinPopup';
 import { JackpotWinPopup, JackpotWinPopupData } from './popups/JackpotWinPopup';
+import { loadGameConfig } from './config';
 
 /** The PixiJS app Application instance, shared across the project */
 export const app = new Application();
@@ -89,26 +82,6 @@ function visibilityChange() {
         sound.resumeAll();
         navigation.focus();
     }
-}
-
-async function loadGameConfig() {
-    const [result, result2] = await Promise.all([ConfigAPI.config(), BetAPI.collect()]);
-    const lang = getUrlParam('lang') ?? 'en';
-    const cur = getUrlParam('cur') ?? 'usd';
-
-    // Game configuration from server
-    gameConfig.setBlocks(result.blocks);
-    gameConfig.setPaytables(result.paytables);
-    gameConfig.setSpecialBlocks(result.specialBlocks);
-    gameConfig.setScatterBlocks(result.scatterBlocks);
-    gameConfig.setScatterBlocksTrigger(result.scatterBlocksTrigger);
-    gameConfig.setBuyFreeSpinBetMultiplier(result.buyFreeSpinBetMultiplier);
-    gameConfig.setJackpots(result.jackpots);
-
-    // User settings
-    userSettings.setBalance(result2.balance);
-    userSettings.setLanguage(lang);
-    userSettings.setCurrency(cur);
 }
 
 /** Setup app and initialise assets */

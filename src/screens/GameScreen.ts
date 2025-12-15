@@ -100,7 +100,7 @@ export class GameScreen extends Container {
         // Listen for press event (this is FancyButton's built-in click event)
         this.buyFreeSpinButton.onPress.connect(() => {
             if (this.finished) return;
-            const amount = userSettings.getBet() * gameConfig.getBuyFreeSpinBetMultiplier();
+            const amount = userSettings.getBet() * gameConfig.getBuyFeatureBetMultiplier();
             navigation.presentPopup<BuyFreeSpinPopupData>(BuyFreeSpinPopup, {
                 currency: this.currency,
                 amount: amount,
@@ -217,9 +217,6 @@ export class GameScreen extends Container {
                 const spinMode = userSettings.getSpinMode();
                 navigation.presentPopup<AutoplayPopupData>(AutoplayPopup, {
                     spinMode,
-                    onSpinModeChanged(spinMode) {
-                        userSettings.setSpinMode(spinMode);
-                    },
                     callback: async (spins: number) => {
                         if (this.finished) return;
                         await navigation.dismissPopup();
@@ -280,7 +277,7 @@ export class GameScreen extends Container {
     }
 
     private updateBuyFreeSpinAmount() {
-        const amount = userSettings.getBet() * gameConfig.getBuyFreeSpinBetMultiplier();
+        const amount = userSettings.getBet() * gameConfig.getBuyFeatureBetMultiplier();
         this.buyFreeSpinButton.setAmount(formatCurrency(amount, this.currency));
     }
 
@@ -357,10 +354,6 @@ export class GameScreen extends Container {
     /** Update the screen */
     public update() {
         this.slot.update();
-        // console.log('[FREE SPINS]', this.slot.freeSpinsStats.getAvailableFreeSpins());
-        // console.log('[FREE SPINS], IS FREE SPIN PLAYING', this.slot.isFreeSpinPlaying());
-        // console.log('[FREE SPINS], IS PLAYING', this.slot.isPlaying());
-        // console.log('[FREE SPINS], IS AUTOPLAY PLAYING', this.slot.isAutoplayPlaying());
     }
 
     /** Pause gameplay - automatically fired when a popup is presented */
@@ -696,9 +689,7 @@ export class GameScreen extends Container {
     }
 
     /** Fires when the match3 grid finishes auto-processing */
-    private onProcessStart() {
-        console.log('PROCESS STARTING');
-    }
+    private onProcessStart() {}
 
     /** Fires when the match3 grid finishes auto-processing */
     private onProcessComplete() {

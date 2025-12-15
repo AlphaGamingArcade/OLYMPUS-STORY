@@ -144,7 +144,7 @@ export class SettingsPopup extends Container {
             settingsScale = 1.5;
             betX = this.panelWidth * 0.5;
             betY = this.panelHeight * 0.3;
-            audioX = this.panelWidth * 0.5 - this.audioSettings.width * 0.5;
+            audioX = this.panelWidth * 0.5 - this.audioSettings.width * 0.5 - 100;
             audioY = this.panelHeight * 0.6;
         } else if (isMobile && !isPortrait) {
             this.panelWidth = width * (isPortrait ? 0.9 : 0.85);

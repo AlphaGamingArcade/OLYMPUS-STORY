@@ -278,7 +278,6 @@ export class Slot extends Container {
      **/
     public async interruptSpin() {
         if (this.requireSpinInterrupt) return;
-        console.log('[DELAY]Interrupted');
         this.requireSpinInterrupt = true;
     }
 

@@ -10,11 +10,9 @@ const defaultCheckboxWithLabelOptions = {
 export type CheckboxWithLabelOptions = typeof defaultCheckboxWithLabelOptions;
 
 export class CheckboxWithLabel extends Container {
+    public checkbox: Checkbox;
     private container: Container;
-    private checkbox: Checkbox;
     private messageLabel: Label;
-    private _onPress?: () => void;
-
     constructor(options: Partial<CheckboxWithLabelOptions> = {}) {
         super();
 
@@ -26,28 +24,11 @@ export class CheckboxWithLabel extends Container {
         this.checkbox = new Checkbox();
         this.checkbox.y = -(this.checkbox.height / 2);
         this.container.addChild(this.checkbox);
-        this.checkbox.onPress.connect(() => {
-            if (this._onPress) {
-                this._onPress();
-            }
-        });
 
         this.messageLabel = new Label(opts.label, { fontSize: 25, fill: '#ffffff' });
         this.messageLabel.x = this.checkbox.width + 100;
         this.container.addChild(this.messageLabel);
 
         this.container.x = -200;
-    }
-
-    public get check(): boolean {
-        return this.checkbox.active == 0;
-    }
-
-    public set check(v: boolean) {
-        this.checkbox.forceSwitch(v);
-    }
-
-    public onSwitch(callBack: () => void) {
-        this._onPress = callBack;
     }
 }

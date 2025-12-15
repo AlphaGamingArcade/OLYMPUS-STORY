@@ -1,4 +1,5 @@
 import { Block, Jackpot, Paytable } from '../slot/SlotConfig';
+import { SlotType } from '../slot/SlotUtility';
 
 // Default fallbacks (keep your existing arrays as fallbacks)
 const defaultBlocks: Block[] = [
@@ -73,44 +74,14 @@ const defaultBlocks: Block[] = [
         name: 'Divine',
     },
 ];
-const defaultScatterBlocksTrigger: number = 4;
 
-const defaultBuyFreeSpinBetMultiplier: number = 100;
+const defaultBuyFeatureBetMultiplier: number = 100;
 
-const defaultScatterBlocks: Block[] = [
-    {
-        type: 10,
-        symbol: 'symbol-scatter',
-        name: 'Scatter',
-    },
-];
-
-const defaultSpecialBlocks: Block[] = [
-    {
-        type: 11,
-        symbol: 'symbol-grand',
-        name: 'Grand',
-    },
-    {
-        type: 12,
-        symbol: 'symbol-angelic',
-        name: 'Angelic',
-    },
-    {
-        type: 13,
-        symbol: 'symbol-blessed',
-        name: 'Blessed',
-    },
-    {
-        type: 14,
-        symbol: 'symbol-divine',
-        name: 'Divine',
-    },
-];
+const defaultScatterType: SlotType = 10;
+const defaultScatterTriggers: number[] = [4, 5, 6];
 
 const defaultJackpot: Jackpot[] = [
     {
-        id: 'divine',
         name: 'DIVINE',
         type: 14,
         multiplier: 100,
@@ -118,7 +89,6 @@ const defaultJackpot: Jackpot[] = [
         order: 2,
     },
     {
-        id: 'blessed',
         name: 'BLESSED',
         type: 13,
         multiplier: 50,
@@ -126,7 +96,6 @@ const defaultJackpot: Jackpot[] = [
         order: 3,
     },
     {
-        id: 'angelic',
         name: 'ANGELIC',
         type: 12,
         multiplier: 20.0,
@@ -134,7 +103,6 @@ const defaultJackpot: Jackpot[] = [
         order: 4,
     },
     {
-        id: 'grand',
         name: 'GRAND',
         type: 11,
         multiplier: 10.0,
@@ -241,13 +209,13 @@ const defaultPaytables: Paytable[] = [
 class GameConfig {
     // Configuration data
     private blocks: Block[] = defaultBlocks;
-    private specialBlocks: Block[] = defaultSpecialBlocks;
-    private scatterBlocksTrigger: number = defaultScatterBlocksTrigger;
-    private scatterBlocks: Block[] = defaultScatterBlocks;
+    private scatterType: SlotType = 10;
+    private scatterTriggers: number[] = [4, 5, 6];
+    private freeSpinScatterTriggers: number[] = [3, 4, 5, 6];
     private paytables: Paytable[] = defaultPaytables;
     private paytablesByType: Record<number, Paytable> = {};
     private jackpots: Jackpot[] = defaultJackpot;
-    private buyFreeSpinBetMultiplier: number = defaultBuyFreeSpinBetMultiplier;
+    private buyFeatureBetMultiplier: number = defaultBuyFeatureBetMultiplier;
 
     public constructor() {
         this.paytablesByType = this.paytables.reduce(
@@ -264,20 +232,20 @@ class GameConfig {
         this.blocks = blocks;
     }
 
-    setSpecialBlocks(blocks: Block[]) {
-        this.specialBlocks = blocks;
+    setScatterType(type: SlotType) {
+        this.scatterType = type;
     }
 
-    setScatterBlocksTrigger(count: number) {
-        this.scatterBlocksTrigger = count;
+    setScatterTriggers(triggers: number[]) {
+        this.scatterTriggers = triggers;
     }
 
-    setBuyFreeSpinBetMultiplier(multiplier: number) {
-        this.buyFreeSpinBetMultiplier = multiplier;
+    setFreeSpinScatterTriggers(triggers: number[]) {
+        this.freeSpinScatterTriggers = triggers;
     }
 
-    setScatterBlocks(blocks: Block[]) {
-        this.scatterBlocks = blocks;
+    setBuyFeatureBetMultiplier(multiplier: number) {
+        this.buyFeatureBetMultiplier = multiplier;
     }
 
     setPaytables(paytables: Paytable[]) {
@@ -301,20 +269,20 @@ class GameConfig {
         return this.blocks;
     }
 
-    getSpecialBlocks(): Block[] {
-        return this.specialBlocks;
+    getScatterTriggers() {
+        return this.scatterTriggers;
     }
 
-    getScatterBlocksTrigger() {
-        return this.scatterBlocksTrigger;
+    getFreeSpinScatterTriggers() {
+        return this.freeSpinScatterTriggers;
     }
 
-    getBuyFreeSpinBetMultiplier() {
-        return this.buyFreeSpinBetMultiplier;
+    getBuyFeatureBetMultiplier() {
+        return this.buyFeatureBetMultiplier;
     }
 
-    getScatterBlocks(): Block[] {
-        return this.scatterBlocks;
+    getScatterType(): SlotType {
+        return this.scatterType;
     }
 
     getPaytables(): Paytable[] {
@@ -334,8 +302,8 @@ class GameConfig {
     reset(): void {
         this.blocks = defaultBlocks;
         this.paytables = defaultPaytables;
-        this.scatterBlocks = defaultScatterBlocks;
-        this.specialBlocks = defaultSpecialBlocks;
+        this.scatterType = defaultScatterType;
+        this.scatterTriggers = defaultScatterTriggers;
     }
 }
 

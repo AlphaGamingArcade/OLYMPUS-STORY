@@ -29,7 +29,6 @@ export async function loadBundles(bundles: string | string[]) {
     if (!loadList.length) return;
 
     // Load bundles
-    console.log('[Assets] Load:', loadList.join(', '));
     await Assets.loadBundle(loadList);
 
     // Append loaded bundles to the loaded list

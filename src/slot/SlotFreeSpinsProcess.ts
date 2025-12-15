@@ -4,7 +4,6 @@ import { Slot } from './Slot';
 import {
     slotFillUp,
     slotGetPieceType,
-    slotGridToString,
     slotGetMatches,
     slotGetRegularMatchesWinAmount,
     slotGetBigWinCategory,
@@ -131,9 +130,6 @@ export class SlotFreeSpinsProcess {
 
         this.slot.onFreeSpinStart?.(freeSpinStartData);
 
-        console.log('[Slot] ======= FREE SPIN PROCESSING START ==========');
-        console.log('[Slot] Total free spins:', freeSpinCount);
-
         this.runNextFreeSpin();
     }
 
@@ -142,11 +138,6 @@ export class SlotFreeSpinsProcess {
         if (!this.processing) return;
         this.processing = false;
         this.queue.clear();
-
-        console.log('[Slot] FREE SPIN rounds:', this.round);
-        console.log('[Slot] FREE SPIN Board pieces:', this.slot.board.pieces.length);
-        console.log('[Slot] FREE SPIN Grid:\n' + slotGridToString(this.slot.board.grid));
-        console.log('[Slot] ======= FREE SPIN PROCESSING COMPLETE =======');
 
         this.slot.stopFreeSpin();
         const data = {
@@ -300,8 +291,6 @@ export class SlotFreeSpinsProcess {
             return;
         }
 
-        console.log('[Slot] ======= FREE SPIN NEXT SPIN START =======');
-
         await waitFor(1);
 
         this.currentFreeSpin += 1;
@@ -363,7 +352,6 @@ export class SlotFreeSpinsProcess {
         // Step #1 – Start round and analyze current matches
         this.queue.add(async () => {
             this.round += 1;
-            console.log(`[Slot] -- FREE SPIN SEQUENCE ROUND #${this.round} START`);
             this.updateStats();
         });
 
@@ -404,7 +392,6 @@ export class SlotFreeSpinsProcess {
 
         // Step #6 – Finalize the round and check whether another is needed
         this.queue.add(async () => {
-            console.log(`[Slot] -- FREE SPIN SEQUENCE ROUND #${this.round} FINISH`);
             this.processCheckpoint();
         });
     }
@@ -413,13 +400,10 @@ export class SlotFreeSpinsProcess {
     private async updateStats() {
         const matches = slotGetMatches(this.slot.board.grid);
         if (!matches.length) return;
-
-        console.log('[Slot] Update free spin stats');
     }
 
     /** Handle all standard (non-jackpot) matches */
     private async processRegularMatches() {
-        console.log('[Slot] Process regular matches (free spin)');
         await waitFor(0.5);
         const matches = slotGetMatches(this.slot.board.grid);
         if (matches.length > 0) this.hasRoundWin = true;
@@ -484,8 +468,6 @@ export class SlotFreeSpinsProcess {
     private async applyGravity() {
         const changes = slotApplyGravity(this.slot.board.grid);
 
-        console.log('[Slot] Apply gravity (free spin) - moved pieces:', changes.length);
-
         const animPromises = [];
         let hasScatter = false;
 
@@ -522,9 +504,6 @@ export class SlotFreeSpinsProcess {
         });
 
         const newPieces = slotFillUp(this.slot.board.grid, this.slot.board.commonTypes, result.reels);
-
-        console.log('[Slot] Refill grid (free spin) - new pieces:', newPieces.length);
-
         const animPromises = [];
         const piecesPerColumn: Record<number, number> = {};
         let hasScatter = false;
@@ -564,9 +543,9 @@ export class SlotFreeSpinsProcess {
     /** Detect scatter symbols and trigger free spins if requirements are met */
     private async processExtraFreeSpinCheckpoint() {
         const scatterMatches = slotGetScatterMatches(this.slot.board.grid);
-        const scatterTrigger = gameConfig.getScatterBlocksTrigger();
+        const scatterTriggers = gameConfig.getFreeSpinScatterTriggers();
 
-        const hasScatterTrigger = scatterMatches.some((group) => group.length >= scatterTrigger);
+        const hasScatterTrigger = scatterMatches.some((group) => scatterTriggers.includes(group.length));
 
         if (hasScatterTrigger) {
             await waitFor(0.75);
@@ -591,15 +570,9 @@ export class SlotFreeSpinsProcess {
         const newMatches = slotGetMatches(this.slot.board.grid);
         const emptySpaces = slotGetEmptyPositions(this.slot.board.grid);
 
-        console.log('[Slot] Checkpoint (free spin) - New matches:', newMatches.length);
-        console.log('[Slot] Checkpoint (free spin) - Empty spaces:', emptySpaces.length);
-
         if (newMatches.length || emptySpaces.length) {
-            console.log('[Slot] Checkpoint - Another sequence run is needed');
             this.runProcessRound();
         } else {
-            console.log(`[Slot] ======= FREE SPIN #${this.currentFreeSpin} COMPLETE ==========`);
-
             await this.slot.jackpot.displayFreeSpinJackpotWins();
             await this.displayBigWins();
 
