@@ -15,7 +15,7 @@ import {
     slotApplyGravity,
     slotGetMismatches,
     SlotGrid,
-    SlotPosition,
+    slotGetPositions,
 } from './SlotUtility';
 
 /**
@@ -202,14 +202,7 @@ export class SlotProcess {
         }
 
         // Get all positions from the grid
-        const positions: SlotPosition[] = [];
-        for (let col = 0; col < this.slot.board.columns; col++) {
-            for (let row = 0; row < this.slot.board.rows; row++) {
-                if (this.slot.board.grid[row][col] !== 0) {
-                    positions.push({ row, column: col });
-                }
-            }
-        }
+        const positions = slotGetPositions(this.slot.board.grid);
 
         // Group pieces by column
         const piecesByColumn: Record<number, Array<{ piece: SlotSymbol; x: number; y: number }>> = {};
@@ -389,40 +382,38 @@ export class SlotProcess {
     }
 
     public async fallGrid() {
+        // Get all positions from the grid
+        const positions = slotGetPositions(this.slot.board.grid);
+
         // Group pieces by column
         const piecesByColumn: Record<number, Array<{ piece: SlotSymbol; x: number; y: number }>> = {};
         const piecesPerColumn: Record<number, number> = {};
+        const height = this.slot.board.getHeight();
 
-        // Use existing pieces from the board
-        for (const piece of this.slot.board.pieces) {
+        // Instantiate all new pieces and place them above the board
+        for (const position of positions) {
+            const piece = this.slot.board.getPieceByPosition(position);
+
+            if (!piece) continue;
+
             if (!piecesPerColumn[piece.column]) {
                 piecesPerColumn[piece.column] = 0;
                 piecesByColumn[piece.column] = [];
             }
-            piecesPerColumn[piece.column] += 1;
+            piecesPerColumn[piece.column]++;
 
-            const viewPosition = this.slot.board.getViewPositionByGridPosition({
-                row: piece.row,
-                column: piece.column,
-            });
+            const x = piece.x;
+            const y = piece.y;
 
-            piecesByColumn[piece.column].push({
-                piece,
-                x: viewPosition.x,
-                y: viewPosition.y,
-            });
+            piecesByColumn[piece.column].push({ piece, x, y });
         }
 
-        const animPromises = [];
-        const height = this.slot.board.getHeight();
-
         // Animate each column with a small delay between them
+        const animPromises: Promise<void>[] = [];
         for (const column in piecesByColumn) {
             const columnPieces = piecesByColumn[column];
-            const columnIndex = Number(column) + 1;
-
             for (const { piece, x, y } of columnPieces) {
-                const targetY = y + height + this.slot.config.tileSize * columnIndex + 20;
+                const targetY = y + height + 20;
                 animPromises.push(piece.animateFall(x, targetY));
             }
 
@@ -430,7 +421,11 @@ export class SlotProcess {
             if (this.slot.requireSpinInterrupt) {
                 delay = 0;
             }
-            await new Promise((resolve) => setTimeout(resolve, delay));
+
+            if (delay >= 0) {
+                await new Promise((resolve) => setTimeout(resolve, delay));
+            }
+
             this.slot.onColumnMoveStart?.({});
         }
 

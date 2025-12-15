@@ -43,6 +43,7 @@ import { BetAPI } from '../api/betApi';
 import { ErrorPopup, ErrorPopupData } from '../popups/ErrorPopup';
 import { SlotOnWinExtraFreeSpinData } from '../slot/SlotFreeSpinsStats';
 import { i18n } from '../i18n/i18n';
+import { Transition } from '../ui/Transition';
 
 /** The screen tha holds the Slot game */
 export class GameScreen extends Container {
@@ -574,6 +575,8 @@ export class GameScreen extends Container {
 
     /** Fires when the match3 grid finishes auto-processing */
     private async onWinFreeSpinTrigger(data: SlotOnWinFreeSpinTriggerData): Promise<void> {
+        await navigation.showTransition(Transition);
+
         return new Promise((resolve) => {
             navigation.presentPopup<FreeSpinPopupData>(FreeSpinPopup, {
                 title: 'YOU HAVE WON',

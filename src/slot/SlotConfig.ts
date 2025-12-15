@@ -4,7 +4,7 @@ import { gameConfig } from '../utils/gameConfig';
 const defaultConfig = {
     rows: 5,
     columns: 6,
-    tileSize: 130,
+    tileSize: 140,
 };
 
 /** Slot configuration */

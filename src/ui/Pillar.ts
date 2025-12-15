@@ -32,7 +32,7 @@ export class Pillar extends Container {
         // Create frame sprite from image
         this.frameSprite = Sprite.from('frame-pillar');
         this.frameSprite.anchor.set(0.5, 0.5);
-        this.frameSprite.scale.set(1.5);
+        this.frameSprite.scale.set(1.6);
         this.addChild(this.frameSprite);
     }
 

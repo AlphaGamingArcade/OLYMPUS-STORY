@@ -53,6 +53,9 @@ class Navigation {
     /** Current popup being displayed */
     public currentPopup?: AppScreen;
 
+    /** Current transition */
+    public transition?: AppScreen;
+
     /** Set the  default load screen */
     public setBackground(ctor: AppScreenConstructor) {
         this.background = new ctor();
@@ -146,6 +149,27 @@ class Navigation {
     }
 
     /**
+     * Hide current transition (if there is one) and present a transition.
+     * Any class that matches AppScreen interface can be used here.
+     */
+    public async showTransition(ctor: AppScreenConstructor) {
+        if (this.transition) {
+            this.transition.interactiveChildren = false;
+        }
+
+        if (this.transition) {
+            await this.hideAndRemoveScreen(this.transition);
+        }
+
+        this.transition = pool.get(ctor);
+        await this.addAndShowScreen(this.transition);
+
+        if (this.currentScreen) {
+            await this.hideAndRemoveScreen(this.transition);
+        }
+    }
+
+    /**
      * Resize screens
      * @param width Viewport width
      * @param height Viewport height
@@ -156,6 +180,7 @@ class Navigation {
         this.currentScreen?.resize?.(width, height);
         this.currentPopup?.resize?.(width, height);
         this.background?.resize?.(width, height);
+        this.transition?.resize?.(width, height);
     }
 
     /**
@@ -196,6 +221,7 @@ class Navigation {
         this.currentScreen?.blur?.();
         this.currentPopup?.blur?.();
         this.background?.blur?.();
+        this.transition?.blur?.();
     }
 
     /**
@@ -205,6 +231,7 @@ class Navigation {
         this.currentScreen?.focus?.();
         this.currentPopup?.focus?.();
         this.background?.focus?.();
+        this.transition?.focus?.();
     }
 }
 

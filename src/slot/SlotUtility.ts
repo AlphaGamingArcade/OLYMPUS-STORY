@@ -472,6 +472,24 @@ export function slotFillUp(grid: SlotGrid, _types: SlotType[], tempGrid: SlotGri
 }
 
 /**
+ * Loop through the grid and fill up all empty positions with random types
+ * @param grid The grid to be changed
+ * @param types List of types available to randomise
+ * @returns A list with all positions that have their types changed from empty (0) to something
+ */
+export function slotGetPositions(grid: SlotGrid) {
+    const rows = grid.length;
+    const columns = grid[0].length;
+    const newPositions: SlotPosition[] = [];
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < columns; c++) {
+            newPositions.push({ row: r, column: c });
+        }
+    }
+    return newPositions.reverse();
+}
+
+/**
  * Filter out repeated positions from position list
  * @param positions List of positions to be filtered
  * @returns A new list without repeated positions

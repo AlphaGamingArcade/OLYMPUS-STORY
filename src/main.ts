@@ -13,6 +13,7 @@ import { BigWinPopup, BigWinPopupData } from './popups/BigWinPopup';
 import { FreeSpinWinPopup, FreeSpinWinPopupData } from './popups/FreeSpinWinPopup';
 import { JackpotWinPopup, JackpotWinPopupData } from './popups/JackpotWinPopup';
 import { loadGameConfig } from './config';
+import { Transition } from './ui/Transition';
 
 /** The PixiJS app Application instance, shared across the project */
 export const app = new Application();
@@ -150,6 +151,8 @@ async function init() {
             spins: 10,
             callback: async () => {},
         });
+    } else if (getUrlParam('transition') != null) {
+        navigation.showTransition(Transition);
     } else {
         await navigation.showScreen(LoadScreen);
     }

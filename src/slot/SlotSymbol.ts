@@ -51,7 +51,6 @@ export class SlotSymbol extends Container {
 
         // Scale to match size
         this.spine.pivot.set(0.5);
-        this.spine.scale.set(0.45);
 
         // Create explosion animated sprite
         this.createExplosionSprite();
@@ -121,7 +120,7 @@ export class SlotSymbol extends Container {
 
         // Scale to match size
         this.spine.pivot.set(0.5);
-        this.spine.scale.set(0.45);
+        this.spine.scale.set(0.475);
 
         // Add spine to display (behind explosion)
         this.addChildAt(this.spine, 0);
