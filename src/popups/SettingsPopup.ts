@@ -92,27 +92,18 @@ export class SettingsPopup extends Container {
         /** Audio Settings */
         this.audioSettings = new AudioSettings({
             gap: 50,
-            width: 400,
+            width: 450,
         });
-        this.audioSettings.onAmbientMusicToggle(() => {
-            const bgmVolume = bgm.getVolume();
-            const newState = bgmVolume <= 0;
-            bgm.setVolume(newState ? 1 : 0);
-            this.audioSettings.ambientMusicSwitcher.forceSwitch(!newState);
+        this.audioSettings.ambientMusicSwitcher.switcher.onChange.connect((state: number | boolean) => {
+            bgm.setVolume(state == 1 ? 1 : 0);
 
-            const sfxVolume = sfx.getVolume();
-            const isAudioOn = newState || sfxVolume > 0;
-            this.onAudioSettingChanged?.(isAudioOn);
+            const isSoundFXOn = this.audioSettings.soundFXSwitcher.switcher.active == 1;
+            this.onAudioSettingChanged?.(state == 1 || isSoundFXOn);
         });
-        this.audioSettings.onSoundFXToggle(() => {
-            const sfxVolume = sfx.getVolume();
-            const newState = sfxVolume <= 0;
-            sfx.setVolume(newState ? 1 : 0);
-            this.audioSettings.soundFXSwitcher.forceSwitch(!newState);
-
-            const bgmVolume = bgm.getVolume();
-            const isAudioOn = newState || bgmVolume > 0;
-            this.onAudioSettingChanged?.(isAudioOn);
+        this.audioSettings.soundFXSwitcher.switcher.onChange.connect((state: number | boolean) => {
+            sfx.setVolume(state == 1 ? 1 : 0);
+            const isSoundFXOn = this.audioSettings.ambientMusicSwitcher.switcher.active == 1;
+            this.onAudioSettingChanged?.(state == 1 || isSoundFXOn);
         });
         this.panelBase.addChild(this.audioSettings);
 
@@ -131,41 +122,25 @@ export class SettingsPopup extends Container {
         let titleFontSize: number;
         let closeButtonScale: number;
         let settingsScale: number;
-        let betX: number;
-        let betY: number;
-        let audioX: number;
-        let audioY: number;
 
         if (isMobile && isPortrait) {
-            this.panelWidth = width * (isPortrait ? 0.9 : 0.85);
-            this.panelHeight = height * (isPortrait ? 0.85 : 0.9);
+            this.panelWidth = width * 0.9;
+            this.panelHeight = height * 0.85;
             titleFontSize = 52;
             closeButtonScale = 0.75;
             settingsScale = 1.5;
-            betX = this.panelWidth * 0.5;
-            betY = this.panelHeight * 0.3;
-            audioX = this.panelWidth * 0.5 - this.audioSettings.width * 0.5 - 100;
-            audioY = this.panelHeight * 0.6;
         } else if (isMobile && !isPortrait) {
-            this.panelWidth = width * (isPortrait ? 0.9 : 0.85);
-            this.panelHeight = height * (isPortrait ? 0.85 : 0.9);
+            this.panelWidth = width * 0.85;
+            this.panelHeight = height * 0.9;
             titleFontSize = 52;
             closeButtonScale = 0.75;
             settingsScale = 1.5;
-            betX = this.panelWidth * 0.25;
-            betY = this.panelHeight * 0.5 - this.betSettings.height * 0.25;
-            audioX = this.panelWidth * 0.5;
-            audioY = this.panelHeight * 0.5 - this.audioSettings.height * 0.5;
         } else {
             this.panelWidth = 1400;
             this.panelHeight = 800;
             titleFontSize = 32;
             closeButtonScale = 0.5;
             settingsScale = 1;
-            betX = this.panelWidth * 0.25;
-            betY = this.panelHeight * 0.5 - this.betSettings.height * 0.25;
-            audioX = this.panelWidth * 0.5;
-            audioY = this.panelHeight * 0.5 - this.audioSettings.height * 0.5;
         }
 
         /** Panel background sprite */
@@ -182,18 +157,42 @@ export class SettingsPopup extends Container {
         this.title.x = this.panelWidth * 0.5;
         this.title.y = 100;
 
-        /** Close button */
+        /** Close button - scale first, then position */
         this.closeButton.scale.set(closeButtonScale);
         this.closeButton.x = this.panelWidth - 60;
         this.closeButton.y = 60;
 
-        /** Bet settings */
+        /** Bet settings - scale first, then position */
         this.betSettings.scale.set(settingsScale);
+
+        let betX: number;
+        let betY: number;
+
+        if (isMobile && isPortrait) {
+            betX = this.panelWidth * 0.5;
+            betY = this.panelHeight * 0.3;
+        } else {
+            betX = this.panelWidth * 0.25;
+            betY = this.panelHeight * 0.5 - this.betSettings.height * 0.25;
+        }
+
         this.betSettings.x = betX;
         this.betSettings.y = betY;
 
-        /** Audio settings */
+        /** Audio settings - scale first, then position */
         this.audioSettings.scale.set(settingsScale);
+
+        let audioX: number;
+        let audioY: number;
+
+        if (isMobile && isPortrait) {
+            audioX = this.panelWidth * 0.5 - this.audioSettings.width * 0.5;
+            audioY = this.panelHeight * 0.6;
+        } else {
+            audioX = this.panelWidth * 0.5;
+            audioY = this.panelHeight * 0.5 - this.audioSettings.height * 0.5;
+        }
+
         this.audioSettings.x = audioX;
         this.audioSettings.y = audioY;
     }

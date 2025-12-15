@@ -1,6 +1,6 @@
 import { Container } from 'pixi.js';
 import { Label } from './Label';
-import { Switcher } from './Switcher';
+import { Switcher } from '@pixi/ui';
 import { sfx } from '../utils/audio';
 
 const defaultAudioSwitcherOptions = {
@@ -16,7 +16,7 @@ export class AudioSwitcher extends Container {
     private textContainer: Container;
     private title: Label;
     private description: Label;
-    private switcher: Switcher;
+    public switcher: Switcher;
     private _width: number;
 
     constructor(options: Partial<AudioSwitcherOptions> = {}) {
@@ -48,8 +48,7 @@ export class AudioSwitcher extends Container {
         this.textContainer.addChild(this.description);
 
         // Switcher on the right
-        this.switcher = new Switcher();
-        this.switcher.scale.set(0.75);
+        this.switcher = new Switcher(['switch-off', 'switch-on']);
         this.addChild(this.switcher);
 
         // Position switcher at the right edge
@@ -66,12 +65,8 @@ export class AudioSwitcher extends Container {
         this.switcher.y = this.textContainer.height / 2 - switcherBounds.height / 2;
     }
 
-    public onPress(callBack: () => void) {
-        this.switcher.onPress.connect(callBack);
-    }
-
-    public forceSwitch(value: boolean) {
+    public forceSwitch(id?: number) {
         sfx.play('common/sfx-hover.wav');
-        this.switcher.forceSwitch(value);
+        this.switcher.forceSwitch(id);
     }
 }
