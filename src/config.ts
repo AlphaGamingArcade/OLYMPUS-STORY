@@ -1,12 +1,17 @@
-import { BetAPI } from './api/betApi';
-import { SettingsAPI } from './api/settingsApi';
+import { AuthAPI } from './api/authApi';
+import { GameAPI } from './api/gameApi';
 import { gameConfig } from './utils/gameConfig';
 import { getUrlParam } from './utils/getUrlParams';
 import { setUrlParams } from './utils/setUrlParams';
 import { userSettings } from './utils/userSettings';
 
+export async function loginUser() {
+    const token = getUrlParam('token');
+    await AuthAPI.login(token);
+}
+
 export async function loadGameConfig() {
-    const [result, result2] = await Promise.all([SettingsAPI.settings(), BetAPI.collect()]);
+    const [result, result2] = await Promise.all([GameAPI.getSettings(), GameAPI.collect()]);
     const lang = getUrlParam('lang') ?? result.language ?? 'en';
     const cur = getUrlParam('cur') ?? result.currency ?? 'usd';
 

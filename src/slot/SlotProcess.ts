@@ -1,4 +1,4 @@
-import { BetAPI } from '../api/betApi';
+import { GameAPI } from '../api/gameApi';
 import { AsyncQueue, waitFor } from '../utils/asyncUtils';
 import { gameConfig } from '../utils/gameConfig';
 import { Slot } from './Slot';
@@ -187,7 +187,7 @@ export class SlotProcess {
      * @param feature - {number | undefined} 0 for normal spin, 1 for buy feature
      */
     public async fillGrid(bet: number, feature?: number) {
-        const result = await BetAPI.spin({
+        const result = await GameAPI.spin({
             game: this.slot.game,
             bet,
             feature,
@@ -437,7 +437,7 @@ export class SlotProcess {
 
     /** Create brand-new symbols in empty spaces and animate them falling in */
     private async refillGrid() {
-        const result = await BetAPI.spin({
+        const result = await GameAPI.spin({
             game: this.slot.game,
             bet: this.betAmount,
         });

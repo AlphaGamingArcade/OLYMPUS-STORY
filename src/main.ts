@@ -12,8 +12,9 @@ import { initDevtools } from '@pixi/devtools';
 import { BigWinPopup, BigWinPopupData } from './popups/BigWinPopup';
 import { FreeSpinWinPopup, FreeSpinWinPopupData } from './popups/FreeSpinWinPopup';
 import { JackpotWinPopup, JackpotWinPopupData } from './popups/JackpotWinPopup';
-import { loadGameConfig } from './config';
+import { loadGameConfig, loginUser } from './config';
 import { Transition } from './ui/Transition';
+import { showErrorScreen } from './utils/error';
 
 /** The PixiJS app Application instance, shared across the project */
 export const app = new Application();
@@ -87,9 +88,26 @@ function visibilityChange() {
 
 /** Setup app and initialise assets */
 async function init() {
-    // Load game config
-    await loadGameConfig();
+    try {
+        // Load user data - stop if this fails
+        await loginUser();
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unable to login. Please try again later.';
+        showErrorScreen(message);
+        return;
+    }
 
+    try {
+        // Load game config - stop if this fails
+        await loadGameConfig();
+    } catch (error) {
+        const message =
+            error instanceof Error ? error.message : 'Unable to load game configuration. Please try again later.';
+        showErrorScreen(message);
+        return;
+    }
+
+    // Start game
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     if (isMobile) {

@@ -39,12 +39,12 @@ import { SettingsPopup, SettingsPopupData } from '../popups/SettingsPopup';
 import { InfoPopup, InfoPopupData } from '../popups/InfoPopup';
 import { formatCurrency } from '../utils/formatter';
 import { BigWinPopup, BigWinPopupData } from '../popups/BigWinPopup';
-import { BetAPI } from '../api/betApi';
 import { ErrorPopup, ErrorPopupData } from '../popups/ErrorPopup';
 import { SlotOnWinExtraFreeSpinData } from '../slot/SlotFreeSpinsStats';
 import { i18n } from '../i18n/i18n';
 import { Transition } from '../ui/Transition';
 import { getUrlParam } from '../utils/getUrlParams';
+import { GameAPI } from '../api/gameApi';
 
 /** The screen tha holds the Slot game */
 export class GameScreen extends Container {
@@ -493,7 +493,7 @@ export class GameScreen extends Container {
 
             this.controlPanel.playMatchMessages();
 
-            const result = await BetAPI.collect();
+            const result = await GameAPI.collect();
             userSettings.setBalance(result.balance);
             this.controlPanel.setCredit(userSettings.getBalance());
         }
@@ -642,7 +642,7 @@ export class GameScreen extends Container {
                 callback: async () => {
                     this.controlPanel.setMessage('');
 
-                    const result = await BetAPI.collect();
+                    const result = await GameAPI.collect();
                     userSettings.setBalance(result.balance);
                     this.controlPanel.setCredit(userSettings.getBalance());
 

@@ -1,4 +1,3 @@
-import { BetAPI } from '../api/betApi';
 import { AsyncQueue, waitFor } from '../utils/asyncUtils';
 import { Slot } from './Slot';
 import {
@@ -19,6 +18,7 @@ import {
 import { gameConfig } from '../utils/gameConfig';
 import { SlotSymbol } from './SlotSymbol';
 import { slotGetSpinModeDelay } from './SlotConfig';
+import { GameAPI } from '../api/gameApi';
 
 /**
  * Controls the entire free-spin resolution flow for the Slot board.
@@ -150,7 +150,7 @@ export class SlotFreeSpinsProcess {
 
     /** Generate the board for a free-spin round using backend reel data this is different from board.fillGrid*/
     public async fillGrid() {
-        const result = await BetAPI.spin({
+        const result = await GameAPI.spin({
             game: this.slot.game,
             bet: this.betAmount,
         });
@@ -499,7 +499,7 @@ export class SlotFreeSpinsProcess {
 
     /** Refill all empty cells with brand-new pieces falling from above */
     private async refillGrid() {
-        const result = await BetAPI.spin({
+        const result = await GameAPI.spin({
             game: this.slot.game,
             bet: this.betAmount,
         });

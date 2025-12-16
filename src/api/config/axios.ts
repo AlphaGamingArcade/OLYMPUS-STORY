@@ -1,15 +1,14 @@
 import axios, { AxiosInstance } from 'axios';
 import { userAuth } from '../../utils/userAuth';
-
 // Axios instance with base URL and default headers
 const axiosInstance: AxiosInstance = axios.create({
     baseURL:
         /** @ts-expect-error Axios type mismatch due to custom config*/
         import.meta.env.MODE === 'development'
             ? /** @ts-expect-error Axios type mismatch due to custom config*/
-              `${import.meta.env.VITE_DEV_API_URL}/api`
+              `${import.meta.env.VITE_DEV_API_URL}`
             : /** @ts-expect-error Axios type mismatch due to custom config*/
-              `${import.meta.env.VITE_PROD_API_URL}/api`,
+              `${import.meta.env.VITE_PROD_API_URL}`,
     timeout: 30000, // 30 seconds
     withCredentials: true,
 });
