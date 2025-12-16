@@ -20,14 +20,10 @@ class UserSettings {
     private betIndex: number;
     private betOptions: number[];
     private freeSpins: number;
-    private currency: string;
-    private language: string;
     private balance: number;
 
     constructor() {
         this.spinMode = 'normal-spin';
-        this.currency = 'usd';
-        this.language = 'en';
         this.balance = 0;
         this.freeSpins = 0;
 
@@ -94,14 +90,6 @@ class UserSettings {
         return this.freeSpins;
     }
 
-    public getCurrency() {
-        return this.currency;
-    }
-
-    public getLanguage() {
-        return this.language;
-    }
-
     /** Adjust bet amount */
     public setBet(type: BetAction) {
         if (type === BetAction.INCREASE && this.betIndex < this.betOptions.length - 1) {
@@ -117,14 +105,6 @@ class UserSettings {
 
     public setFreeSpins(totalSpins: number) {
         this.freeSpins = totalSpins;
-    }
-
-    public setLanguage(lang: string) {
-        this.language = lang;
-    }
-
-    public setCurrency(cur: string) {
-        this.currency = cur;
     }
 }
 

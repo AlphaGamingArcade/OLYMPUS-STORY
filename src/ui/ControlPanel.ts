@@ -6,6 +6,7 @@ import { AudioButton } from './AudioButton';
 import { SpinButton, SpinButtonState } from './SpinButton';
 import { LabelValue } from './LabelValue';
 import { i18n } from '../i18n/i18n';
+import { getUrlParam } from '../utils/getUrlParams';
 
 export interface WinMatchPattern {
     times: number;
@@ -48,7 +49,7 @@ export class ControlPanel extends Container {
     constructor() {
         super();
 
-        this.currency = userSettings.getCurrency();
+        this.currency = getUrlParam('cur') ?? 'usd';
 
         // Create semi-transparent background using Sprite
         this.background = Sprite.from(Texture.WHITE);

@@ -21,7 +21,7 @@ import { navigation } from '../utils/navigation';
 import { GameEffects } from '../ui/GameEffects';
 import { bgm, sfx } from '../utils/audio';
 import { waitFor } from '../utils/asyncUtils';
-import { slotGetConfig } from '../slot/SlotConfig';
+import { slotGetConfig, slotGetJackpotNames } from '../slot/SlotConfig';
 import { JackpotTier } from '../ui/JackpotTier';
 import { GameLogo } from '../ui/GameLogo';
 import { BuyFreeSpinButton } from '../ui/BuyFreeSpinButton';
@@ -44,6 +44,7 @@ import { ErrorPopup, ErrorPopupData } from '../popups/ErrorPopup';
 import { SlotOnWinExtraFreeSpinData } from '../slot/SlotFreeSpinsStats';
 import { i18n } from '../i18n/i18n';
 import { Transition } from '../ui/Transition';
+import { getUrlParam } from '../utils/getUrlParams';
 
 /** The screen tha holds the Slot game */
 export class GameScreen extends Container {
@@ -87,7 +88,7 @@ export class GameScreen extends Container {
 
     constructor() {
         super();
-        this.currency = 'usd';
+        this.currency = getUrlParam('cur') ?? 'usd';
         this.gameContainer = new Container();
         this.addChild(this.gameContainer);
 
@@ -284,10 +285,13 @@ export class GameScreen extends Container {
 
     private updateMultiplierAmounts() {
         const multipliers = gameConfig.getJackpots();
+        const jackpotNames = slotGetJackpotNames();
+
         for (let index = 0; index < multipliers.length; index++) {
             const multiplier = multipliers[index];
             const amount = userSettings.getBet() * multiplier.multiplier;
-            const name = multiplier.name.toLowerCase();
+            const name = jackpotNames[index].toLowerCase();
+
             if (name == 'grand') {
                 this.grandJackpotTier.amount = amount;
             } else if (name == 'angelic') {
@@ -346,8 +350,6 @@ export class GameScreen extends Container {
     /** Prepare the screen just before showing */
     public prepare() {
         const match3Config = slotGetConfig();
-        this.currency = userSettings.getCurrency();
-
         this.pillar?.setup(match3Config);
         this.slot.setup(match3Config);
     }
@@ -545,8 +547,9 @@ export class GameScreen extends Container {
     /** Fires when the match3 grid finishes auto-processing */
     private async onJackpotTrigger(data: SlotOnJackpotTriggerData): Promise<void> {
         return new Promise((resolve) => {
+            const jackpotNames = slotGetJackpotNames();
             navigation.presentPopup<JackpotWinPopupData>(JackpotWinPopup, {
-                name: data.jackpot.name,
+                name: jackpotNames[data.jackpot.type - 11], // we need to add minus 10 to get index 0, 1, 2, 3
                 times: data.times,
                 amount: data.amount,
                 callback: async () => {

@@ -1,6 +1,6 @@
 import { Container, Graphics } from 'pixi.js';
 import { pool } from '../../utils/pool';
-import { SlotConfig, slotGetBlocks } from '../SlotConfig';
+import { SlotConfig, slotGetSymbols, slotGetTypes } from '../SlotConfig';
 import {
     SlotPosition,
     match3SetPieceType,
@@ -63,17 +63,17 @@ export class SlotBoardPreview {
         this.piecesMask.height = this.getHeight();
         this.piecesContainer.visible = true;
         // // The list of blocks (including specials) that will be used in the game
-        const blocks = slotGetBlocks();
+        const symbols = slotGetSymbols();
+        const types = slotGetTypes();
         this.typesMap = {};
 
         // Organise types and set up special handlers
         // Piece types will be defined according to their positions in the string array of blocks
         // Example: If 'piece-dragon' is the 2nd in the blocks list (blocks[1]), its type will be 2
-        for (let i = 0; i < blocks.length; i++) {
-            const name = blocks[i];
+        for (let i = 0; i < types.length; i++) {
             const type = i + 1;
             this.commonTypes.push(type);
-            this.typesMap[type] = name.symbol;
+            this.typesMap[type] = symbols[i];
         }
 
         // Create the initial grid state

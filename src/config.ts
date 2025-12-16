@@ -1,24 +1,27 @@
 import { BetAPI } from './api/betApi';
-import { ConfigAPI } from './api/configApi';
+import { SettingsAPI } from './api/settingsApi';
 import { gameConfig } from './utils/gameConfig';
 import { getUrlParam } from './utils/getUrlParams';
+import { setUrlParams } from './utils/setUrlParams';
 import { userSettings } from './utils/userSettings';
 
 export async function loadGameConfig() {
-    const [result, result2] = await Promise.all([ConfigAPI.config(), BetAPI.collect()]);
-    const lang = getUrlParam('lang') ?? 'en';
-    const cur = getUrlParam('cur') ?? 'usd';
+    const [result, result2] = await Promise.all([SettingsAPI.settings(), BetAPI.collect()]);
+    const lang = getUrlParam('lang') ?? result.language ?? 'en';
+    const cur = getUrlParam('cur') ?? result.currency ?? 'usd';
 
     // Game configuration from server
-    gameConfig.setBlocks(result.blocks);
-    gameConfig.setPaytables(result.paytables);
-    gameConfig.setScatterType(result.scatterType);
-    gameConfig.setScatterTriggers(result.scatterTriggers);
-    gameConfig.setBuyFeatureBetMultiplier(result.buyFeatureBetMultiplier);
-    gameConfig.setJackpots(result.jackpots);
+    gameConfig.setTypes(result.config.blocks);
+    gameConfig.setPaytables(result.config.paytables);
+    gameConfig.setScatterType(result.config.scatterType);
+    gameConfig.setScatterTriggers(result.config.scatterTriggers);
+    gameConfig.setBuyFeatureBetMultiplier(result.config.buyFeatureBetMultiplier);
+    gameConfig.setJackpots(result.config.jackpots);
 
     // User settings
     userSettings.setBalance(result2.balance);
-    userSettings.setLanguage(lang);
-    userSettings.setCurrency(cur);
+
+    // Update URL with both parameters
+    setUrlParams('lang', lang);
+    setUrlParams('cur', cur);
 }

@@ -1,18 +1,27 @@
 import { Block, Jackpot, Paytable } from '../slot/SlotConfig';
 import { BASE_URL } from './betApi';
 
-export class ConfigAPI {
-    static async config(): Promise<{
-        buyFeatureBetMultiplier: number;
-        scatterType: number;
-        scatterTriggers: number[];
-        jackpots: Jackpot[];
-        paytables: Paytable[];
-        blocks: Block[];
+export class SettingsAPI {
+    static async settings(): Promise<{
+        language: 'ko';
+        currency: 'KRW';
+        bettingLimit: {
+            MAX: string;
+            MIN: string;
+            MONEY_OPTION: number[];
+        };
+        config: {
+            buyFeatureBetMultiplier: number;
+            scatterType: number;
+            scatterTriggers: number[];
+            jackpots: Jackpot[];
+            paytables: Paytable[];
+            blocks: Block[];
+        };
     }> {
         try {
             // Define the URL of your Express server endpoint
-            const url = `${BASE_URL}/config`;
+            const url = `${BASE_URL}/settings`;
 
             // Make a POST request to the Express server
             const response = await fetch(url, {

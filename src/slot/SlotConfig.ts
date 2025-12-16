@@ -17,6 +17,26 @@ export function slotGetConfig(): SlotConfig {
 
 export type SlotSpinMode = 'quick-spin' | 'turbo-spin' | 'normal-spin';
 
+// This creates a readonly tuple type with 4 specific string values
+export const SlotJackpotNames = ['grand', 'angelic', 'blessed', 'divine'];
+
+export const SlotSymbols = [
+    'symbol-laurel',
+    'symbol-hourglass',
+    'symbol-boot',
+    'symbol-thunder',
+    'symbol-chalice',
+    'symbol-trident',
+    'symbol-ring',
+    'symbol-chestplate',
+    'symbol-helmet',
+    'symbol-scatter',
+    'symbol-grand',
+    'symbol-angelic',
+    'symbol-blessed',
+    'symbol-divine',
+];
+
 export function slotGetSpinModeDelay(mode: SlotSpinMode): number {
     if (mode == 'normal-spin') {
         return 100;
@@ -32,27 +52,28 @@ export function slotGetSpinModeDelay(mode: SlotSpinMode): number {
  * Each item in these lists should have a corresponding pixi texture with the same name
  */
 
-/** Default match3 configuration */
-const defaultBlock = {
-    type: 0,
-    symbol: 'symbol-placeholder',
-    name: 'Placeholder',
-};
-
-export type Block = typeof defaultBlock;
+export type Block = number;
 
 /** Mount a list of blocks available */
-export function slotGetBlocks(): Block[] {
-    return gameConfig.getBlocks();
+export function slotGetTypes(): Block[] {
+    return gameConfig.getTypes();
+}
+
+/** Mount a list of blocks available */
+export function slotGetSymbols(): string[] {
+    return SlotSymbols;
+}
+
+/** Mount a list of blocks available */
+export function slotGetJackpotNames(): string[] {
+    return SlotJackpotNames;
 }
 
 /** Default special block tier configuration */
 const defaultJackpot = {
-    name: 'GRAND',
     type: 9,
     multiplier: 100,
     requiredSymbols: 5,
-    order: 2,
 };
 
 export type Jackpot = typeof defaultJackpot;
