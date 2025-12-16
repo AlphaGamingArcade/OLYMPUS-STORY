@@ -1,11 +1,11 @@
 class UserAuth {
-    public accessToken: string | null = null;
+    private accessToken: string | null = null;
 
-    public set(token: string) {
+    public setAccessToken(token: string) {
         this.accessToken = token;
     }
 
-    public get(): string | null {
+    public getAccessToken(): string | null {
         return this.accessToken;
     }
 

@@ -1,3 +1,4 @@
+import { userAuth } from '../utils/userAuth';
 import axiosInstance from './config/axios';
 
 export class AuthAPI {
@@ -8,7 +9,8 @@ export class AuthAPI {
      */
     static async tryRefreshToken() {
         try {
-            const refreshResponse = await axiosInstance.post(`/auth/refresh`, {}, { withCredentials: true });
+            const refreshResponse = await axiosInstance.post(`/auth/refresh`, {});
+            userAuth.setAccessToken(refreshResponse.data['accessToken']);
             return refreshResponse.data;
         } catch (error: any) {
             throw new Error('Session expired. Please login again.');
@@ -21,7 +23,8 @@ export class AuthAPI {
         }
 
         try {
-            const authResponse = await axiosInstance.post(`/auth/login`, { token }, { withCredentials: true });
+            const authResponse = await axiosInstance.post(`/auth/login`, { token });
+            userAuth.setAccessToken(authResponse.data['accessToken']);
             return authResponse.data;
         } catch (error: any) {
             alert(JSON.stringify(error));

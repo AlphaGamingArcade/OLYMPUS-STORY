@@ -3,12 +3,9 @@ import { userAuth } from '../../utils/userAuth';
 // Axios instance with base URL and default headers
 const axiosInstance: AxiosInstance = axios.create({
     baseURL:
-        /** @ts-expect-error Axios type mismatch due to custom config*/
         import.meta.env.MODE === 'development'
-            ? /** @ts-expect-error Axios type mismatch due to custom config*/
-              `${import.meta.env.VITE_DEV_API_URL}`
-            : /** @ts-expect-error Axios type mismatch due to custom config*/
-              `${import.meta.env.VITE_PROD_API_URL}`,
+            ? `${import.meta.env.VITE_DEV_API_URL}`
+            : `${import.meta.env.VITE_PROD_API_URL}`,
     timeout: 30000, // 30 seconds
     withCredentials: true,
 });
@@ -16,11 +13,21 @@ const axiosInstance: AxiosInstance = axios.create({
 // Axios interceptor to attach token to outgoing requests
 axiosInstance.interceptors.request.use(
     (config) => {
-        const token = userAuth.get();
+        const token = userAuth.getAccessToken();
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    },
+);
+
+// Axios interceptor to attach token to outgoing requests
+axiosInstance.interceptors.response.use(
+    (response) => {
+        return response.data;
     },
     (error) => {
         return Promise.reject(error);
@@ -117,7 +124,7 @@ axiosInstance.interceptors.response.use(
             }
 
             // Save & resume queued requests
-            userAuth.set(newAccessToken);
+            userAuth.setAccessToken(newAccessToken);
             processQueue(null, newAccessToken);
 
             // Retry original request

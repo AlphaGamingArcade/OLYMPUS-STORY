@@ -99,6 +99,10 @@ class UserSettings {
         }
     }
 
+    public setBetOptions(options: number[]) {
+        this.betOptions = options;
+    }
+
     public setBalance(amount: number) {
         this.balance = amount;
     }

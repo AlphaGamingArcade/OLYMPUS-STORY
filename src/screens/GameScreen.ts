@@ -81,6 +81,8 @@ export class GameScreen extends Container {
     public finished: boolean;
     /** Currency */
     public currency: string;
+    /** Game code */
+    public gamecode: string;
     /** Greetings */
     public preBetGreetings = [i18n.t('holdSpaceForTurboSpin'), i18n.t('placeYourBets')];
     /** Index */
@@ -88,6 +90,7 @@ export class GameScreen extends Container {
 
     constructor() {
         super();
+        this.gamecode = 'olympusstory';
         this.currency = getUrlParam('cur') ?? 'usd';
         this.gameContainer = new Container();
         this.addChild(this.gameContainer);
@@ -319,6 +322,8 @@ export class GameScreen extends Container {
         const bet = userSettings.getBet();
         const balance = userSettings.getBalance();
 
+        console.log('[BALANCE]', balance);
+
         let toPayAmount = bet;
 
         // For buy feature
@@ -493,7 +498,7 @@ export class GameScreen extends Container {
 
             this.controlPanel.playMatchMessages();
 
-            const result = await GameAPI.collect();
+            const result = await GameAPI.collect({ gamecode: this.gamecode });
             userSettings.setBalance(result.balance);
             this.controlPanel.setCredit(userSettings.getBalance());
         }
@@ -642,7 +647,7 @@ export class GameScreen extends Container {
                 callback: async () => {
                     this.controlPanel.setMessage('');
 
-                    const result = await GameAPI.collect();
+                    const result = await GameAPI.collect({ gamecode: this.gamecode });
                     userSettings.setBalance(result.balance);
                     this.controlPanel.setCredit(userSettings.getBalance());
 
