@@ -280,9 +280,6 @@ export class SlotFreeSpinsProcess {
             this.slot.onColumnMoveStart?.({});
         }
 
-        // Always cancel interruption
-        this.slot.requireSpinInterrupt = false;
-
         await Promise.all(animPromises);
     }
 

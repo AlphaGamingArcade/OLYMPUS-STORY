@@ -431,9 +431,6 @@ export class SlotProcess {
             this.slot.onColumnMoveStart?.({});
         }
 
-        // Always cancel interruption
-        this.slot.requireSpinInterrupt = false;
-
         await Promise.all(animPromises);
     }
 
