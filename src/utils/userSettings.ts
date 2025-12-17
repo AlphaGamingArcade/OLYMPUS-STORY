@@ -21,11 +21,16 @@ class UserSettings {
     private betOptions: number[];
     private freeSpins: number;
     private balance: number;
+    /**
+     * index is needed for launch only it does not update during runtime
+     */
+    private index: number;
 
     constructor() {
         this.spinMode = 'normal-spin';
         this.balance = 0;
         this.freeSpins = 0;
+        this.index = 0;
 
         this.betOptions = [0.5, 1, 5, 10, 15, 20, 50, 100, 1000, 2000];
         this.betIndex = 0;
@@ -90,7 +95,15 @@ class UserSettings {
         return this.freeSpins;
     }
 
+    public getIndex() {
+        return this.index;
+    }
+
     /** Adjust bet amount */
+    public setIndex(index: number) {
+        this.index = index;
+    }
+
     public setBet(type: BetAction) {
         if (type === BetAction.INCREASE && this.betIndex < this.betOptions.length - 1) {
             this.betIndex++;

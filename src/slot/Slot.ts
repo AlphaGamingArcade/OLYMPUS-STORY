@@ -110,7 +110,9 @@ export interface SlotOnAutoplayCompleteData {
  */
 export class Slot extends Container {
     /** Game code */
-    public game = 'olympusstory';
+    public gamecode = 'olympusstory';
+    /** Game code */
+    public spinIndex = 1;
     /** Playing flag */
     public playing = false;
     /** spin mode */

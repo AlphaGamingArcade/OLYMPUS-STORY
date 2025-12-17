@@ -156,15 +156,15 @@ export class SlotProcess {
             let jackpotPromise: Promise<void> | null = null;
             let refillReels: SlotGrid = [];
 
+            // Step to replace some symbols to match from the reels grid
+            this.queue.add(async () => {
+                jackpotPromise = this.processJackpotMatches();
+            });
+
             // Step #4 & #5 – Jackpot processing + refill simultaneously
             this.queue.add(async () => {
                 refillReels = await this.refillGrid();
-            });
-
-            // Step to replace some symbols to match from the reels grid
-            this.queue.add(async () => {
                 await this.processReplaceMismatchedPieces(refillReels);
-                jackpotPromise = this.processJackpotMatches();
             });
 
             // Step #6 – Wait for jackpot to finish
@@ -188,10 +188,12 @@ export class SlotProcess {
      */
     public async fillGrid(bet: number, feature?: number) {
         const result = await GameAPI.spin({
-            game: this.slot.game,
+            gamecode: this.slot.gamecode,
             bet,
+            index: this.slot.spinIndex,
             feature,
         });
+        this.slot.spinIndex++;
         this.slot.board.grid = result.reels;
 
         // Add win free spins
@@ -438,9 +440,12 @@ export class SlotProcess {
     /** Create brand-new symbols in empty spaces and animate them falling in */
     private async refillGrid() {
         const result = await GameAPI.spin({
-            game: this.slot.game,
+            gamecode: this.slot.gamecode,
             bet: this.betAmount,
+            index: this.slot.spinIndex,
         });
+        this.slot.spinIndex++;
+
         const newPieces = slotFillUp(this.slot.board.grid, this.slot.board.commonTypes, result.reels);
 
         const animPromises = [];

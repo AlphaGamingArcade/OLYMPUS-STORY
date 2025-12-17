@@ -22,16 +22,17 @@ export async function loadGameConfig() {
     const cur = getUrlParam('cur') ?? result.currency ?? 'usd';
 
     // Game configuration from server
-    gameConfig.setTypes(result.config.blocks);
-    gameConfig.setPaytables(result.config.paytables);
-    gameConfig.setScatterType(result.config.scatterType);
-    gameConfig.setScatterTriggers(result.config.scatterTriggers);
-    gameConfig.setBuyFeatureBetMultiplier(result.config.buyFeatureBetMultiplier);
-    gameConfig.setJackpots(result.config.jackpots);
+    gameConfig.setTypes(result.settings.blocks);
+    gameConfig.setPaytables(result.settings.paytables);
+    gameConfig.setScatterType(result.settings.scatterType);
+    gameConfig.setScatterTriggers(result.settings.scatterTriggers);
+    gameConfig.setBuyFeatureBetMultiplier(result.settings.buyFeatureBetMultiplier);
+    gameConfig.setJackpots(result.settings.jackpots);
 
     // User settings
     userSettings.setBetOptions(result.bettingLimit.MONEY_OPTION);
     userSettings.setBalance(result2.balance ?? 0);
+    userSettings.setIndex(result2.index ?? 0);
 
     // Update URL with both parameters
     setUrlParams('lang', lang);

@@ -151,9 +151,11 @@ export class SlotFreeSpinsProcess {
     /** Generate the board for a free-spin round using backend reel data this is different from board.fillGrid*/
     public async fillGrid() {
         const result = await GameAPI.spin({
-            game: this.slot.game,
+            gamecode: this.slot.gamecode,
             bet: this.betAmount,
+            index: this.slot.spinIndex,
         });
+        this.slot.spinIndex++;
         this.slot.board.grid = result.reels;
 
         // Add win free spins
@@ -371,16 +373,15 @@ export class SlotFreeSpinsProcess {
             let jackpotPromise: Promise<void> | null = null;
             let refillReels: SlotGrid = [];
 
+            // Step to replace some symbols to match from the reels grid
+            this.queue.add(async () => {
+                jackpotPromise = this.processJackpotMatches();
+            });
+
             // Step #4 & #5 – Jackpot processing + refill simultaneously
             this.queue.add(async () => {
                 refillReels = await this.refillGrid();
-            });
-
-            // Step to replace some symbols to match from the reels grid
-            this.queue.add(async () => {
                 await this.processReplaceMismatchedPieces(refillReels);
-                await waitFor(0.7);
-                jackpotPromise = this.processJackpotMatches();
             });
 
             // Step #6 – Wait for jackpot to finish
@@ -500,9 +501,11 @@ export class SlotFreeSpinsProcess {
     /** Refill all empty cells with brand-new pieces falling from above */
     private async refillGrid() {
         const result = await GameAPI.spin({
-            game: this.slot.game,
+            gamecode: this.slot.gamecode,
             bet: this.betAmount,
+            index: this.slot.spinIndex,
         });
+        this.slot.spinIndex++;
 
         const newPieces = slotFillUp(this.slot.board.grid, this.slot.board.commonTypes, result.reels);
         const animPromises = [];

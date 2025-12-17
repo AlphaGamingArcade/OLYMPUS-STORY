@@ -14,7 +14,7 @@ export class GameAPI {
                     MIN: string;
                     MONEY_OPTION: number[];
                 };
-                config: {
+                settings: {
                     buyFeatureBetMultiplier: number;
                     scatterType: number;
                     scatterTriggers: number[];
@@ -42,11 +42,22 @@ export class GameAPI {
      * @param type - The type of spin ('n' for new, 'r' for refill, 'f' for free).
      * @returns {Promise<{reels: number[][]}>} A promise that resolves with the reels data.
      */
-    static async spin({ gamecode, bet, feature }: { gamecode: string; bet: number; feature?: number }) {
+    static async spin({
+        gamecode,
+        bet,
+        index,
+        feature,
+    }: {
+        gamecode: string;
+        bet: number;
+        index: number;
+        feature?: number;
+    }) {
         try {
-            const response = await axiosInstance.post<{ reels: number[][]; freeSpins?: number }>('/spin', {
+            const response = await axiosInstance.post<{ reels: number[][]; freeSpins?: number }>('/game/spin', {
                 gamecode,
                 bet,
+                index,
                 feature,
             });
             return response.data;
@@ -60,7 +71,9 @@ export class GameAPI {
     static async collect({ gamecode }: { gamecode: string }) {
         try {
             // Make a GET request to the Express server
-            const response = await axiosInstance.get<{ balance: number }>(`/game/collect?gamecode=${gamecode}`);
+            const response = await axiosInstance.get<{ balance: number; index: number }>(
+                `/game/collect?gamecode=${gamecode}`,
+            );
 
             return response.data;
         } catch (error: any) {

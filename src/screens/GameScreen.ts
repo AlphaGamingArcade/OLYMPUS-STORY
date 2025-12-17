@@ -81,8 +81,6 @@ export class GameScreen extends Container {
     public finished: boolean;
     /** Currency */
     public currency: string;
-    /** Game code */
-    public gamecode: string;
     /** Greetings */
     public preBetGreetings = [i18n.t('holdSpaceForTurboSpin'), i18n.t('placeYourBets')];
     /** Index */
@@ -90,7 +88,6 @@ export class GameScreen extends Container {
 
     constructor() {
         super();
-        this.gamecode = 'olympusstory';
         this.currency = getUrlParam('cur') ?? 'usd';
         this.gameContainer = new Container();
         this.addChild(this.gameContainer);
@@ -171,6 +168,8 @@ export class GameScreen extends Container {
         this.grandJackpotTier.setActiveDots(0);
 
         this.slot = new Slot();
+        this.slot.spinIndex = userSettings.getIndex() + 1;
+
         this.slot.onMatch = this.onMatch.bind(this);
         this.slot.onWin = this.onWin.bind(this);
         this.slot.onBigWinTrigger = this.onBigWinTrigger.bind(this);
@@ -321,8 +320,6 @@ export class GameScreen extends Container {
 
         const bet = userSettings.getBet();
         const balance = userSettings.getBalance();
-
-        console.log('[BALANCE]', balance);
 
         let toPayAmount = bet;
 
@@ -498,8 +495,9 @@ export class GameScreen extends Container {
 
             this.controlPanel.playMatchMessages();
 
-            const result = await GameAPI.collect({ gamecode: this.gamecode });
+            const result = await GameAPI.collect({ gamecode: this.slot.gamecode });
             userSettings.setBalance(result.balance);
+            this.slot.spinIndex = result.index + 1;
             this.controlPanel.setCredit(userSettings.getBalance());
         }
     }
@@ -647,8 +645,9 @@ export class GameScreen extends Container {
                 callback: async () => {
                     this.controlPanel.setMessage('');
 
-                    const result = await GameAPI.collect({ gamecode: this.gamecode });
+                    const result = await GameAPI.collect({ gamecode: this.slot.gamecode });
                     userSettings.setBalance(result.balance);
+                    this.slot.spinIndex = result.index + 1;
                     this.controlPanel.setCredit(userSettings.getBalance());
 
                     await navigation.dismissPopup();
