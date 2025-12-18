@@ -317,6 +317,7 @@ export class GameScreen extends Container {
             this.slot.interruptSpin();
             return;
         }
+        this.finished = true;
 
         const bet = userSettings.getBet();
         const balance = userSettings.getBalance();
@@ -334,7 +335,9 @@ export class GameScreen extends Container {
             });
         }
 
-        this.finished = true;
+        userSettings.setBalance(balance - toPayAmount);
+
+        this.controlPanel.setCredit(userSettings.getBalance());
         this.controlPanel.disableBetting();
         this.buyFreeSpinButton.enabled = false;
         this.controlPanel.setTitle(this.betGreetings[Math.floor(Math.random() * this.betGreetings.length)]);
