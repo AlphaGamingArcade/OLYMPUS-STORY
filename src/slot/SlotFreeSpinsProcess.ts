@@ -11,9 +11,9 @@ import {
     slotGetEmptyPositions,
     SlotGrid,
     slotGetMismatches,
-    slotGetScatterMatches,
     SlotPosition,
     slotGetPositions,
+    slotGetExtraScatterMatches,
 } from './SlotUtility';
 import { gameConfig } from '../utils/gameConfig';
 import { SlotSymbol } from './SlotSymbol';
@@ -160,7 +160,8 @@ export class SlotFreeSpinsProcess {
 
         // Add win free spins
         if (result.freeSpins) {
-            const extraFreeSpins = result.freeSpins;
+            const usedFreeSpins = this.slot.freeSpinsStats.getTotalFreeSpinsPlayed();
+            const extraFreeSpins = result.freeSpins - usedFreeSpins;
             this.extraFreeSpins = extraFreeSpins;
             const winFreeSpinsData = { freeSpins: extraFreeSpins };
             this.slot.freeSpinsStats.registerWinFreeSpins(winFreeSpinsData);
@@ -315,6 +316,8 @@ export class SlotFreeSpinsProcess {
 
         // Reset the free spin win
         this.currentSpinWinAmount = 0;
+
+        // await waitFor(3);
 
         // Queue filling for this free-spin round
         this.queue.add(async () => {
@@ -504,6 +507,15 @@ export class SlotFreeSpinsProcess {
         });
         this.slot.spinIndex++;
 
+        // Add win free spins
+        if (result.freeSpins) {
+            this.slot.freeSpinsStats.reset();
+            const usedFreeSpins = this.slot.freeSpinsStats.getTotalFreeSpinsPlayed();
+            const extraFreeSpins = result.freeSpins - usedFreeSpins;
+            const winFreeSpinsData = { freeSpins: extraFreeSpins };
+            this.slot.freeSpinsStats.registerWinFreeSpins(winFreeSpinsData);
+        }
+
         const newPieces = slotFillUp(this.slot.board.grid, this.slot.board.commonTypes, result.reels);
         const animPromises = [];
         const piecesPerColumn: Record<number, number> = {};
@@ -543,12 +555,8 @@ export class SlotFreeSpinsProcess {
 
     /** Detect scatter symbols and trigger free spins if requirements are met */
     private async processExtraFreeSpinCheckpoint() {
-        const scatterMatches = slotGetScatterMatches(this.slot.board.grid);
-        const scatterTriggers = gameConfig.getFreeSpinScatterTriggers();
-
-        const hasScatterTrigger = scatterMatches.some((group) => scatterTriggers.includes(group.length));
-
-        if (hasScatterTrigger) {
+        const scatterMatches = slotGetExtraScatterMatches(this.slot.board.grid);
+        if (scatterMatches.length > 0) {
             await waitFor(0.75);
             this.slot.onScatterMatch?.({ symbols: [] });
             const animatePlayPieces = scatterMatches.map((m) => this.slot.board.playPieces(m));

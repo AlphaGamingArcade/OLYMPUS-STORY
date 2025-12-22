@@ -1,69 +1,15 @@
 symbol-angelic.png
-size:1472,689
+size:497,269
 filter:Linear,Linear
 ANGELIC
-bounds:1390,275,248,58
+bounds:340,19,248,58
 rotate:90
-asset symbol glow/00
-bounds:269,479,208,208
-offsets:46,46,300,300
-asset symbol glow/01
-bounds:479,479,208,208
-offsets:46,46,300,300
-asset symbol glow/02
-bounds:689,479,208,208
-offsets:46,46,300,300
-asset symbol glow/03
-bounds:899,479,208,208
-offsets:46,46,300,300
-asset symbol glow/04
-bounds:1109,479,208,208
-offsets:46,46,300,300
-asset symbol glow/05
-bounds:269,269,208,208
-offsets:46,46,300,300
-asset symbol glow/06
-bounds:2,212,208,208
-offsets:46,46,300,300
-asset symbol glow/07
-bounds:479,269,208,208
-offsets:46,46,300,300
-asset symbol glow/08
-bounds:689,269,208,208
-offsets:46,46,300,300
-asset symbol glow/09
-bounds:899,269,208,208
-offsets:46,46,300,300
-asset symbol glow/10
-bounds:1109,269,208,208
-offsets:46,46,300,300
-asset symbol glow/11
-bounds:212,59,208,208
-offsets:46,46,300,300
-asset symbol glow/12
-bounds:2,2,208,208
-offsets:46,46,300,300
-asset symbol glow/13
-bounds:422,59,208,208
-offsets:46,46,300,300
-asset symbol glow/14
-bounds:632,59,208,208
-offsets:46,46,300,300
-asset symbol glow/15
-bounds:842,59,208,208
-offsets:46,46,300,300
-asset symbol glow/16
-bounds:1052,59,208,208
-offsets:46,46,300,300
-asset symbol glow/17
-bounds:1262,48,208,208
-offsets:46,46,300,300
 bg
-bounds:2,422,265,265
+bounds:2,2,265,265
 halo
-bounds:1319,525,162,95
+bounds:400,105,162,95
 offsets:25,68,213,213
 rotate:90
 shine
-bounds:1319,258,69,265
+bounds:269,2,69,265
 offsets:3,1,75,267

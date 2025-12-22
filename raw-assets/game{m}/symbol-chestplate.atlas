@@ -1,12 +1,66 @@
 symbol-chestplate.png
-size:456,269
+size:1472,689
 filter:Linear,Linear
+asset symbol glow/00
+bounds:2,212,208,208
+offsets:46,46,300,300
+asset symbol glow/01
+bounds:2,2,208,208
+offsets:46,46,300,300
+asset symbol glow/02
+bounds:212,212,208,208
+offsets:46,46,300,300
+asset symbol glow/03
+bounds:212,2,208,208
+offsets:46,46,300,300
+asset symbol glow/04
+bounds:269,479,208,208
+offsets:46,46,300,300
+asset symbol glow/05
+bounds:422,269,208,208
+offsets:46,46,300,300
+asset symbol glow/06
+bounds:479,479,208,208
+offsets:46,46,300,300
+asset symbol glow/07
+bounds:422,59,208,208
+offsets:46,46,300,300
+asset symbol glow/08
+bounds:632,269,208,208
+offsets:46,46,300,300
+asset symbol glow/09
+bounds:689,479,208,208
+offsets:46,46,300,300
+asset symbol glow/10
+bounds:632,59,208,208
+offsets:46,46,300,300
+asset symbol glow/11
+bounds:842,269,208,208
+offsets:46,46,300,300
+asset symbol glow/12
+bounds:899,479,208,208
+offsets:46,46,300,300
+asset symbol glow/13
+bounds:842,59,208,208
+offsets:46,46,300,300
+asset symbol glow/14
+bounds:1052,269,208,208
+offsets:46,46,300,300
+asset symbol glow/15
+bounds:1109,479,208,208
+offsets:46,46,300,300
+asset symbol glow/16
+bounds:1262,269,208,208
+offsets:46,46,300,300
+asset symbol glow/17
+bounds:1052,59,208,208
+offsets:46,46,300,300
 bg
-bounds:2,2,265,265
+bounds:2,422,265,265
 offsets:1,1,267,267
 shine
-bounds:269,2,69,265
+bounds:1262,2,69,265
 offsets:3,1,75,267
 trident
-bounds:340,107,114,160
+bounds:1319,527,114,160
 offsets:23,5,173,173

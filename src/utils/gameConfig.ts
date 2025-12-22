@@ -132,7 +132,9 @@ class GameConfig {
     private types: SlotType[] = defaultTypes;
     private scatterType: SlotType = 10;
     private scatterTriggers: number[] = [4, 5, 6];
-    private freeSpinScatterTriggers: number[] = [3, 4, 5, 6];
+    private scatterFreeSpins: number[] = [10, 15, 20];
+    private extraScatterTriggers: number[] = [3, 4, 5, 6];
+    private extraScatterFreeSpins: number[] = [5, 10, 15, 20];
     private paytables: Paytable[] = defaultPaytables;
     private paytablesByType: Record<number, Paytable> = {};
     private jackpots: Jackpot[] = defaultJackpot;
@@ -161,8 +163,16 @@ class GameConfig {
         this.scatterTriggers = triggers;
     }
 
-    setFreeSpinScatterTriggers(triggers: number[]) {
-        this.freeSpinScatterTriggers = triggers;
+    setScatterFreeSpins(freeSpins: number[]) {
+        this.scatterFreeSpins = freeSpins;
+    }
+
+    setExtraScatterTriggers(triggers: number[]) {
+        this.extraScatterTriggers = triggers;
+    }
+
+    setExtraScatterFreeSpins(freeSpins: number[]) {
+        this.extraScatterFreeSpins = freeSpins;
     }
 
     setBuyFeatureBetMultiplier(multiplier: number) {
@@ -194,8 +204,16 @@ class GameConfig {
         return this.scatterTriggers;
     }
 
-    getFreeSpinScatterTriggers() {
-        return this.freeSpinScatterTriggers;
+    getScatterFreeSpins() {
+        return this.scatterFreeSpins;
+    }
+
+    getExtraScatterTriggers() {
+        return this.extraScatterTriggers;
+    }
+
+    getExtraScatterFreeSpins() {
+        return this.extraScatterFreeSpins;
     }
 
     getBuyFeatureBetMultiplier() {

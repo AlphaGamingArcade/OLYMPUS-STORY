@@ -1,12 +1,67 @@
 symbol-trident.png
-size:517,269
+size:1472,703
 filter:Linear,Linear
+asset symbol glow/00
+bounds:2,226,208,208
+offsets:46,46,300,300
+asset symbol glow/01
+bounds:2,16,208,208
+offsets:46,46,300,300
+asset symbol glow/02
+bounds:212,226,208,208
+offsets:46,46,300,300
+asset symbol glow/03
+bounds:212,16,208,208
+offsets:46,46,300,300
+asset symbol glow/04
+bounds:269,493,208,208
+offsets:46,46,300,300
+asset symbol glow/05
+bounds:422,283,208,208
+offsets:46,46,300,300
+asset symbol glow/06
+bounds:479,493,208,208
+offsets:46,46,300,300
+asset symbol glow/07
+bounds:422,73,208,208
+offsets:46,46,300,300
+asset symbol glow/08
+bounds:632,283,208,208
+offsets:46,46,300,300
+asset symbol glow/09
+bounds:689,493,208,208
+offsets:46,46,300,300
+asset symbol glow/10
+bounds:632,73,208,208
+offsets:46,46,300,300
+asset symbol glow/11
+bounds:842,283,208,208
+offsets:46,46,300,300
+asset symbol glow/12
+bounds:899,493,208,208
+offsets:46,46,300,300
+asset symbol glow/13
+bounds:842,73,208,208
+offsets:46,46,300,300
+asset symbol glow/14
+bounds:1052,283,208,208
+offsets:46,46,300,300
+asset symbol glow/15
+bounds:1109,493,208,208
+offsets:46,46,300,300
+asset symbol glow/16
+bounds:1262,283,208,208
+offsets:46,46,300,300
+asset symbol glow/17
+bounds:1052,73,208,208
+offsets:46,46,300,300
 bg
-bounds:2,2,265,265
+bounds:2,436,265,265
 offsets:1,1,267,267
 shine
-bounds:446,2,69,265
+bounds:422,2,69,265
 offsets:3,1,75,267
+rotate:90
 trident
-bounds:269,92,175,175
+bounds:1262,106,175,175
 offsets:15,11,205,205

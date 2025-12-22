@@ -314,8 +314,8 @@ export function slotGetJackpotMatches(grid: SlotGrid, configJackpots: Jackpot[])
  * @param grid The grid to be analysed
  * @returns An array of position groups, where each group contains positions of the same special type
  */
-export function slotGetScatterMatches(grid: SlotGrid): SlotPosition[][] {
-    const scatterTriggers = gameConfig.getScatterTriggers();
+export function slotGetExtraScatterMatches(grid: SlotGrid): SlotPosition[][] {
+    const scatterTriggers = gameConfig.getExtraScatterTriggers();
     const scatterType = gameConfig.getScatterType();
 
     // Use Map to efficiently group by type
@@ -345,6 +345,54 @@ export function slotGetScatterMatches(grid: SlotGrid): SlotPosition[][] {
     // Check if any group meets the trigger requirement
     const hasTriggered = allMatches.some((group) => scatterTriggers.includes(group.length));
     if (!hasTriggered) {
+        return [];
+    }
+
+    return allMatches;
+}
+
+/**
+ * Get all special block positions in the grid, grouped by their special type
+ * Example:
+ * [
+ *   [{row: 0, column: 1}, {row: 2, column: 3}],
+ *   [{row: 1, column: 2}],
+ *   [{row: 3, column: 4}, {row: 4, column: 0}]
+ * ]
+ * @param grid The grid to be analysed
+ * @returns An array of position groups, where each group contains positions of the same special type
+ */
+export function slotGetScatterMatches(grid: SlotGrid): SlotPosition[][] {
+    const scatterTriggers = gameConfig.getScatterTriggers();
+    const scatterType = gameConfig.getScatterType();
+
+    // Use Map to efficiently group by type
+    const matchesByType = new Map<number, SlotPosition[]>();
+
+    for (let row = 0; row < grid.length; row++) {
+        for (let col = 0; col < grid[0].length; col++) {
+            const cellType = grid[row][col];
+
+            if (scatterType == cellType) {
+                // Get or create group for this type
+                let group = matchesByType.get(cellType);
+                if (!group) {
+                    group = [];
+                    matchesByType.set(cellType, group);
+                }
+
+                // Add position to the group
+                group.push({ row, column: col });
+            }
+        }
+    }
+
+    // Convert Map values to array
+    const allMatches = Array.from(matchesByType.values());
+
+    // Check if any group meets the trigger requirement
+    const hasScatterTrigger = allMatches.some((matches) => matches.length >= Math.min(...scatterTriggers));
+    if (!hasScatterTrigger) {
         return [];
     }
 

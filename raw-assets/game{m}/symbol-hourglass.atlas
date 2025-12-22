@@ -1,12 +1,67 @@
 symbol-hourglass.png
-size:471,269
+size:1123,842
 filter:Linear,Linear
 Hourglass
-bounds:340,75,129,192
+bounds:2,24,129,192
 offsets:1,1,131,194
+rotate:90
+asset symbol glow/00
+bounds:2,365,208,208
+offsets:46,46,300,300
+asset symbol glow/01
+bounds:269,632,208,208
+offsets:46,46,300,300
+asset symbol glow/02
+bounds:2,155,208,208
+offsets:46,46,300,300
+asset symbol glow/03
+bounds:479,632,208,208
+offsets:46,46,300,300
+asset symbol glow/04
+bounds:689,632,208,208
+offsets:46,46,300,300
+asset symbol glow/05
+bounds:899,632,208,208
+offsets:46,46,300,300
+asset symbol glow/06
+bounds:283,422,208,208
+offsets:46,46,300,300
+asset symbol glow/07
+bounds:493,422,208,208
+offsets:46,46,300,300
+asset symbol glow/08
+bounds:703,422,208,208
+offsets:46,46,300,300
+asset symbol glow/09
+bounds:913,422,208,208
+offsets:46,46,300,300
+asset symbol glow/10
+bounds:283,212,208,208
+offsets:46,46,300,300
+asset symbol glow/11
+bounds:493,212,208,208
+offsets:46,46,300,300
+asset symbol glow/12
+bounds:703,212,208,208
+offsets:46,46,300,300
+asset symbol glow/13
+bounds:913,212,208,208
+offsets:46,46,300,300
+asset symbol glow/14
+bounds:212,2,208,208
+offsets:46,46,300,300
+asset symbol glow/15
+bounds:422,2,208,208
+offsets:46,46,300,300
+asset symbol glow/16
+bounds:632,2,208,208
+offsets:46,46,300,300
+asset symbol glow/17
+bounds:842,2,208,208
+offsets:46,46,300,300
 bg
-bounds:2,2,265,265
+bounds:2,575,265,265
 offsets:1,1,267,267
 shine
-bounds:269,2,69,265
+bounds:212,308,69,265
 offsets:3,1,75,267

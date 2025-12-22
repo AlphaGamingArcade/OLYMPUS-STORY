@@ -443,8 +443,14 @@ export class SlotProcess {
         });
         this.slot.spinIndex++;
 
-        const newPieces = slotFillUp(this.slot.board.grid, this.slot.board.commonTypes, result.reels);
+        // Add win free spins
+        if (result.freeSpins) {
+            this.slot.freeSpinsStats.reset();
+            const winFreeSpinsData = { freeSpins: result.freeSpins };
+            this.slot.freeSpinsStats.registerWinFreeSpins(winFreeSpinsData);
+        }
 
+        const newPieces = slotFillUp(this.slot.board.grid, this.slot.board.commonTypes, result.reels);
         const animPromises = [];
         const piecesPerColumn: Record<number, number> = {};
         let hasScatter = false;
@@ -484,11 +490,7 @@ export class SlotProcess {
     /** Detect scatter symbols and trigger free spins if requirements are met */
     private async processFreeSpinCheckpoint() {
         const scatterMatches = slotGetScatterMatches(this.slot.board.grid);
-        const scatterTriggers = gameConfig.getScatterTriggers();
-
-        const hasScatterTrigger = scatterMatches.some((matches) => scatterTriggers.includes(matches.length));
-
-        if (hasScatterTrigger) {
+        if (scatterMatches.length > 0) {
             await waitFor(0.75);
             this.slot.onScatterMatch?.({ symbols: [] });
             const animatePlayPieces = scatterMatches.map((m) => this.slot.board.playPieces(m));
