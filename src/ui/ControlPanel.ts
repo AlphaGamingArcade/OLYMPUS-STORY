@@ -7,6 +7,7 @@ import { SpinButton, SpinButtonState } from './SpinButton';
 import { LabelValue } from './LabelValue';
 import { i18n } from '../i18n/i18n';
 import { getUrlParam } from '../utils/getUrlParams';
+import { AutoplayButton, AutoplayButtonState } from './AutoplayButton';
 
 export interface WinMatchPattern {
     times: number;
@@ -34,7 +35,7 @@ export class ControlPanel extends Container {
     private minusButton: IconButton;
     private spinButton: SpinButton;
     private plusButton: IconButton;
-    private autoplayButton: IconButton;
+    private autoplayButton: AutoplayButton;
 
     private panelHeight = 160;
     private contentWidth = 1920;
@@ -139,12 +140,8 @@ export class ControlPanel extends Container {
             imagePressed: 'icon-button-add-active-view',
             imageDisabled: 'icon-button-add-disabled-view',
         });
-        this.autoplayButton = new IconButton({
-            imageDefault: 'icon-button-autoplay-default-view',
-            imageHover: 'icon-button-autoplay-hover-view',
-            imagePressed: 'icon-button-autoplay-active-view',
-            imageDisabled: 'icon-button-autoplay-disabled-view',
-        });
+
+        this.autoplayButton = new AutoplayButton();
 
         this.contentContainer.addChild(this.audioButton);
         this.contentContainer.addChild(this.infoButton);
@@ -466,10 +463,10 @@ export class ControlPanel extends Container {
 
     /** Disabled betting */
     public disableBetting() {
-        this.autoplayButton.enabled = false;
         this.plusButton.enabled = false;
         this.minusButton.enabled = false;
 
+        this.autoplayButton.setState(AutoplayButtonState.DISABLED);
         this.spinButton.setState(SpinButtonState.STOP);
     }
 
@@ -479,17 +476,18 @@ export class ControlPanel extends Container {
         this.plusButton.enabled = true;
         this.minusButton.enabled = true;
 
+        this.autoplayButton.setState(AutoplayButtonState.ENABLED);
         this.spinButton.setState(SpinButtonState.PLAY);
     }
 
     /** Enabled autoplay button */
     public disableAutoplay() {
-        this.autoplayButton.enabled = false;
+        this.autoplayButton.setState(AutoplayButtonState.DISABLED);
     }
 
     /** Enabled autoplay button */
     public enableAutoplay() {
-        this.autoplayButton.enabled = true;
+        this.autoplayButton.setState(AutoplayButtonState.AUTOPLAY);
     }
 
     /**

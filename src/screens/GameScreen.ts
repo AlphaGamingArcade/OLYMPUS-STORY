@@ -679,7 +679,7 @@ export class GameScreen extends Container {
     /** Fires when the match3 grid finishes auto-processing */
     private onAutoplaySpinStart(data: SlotOnAutoplaySpinStartData) {
         this.roundResult.clearResults();
-        this.controlPanel.disableAutoplay();
+        this.controlPanel.enableAutoplay();
         this.controlPanel.setMessage(`AUTOPLAY SPINS LEFT ${data.remainingSpins}`);
     }
 
