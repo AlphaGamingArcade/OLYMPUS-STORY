@@ -630,6 +630,7 @@ export class GameScreen extends Container {
 
     /** Fires when the match3 grid finishes auto-processing */
     private async onFreeSpinStart(data: SlotFreeSpinStartData) {
+        this.controlPanel.disableAutoplay();
         this.controlPanel.setMessage(i18n.t('freeSpinsLeft', { spins: data.remainingSpins }));
     }
 

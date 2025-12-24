@@ -78,10 +78,13 @@ export class AutoplayButton extends ButtonContainer {
     /** Update button view based on current state */
     private updateView() {
         if (this.currentState === AutoplayButtonState.ENABLED) {
+            this.enabled = true;
             this.buttonView.texture = Texture.from('icon-button-autoplay-default-view');
         } else if (this.currentState == AutoplayButtonState.DISABLED) {
+            this.enabled = false;
             this.buttonView.texture = Texture.from('icon-button-autoplay-disabled-view');
         } else {
+            this.enabled = true;
             this.buttonView.texture = Texture.from('icon-button-autoplay-playing-view');
         }
 
