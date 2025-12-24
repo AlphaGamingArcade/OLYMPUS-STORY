@@ -65,4 +65,7 @@ export const i18nDict = {
     youHaveWon: 'あなたは当選しました',
     clickAnywhereToContinue: 'クリックして続行してください。',
     inFreeSpins: '{spins} 回のフリースピン中',
+    autoplaySpinsLeft: '残りのオートプレイ回数 {spins}',
+    extraFreeSpins: '追加フリースピン',
+    freeSpinsLeft: '残りフリースピン {spins}',
 };

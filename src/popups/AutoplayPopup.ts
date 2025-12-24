@@ -8,6 +8,7 @@ import { Slider } from '../ui/Slider';
 import { SlotSpinMode } from '../slot/SlotConfig';
 import { i18n } from '../i18n/i18n';
 import { userSettings } from '../utils/userSettings';
+import { getUrlParamNumber } from '../utils/getUrlParams';
 
 export type AutoplayPopupData = {
     spinMode: SlotSpinMode;
@@ -121,7 +122,7 @@ export class AutoplayPopup extends Container {
         this.autoplaySlider = new Slider({
             text: i18n.t('numberOfAutoSpins', { autospins: this.autoplayCount }),
             min: 10,
-            max: 1000000,
+            max: getUrlParamNumber('autoplay') ?? 1000,
             value: 10,
         });
         this.autoplaySlider.onUpdate.connect((value: number) => {

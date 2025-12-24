@@ -61,4 +61,7 @@ export const i18nDict = {
     youHaveWon: '您中奖了',
     clickAnywhereToContinue: '点击任意位置继续。',
     inFreeSpins: '第 {spins} 次免费旋转中',
+    autoplaySpinsLeft: '剩余自动旋转次数 {spins}',
+    extraFreeSpins: '额外免费旋转',
+    freeSpinsLeft: '剩余免费旋转 {spins}',
 };

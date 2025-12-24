@@ -689,7 +689,7 @@ export class FreeSpinWinPopup extends Container {
             this.spinsCount = data.spins;
             this.onPressConfirm = data.callback;
 
-            this.bottomText.text = `IN ${this.spinsCount} FREE SPINS`;
+            this.bottomText.text = i18n.t('inFreeSpins', { spins: this.spinsCount });
         }
     }
 

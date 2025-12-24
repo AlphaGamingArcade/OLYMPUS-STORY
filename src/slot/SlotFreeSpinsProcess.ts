@@ -173,8 +173,6 @@ export class SlotFreeSpinsProcess {
                 extraScatterFreeSpins,
             );
 
-            console.log('[FREE SPINS fillGrid()]', extraFreeSpins);
-
             this.extraFreeSpins = extraFreeSpins;
             const winFreeSpinsData = { freeSpins: extraFreeSpins };
             this.slot.freeSpinsStats.registerWinFreeSpins(winFreeSpinsData);
@@ -309,6 +307,9 @@ export class SlotFreeSpinsProcess {
 
         this.currentFreeSpin += 1;
         this.remainingFreeSpins -= 1;
+
+        // reset requires interruption
+        this.slot.requireSpinInterrupt = false;
 
         // Mark the free spin as consumed in stats
         this.slot.freeSpinsStats.consumeFreeSpin();
@@ -527,7 +528,7 @@ export class SlotFreeSpinsProcess {
             const scatterType = gameConfig.getScatterType();
 
             const extraFreeSpins = slotGetExtraFreeSpins(
-                this.slot.board.grid,
+                result.reels, // use reels since slot.board.grid is not yet up to date
                 scatterType,
                 extraScatterTriggers,
                 extraScatterFreeSpins,

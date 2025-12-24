@@ -63,4 +63,7 @@ export const i18nDict = {
     youHaveWon: '당첨되었습니다',
     clickAnywhereToContinue: '아무 곳이나 클릭하여 계속하세요.',
     inFreeSpins: '{spins}번의 무료 스핀 중',
+    autoplaySpinsLeft: '남은 자동 플레이 횟수 {spins}',
+    extraFreeSpins: '추가 프리 스핀',
+    freeSpinsLeft: '남은 프리 스핀 {spins}',
 };

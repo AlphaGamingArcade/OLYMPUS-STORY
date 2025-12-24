@@ -588,8 +588,8 @@ export class GameScreen extends Container {
 
         return new Promise((resolve) => {
             navigation.presentPopup<FreeSpinPopupData>(FreeSpinPopup, {
-                title: 'YOU HAVE WON',
-                message: 'FREE SPINS',
+                title: i18n.t('youHaveWon'),
+                message: i18n.t('freeSpins'),
                 totalFreeSpins: data.totalFreeSpins,
                 callback: async () => {
                     await navigation.dismissPopup();
@@ -616,8 +616,8 @@ export class GameScreen extends Container {
     public async onWinExtraFreeSpinTrigger(data: SlotOnWinExtraFreeSpinData): Promise<void> {
         return new Promise((resolve) => {
             navigation.presentPopup<FreeSpinPopupData>(FreeSpinPopup, {
-                title: 'YOU HAVE WON',
-                message: 'EXTRA FREE SPINS',
+                title: i18n.t('youHaveWon'),
+                message: i18n.t('extraFreeSpins'),
                 totalFreeSpins: data.extraFreeSpins,
                 callback: async () => {
                     await navigation.dismissPopup();
@@ -630,13 +630,13 @@ export class GameScreen extends Container {
 
     /** Fires when the match3 grid finishes auto-processing */
     private async onFreeSpinStart(data: SlotFreeSpinStartData) {
-        this.controlPanel.setMessage(`FREE SPINS LEFT ${data.remainingSpins}`);
+        this.controlPanel.setMessage(i18n.t('freeSpinsLeft', { spins: data.remainingSpins }));
     }
 
     private async onNextFreeSpinStart(data: SlotOnNextFreeSpinData) {
         this.roundResult.clearResults();
         this.vfx?.playSetActiveJackpots(data);
-        this.controlPanel.setMessage(`FREE SPINS LEFT ${data.remainingSpins}`);
+        this.controlPanel.setMessage(i18n.t('freeSpinsLeft', { spins: data.remainingSpins }));
     }
 
     /** Fires when the match3 grid finishes auto-processing */
@@ -673,20 +673,20 @@ export class GameScreen extends Container {
     /** Fires when the match3 grid finishes auto-processing */
     private onAutoplayStart(data: SlotOnAutoplayStartData) {
         this.roundResult.clearResults();
-        this.controlPanel.setMessage(`AUTOPLAY SPINS LEFT ${data.remainingSpins}`);
+        this.controlPanel.setMessage(i18n.t('autoplaySpinsLeft', { spins: data.remainingSpins }));
     }
 
     /** Fires when the match3 grid finishes auto-processing */
     private onAutoplaySpinStart(data: SlotOnAutoplaySpinStartData) {
         this.roundResult.clearResults();
         this.controlPanel.enableAutoplay();
-        this.controlPanel.setMessage(`AUTOPLAY SPINS LEFT ${data.remainingSpins}`);
+        this.controlPanel.setMessage(i18n.t('autoplaySpinsLeft', { spins: data.remainingSpins }));
     }
 
     /** Fires when the match3 grid finishes auto-processing */
     private onAutoplaySpinComplete(data: SlotOnAutoplaySpinCompleteData) {
         this.controlPanel.enableAutoplay();
-        this.controlPanel.setMessage(`AUTOPLAY SPINS LEFT ${data.remainingSpins}`);
+        this.controlPanel.setMessage(i18n.t('autoplaySpinsLeft', { spins: data.remainingSpins }));
     }
 
     /** Fires when the match3 grid finishes auto-processing */

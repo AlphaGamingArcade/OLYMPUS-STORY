@@ -65,5 +65,8 @@ export const i18nDict = {
     congratulations: 'CONGRATULATIONS',
     youHaveWon: 'YOU HAVE WON',
     clickAnywhereToContinue: 'Click anywhere to continue.',
-    inFreeSpins: 'IN {spins} FREE SPIN',
+    inFreeSpins: 'IN {spins} FREE SPINS',
+    autoplaySpinsLeft: 'AUTOPLAY SPINS LEFT {spins}',
+    extraFreeSpins: 'EXTRA FREE SPINS',
+    freeSpinsLeft: 'FREE SPINS LEFT {spins}',
 };
