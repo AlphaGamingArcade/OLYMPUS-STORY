@@ -14,6 +14,7 @@ import {
     SlotPosition,
     slotGetPositions,
     slotGetExtraScatterMatches,
+    slotGetExtraFreeSpins,
 } from './SlotUtility';
 import { gameConfig } from '../utils/gameConfig';
 import { SlotSymbol } from './SlotSymbol';
@@ -129,6 +130,7 @@ export class SlotFreeSpinsProcess {
             remainingSpins: this.remainingFreeSpins,
         };
 
+        this.slot.jackpot.reset();
         this.slot.onFreeSpinStart?.(freeSpinStartData);
 
         this.runNextFreeSpin();
@@ -158,10 +160,21 @@ export class SlotFreeSpinsProcess {
         this.slot.spinIndex++;
         this.slot.board.grid = result.reels;
 
-        // Add win free spins
+        // Add win extra free spins
         if (result.freeSpins) {
-            const usedFreeSpins = this.slot.freeSpinsStats.getTotalFreeSpinsPlayed();
-            const extraFreeSpins = result.freeSpins - usedFreeSpins;
+            const extraScatterTriggers = gameConfig.getExtraScatterTriggers();
+            const extraScatterFreeSpins = gameConfig.getExtraScatterFreeSpins();
+            const scatterType = gameConfig.getScatterType();
+
+            const extraFreeSpins = slotGetExtraFreeSpins(
+                this.slot.board.grid,
+                scatterType,
+                extraScatterTriggers,
+                extraScatterFreeSpins,
+            );
+
+            console.log('[FREE SPINS fillGrid()]', extraFreeSpins);
+
             this.extraFreeSpins = extraFreeSpins;
             const winFreeSpinsData = { freeSpins: extraFreeSpins };
             this.slot.freeSpinsStats.registerWinFreeSpins(winFreeSpinsData);
@@ -507,11 +520,20 @@ export class SlotFreeSpinsProcess {
         });
         this.slot.spinIndex++;
 
-        // Add win free spins
+        // Add win extra free spins
         if (result.freeSpins) {
-            this.slot.freeSpinsStats.reset();
-            const usedFreeSpins = this.slot.freeSpinsStats.getTotalFreeSpinsPlayed();
-            const extraFreeSpins = result.freeSpins - usedFreeSpins;
+            const extraScatterTriggers = gameConfig.getExtraScatterTriggers();
+            const extraScatterFreeSpins = gameConfig.getExtraScatterFreeSpins();
+            const scatterType = gameConfig.getScatterType();
+
+            const extraFreeSpins = slotGetExtraFreeSpins(
+                this.slot.board.grid,
+                scatterType,
+                extraScatterTriggers,
+                extraScatterFreeSpins,
+            );
+
+            this.extraFreeSpins = extraFreeSpins;
             const winFreeSpinsData = { freeSpins: extraFreeSpins };
             this.slot.freeSpinsStats.registerWinFreeSpins(winFreeSpinsData);
         }

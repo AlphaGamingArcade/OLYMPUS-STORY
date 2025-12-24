@@ -11,10 +11,10 @@ import { GameScreen } from './screens/GameScreen';
 import { initDevtools } from '@pixi/devtools';
 import { BigWinPopup, BigWinPopupData } from './popups/BigWinPopup';
 import { FreeSpinWinPopup, FreeSpinWinPopupData } from './popups/FreeSpinWinPopup';
-import { JackpotWinPopup, JackpotWinPopupData } from './popups/JackpotWinPopup';
 import { loadGameConfig, loginUser } from './config';
 import { Transition } from './ui/Transition';
 import { showErrorScreen } from './utils/error';
+import { InfoPopup, InfoPopupData } from './popups/InfoPopup';
 
 /** The PixiJS app Application instance, shared across the project */
 export const app = new Application();
@@ -149,14 +149,7 @@ async function init() {
     } else if (getUrlParam('load') !== null) {
         await navigation.showScreen(LoadScreen);
     } else if (getUrlParam('modal') !== null) {
-        navigation.presentPopup<JackpotWinPopupData>(JackpotWinPopup, {
-            name: 'angelic',
-            times: 2,
-            amount: 1000,
-            callback: async () => {
-                await navigation.dismissPopup();
-            },
-        });
+        navigation.presentPopup<InfoPopupData>(InfoPopup);
     } else if (getUrlParam('modal2') !== null) {
         navigation.presentPopup<BigWinPopupData>(BigWinPopup, {
             category: 'astounding',

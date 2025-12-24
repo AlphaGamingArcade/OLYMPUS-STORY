@@ -10,6 +10,7 @@ import { pool } from '../utils/pool';
 import { FreeSpinSection } from '../ui/FreeSpinSection';
 import { ScatterSection } from '../ui/ScatterSection';
 import { i18n } from '../i18n/i18n';
+import { MaxWinSection } from '../ui/MaxWinSection';
 
 interface ModalSection extends Container {
     /** Show the screen */
@@ -97,6 +98,10 @@ export class InfoPopup extends Container {
         {
             title: i18n.t('settingsMenu'),
             section: SettingsMenuSection,
+        },
+        {
+            title: 'WIN RULES',
+            section: MaxWinSection,
         },
     ];
 

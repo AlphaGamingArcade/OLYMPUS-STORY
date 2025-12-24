@@ -1,6 +1,6 @@
 {
 "skeleton": {
-	"hash": "MPeXMrQYe5U",
+	"hash": "qGNPjp5Rj0Q",
 	"spine": "4.2.43",
 	"x": -371.8,
 	"y": -383.53,
@@ -65,12 +65,6 @@
 "animations": {
 	"animation": {
 		"slots": {
-			"Boot": {
-				"rgba": [
-					{ "color": "ffffffff" },
-					{ "time": 0.8333, "color": "ffffff00" }
-				]
-			},
 			"glow": {
 				"rgba": [
 					{ "color": "ffffff00" },

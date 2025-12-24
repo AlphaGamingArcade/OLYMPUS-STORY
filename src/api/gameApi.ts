@@ -18,6 +18,9 @@ export class GameAPI {
                     buyFeatureBetMultiplier: number;
                     scatterType: number;
                     scatterTriggers: number[];
+                    scatterFreeSpins: number[];
+                    extraScatterTriggers: number[];
+                    extraScatterFreeSpins: number[];
                     jackpots: Jackpot[];
                     paytables: Paytable[];
                     blocks: Block[];

@@ -644,3 +644,31 @@ export function slotGetNextFreeSpinJackpots(
 
     return jackpots;
 }
+
+export function slotGetExtraFreeSpins(
+    grid: SlotGrid,
+    scatterType: number,
+    extraScatterTriggers: number[],
+    extraScatterFreeSpins: number[],
+): number {
+    // Count total scatter symbols in the grid
+    let scatterCount = 0;
+
+    for (let row = 0; row < grid.length; row++) {
+        for (let col = 0; col < grid[row].length; col++) {
+            if (grid[row][col] === scatterType) {
+                scatterCount++;
+            }
+        }
+    }
+
+    // Find matching trigger count and return corresponding free spins
+    for (let i = 0; i < extraScatterTriggers.length; i++) {
+        if (scatterCount === extraScatterTriggers[i]) {
+            return extraScatterFreeSpins[i];
+        }
+    }
+
+    // No matching trigger found, return 0
+    return 0;
+}

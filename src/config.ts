@@ -26,6 +26,9 @@ export async function loadGameConfig() {
     gameConfig.setPaytables(result.settings.paytables);
     gameConfig.setScatterType(result.settings.scatterType);
     gameConfig.setScatterTriggers(result.settings.scatterTriggers);
+    gameConfig.setScatterFreeSpins(result.settings.scatterFreeSpins);
+    gameConfig.setExtraScatterTriggers(result.settings.extraScatterTriggers);
+    gameConfig.setExtraScatterFreeSpins(result.settings.extraScatterFreeSpins);
     gameConfig.setBuyFeatureBetMultiplier(result.settings.buyFeatureBetMultiplier);
     gameConfig.setJackpots(result.settings.jackpots);
 
