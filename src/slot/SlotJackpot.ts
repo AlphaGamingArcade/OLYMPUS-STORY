@@ -39,6 +39,19 @@ export class SlotJackpot {
         this.processing = false;
     }
 
+    /** Remove all specials handlers */
+    public resume(bet: number, bonus: number[]) {
+        this.betAmount = bet;
+        for (const [index, config] of this.configJackpots.entries()) {
+            this.jackpots[config.type] = {
+                type: config.type,
+                active: bonus[index],
+                required: config.requiredSymbols,
+            };
+        }
+        this.processing = false;
+    }
+
     private initializeJackpots() {
         for (const config of this.configJackpots) {
             this.jackpots[config.type] = {

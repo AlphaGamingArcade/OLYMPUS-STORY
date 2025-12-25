@@ -2,6 +2,7 @@ import { gameConfig } from '../utils/gameConfig';
 
 /** Default match3 configuration */
 const defaultConfig = {
+    grid: [] as number[][],
     rows: 5,
     columns: 6,
     tileSize: 140,

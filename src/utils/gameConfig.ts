@@ -4,6 +4,14 @@ import { SlotType } from '../slot/SlotUtility';
 // Default fallbacks (keep your existing arrays as fallbacks)
 const defaultTypes: SlotType[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
+const defaultSlotGrid: SlotType[][] = [
+    [4, 4, 1, 8, 3, 2],
+    [2, 1, 5, 9, 1, 5],
+    [5, 4, 9, 8, 13, 9],
+    [2, 4, 8, 2, 9, 6],
+    [9, 4, 6, 8, 6, 2],
+];
+
 const defaultBuyFeatureBetMultiplier: number = 100;
 
 const defaultScatterType: SlotType = 10;
@@ -129,6 +137,11 @@ const defaultPaytables: Paytable[] = [
 
 class GameConfig {
     // Configuration data
+    private grid: SlotType[][] = defaultSlotGrid;
+    private resumeType: number = 0;
+    private resumeBettingMoney: number = 0;
+    private resumeBonusMeter: number[] = [0, 0, 0, 0];
+    private resumeFreeSpins: number | null = null;
     private types: SlotType[] = defaultTypes;
     private scatterType: SlotType = 10;
     private scatterTriggers: number[] = [4, 5, 6];
@@ -195,6 +208,26 @@ class GameConfig {
         this.jackpots = jackpots;
     }
 
+    setGrid(grid: SlotType[][]) {
+        this.grid = grid;
+    }
+
+    setResumeType(type: number) {
+        this.resumeType = type;
+    }
+
+    setResumeBonusMeter(bonusMeter: number[]) {
+        this.resumeBonusMeter = bonusMeter;
+    }
+
+    setResumeFreeSpins(freeSpins: number | null) {
+        this.resumeFreeSpins = freeSpins;
+    }
+
+    setResumeBettingMoney(bettingMoney: number) {
+        this.resumeBettingMoney = bettingMoney;
+    }
+
     // Getters
     getTypes(): SlotType[] {
         return this.types;
@@ -235,6 +268,26 @@ class GameConfig {
 
     getJackpots(): Jackpot[] {
         return this.jackpots;
+    }
+
+    getGrid() {
+        return this.grid;
+    }
+
+    getResumeType() {
+        return this.resumeType;
+    }
+
+    getResumeBonusMeter() {
+        return this.resumeBonusMeter;
+    }
+
+    getResumeFreeSpins() {
+        return this.resumeFreeSpins;
+    }
+
+    getResumeBettingMoney() {
+        return this.resumeBettingMoney;
     }
 
     // Useful for debugging

@@ -104,6 +104,12 @@ export interface SlotOnAutoplayCompleteData {
     totalSpins: number;
 }
 
+export interface SlotOnResumeStartData {
+    bet: number;
+    bonusMeter: number[];
+    resumeType: number;
+}
+
 /**
  * The main match3 class that sets up game's sub-systems and provide some useful callbacks.
  * All game events are set as plain callbacks for simplicity
@@ -182,6 +188,11 @@ export class Slot extends Container {
     // Fires when autoplay completed
     public onAutoplayComplete?: (data: SlotOnAutoplayCompleteData) => void;
 
+    // Fires when detected requires resume
+    public onResumeStart?: (data: SlotOnResumeStartData) => void;
+    // Fires when detected requires resume end
+    public onResumeEnd?: () => void;
+
     constructor() {
         super();
 
@@ -214,7 +225,17 @@ export class Slot extends Container {
         this.reset();
 
         this.jackpot.setup(jackpotConfig);
+
+        const grid = gameConfig.getGrid();
+        config.grid = grid;
         this.board.setup(config);
+
+        const resumeType = gameConfig.getResumeType();
+        const bettingMoney = gameConfig.getResumeBettingMoney();
+        if (resumeType == 2 || resumeType == 3) {
+            const data = { bonusMeter: gameConfig.getResumeBonusMeter(), resumeType, bet: bettingMoney };
+            this.onResumeStart?.(data);
+        }
     }
 
     /** Fully reset the game */

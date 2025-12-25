@@ -1,15 +1,7 @@
 import { Container, Graphics } from 'pixi.js';
 import { pool } from '../utils/pool';
 import { SlotConfig, slotGetSymbols, slotGetTypes } from './SlotConfig';
-import {
-    SlotPosition,
-    match3SetPieceType,
-    slotGetPieceType,
-    match3CreateGrid,
-    match3ForEach,
-    SlotGrid,
-    SlotType,
-} from './SlotUtility';
+import { SlotPosition, match3SetPieceType, slotGetPieceType, match3ForEach, SlotGrid, SlotType } from './SlotUtility';
 import { SlotSymbol } from './SlotSymbol';
 import { Slot } from './Slot';
 
@@ -79,7 +71,7 @@ export class SlotBoard {
         }
 
         // Create the initial grid state
-        this.grid = match3CreateGrid(this.rows, this.columns, this.commonTypes);
+        this.grid = config.grid;
 
         // Fill up the visual board with piece sprites
         match3ForEach(this.grid, (gridPosition: SlotPosition, type: SlotType) => {

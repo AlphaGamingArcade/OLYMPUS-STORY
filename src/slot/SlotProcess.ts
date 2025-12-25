@@ -96,12 +96,39 @@ export class SlotProcess {
         if (this.processing) return;
         this.processing = true;
 
+        // reset jackpot
+        this.slot.jackpot.reset();
+
         this.slot.onSpinStart?.();
         await this.fallGrid();
 
         // Clean up
         this.slot.board.reset();
-        this.slot.jackpot.reset();
+
+        // Fill new symbols
+        await this.fillGrid(bet, feature);
+
+        this.betAmount = bet;
+        this.winAmount = 0;
+        this.round = 0;
+
+        this.slot.onProcessStart?.();
+        this.runProcessRound();
+    }
+
+    /** Begin resolving the board until no more actions remain */
+    public async resumeProcess(bet: number, bonus: number[], feature?: number) {
+        if (this.processing) return;
+        this.processing = true;
+
+        // resume jackpot
+        this.slot.jackpot.resume(bet, bonus);
+
+        this.slot.onSpinStart?.();
+        await this.fallGrid();
+
+        // Clean up
+        this.slot.board.reset();
 
         // Fill new symbols
         await this.fillGrid(bet, feature);

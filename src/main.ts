@@ -16,6 +16,8 @@ import { Transition } from './ui/Transition';
 import { showErrorScreen } from './utils/error';
 import { InfoPopup, InfoPopupData } from './popups/InfoPopup';
 
+export const GAMECODE = 'olympusstory';
+
 /** The PixiJS app Application instance, shared across the project */
 export const app = new Application();
 

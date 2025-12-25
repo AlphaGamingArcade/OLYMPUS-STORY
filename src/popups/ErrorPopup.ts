@@ -5,6 +5,7 @@ import { navigation } from '../utils/navigation';
 import { i18n } from '../i18n/i18n';
 
 export type ErrorPopupData = {
+    title: string;
     message: string;
 };
 
@@ -127,6 +128,7 @@ export class ErrorPopup extends Container {
     /** Set things up just before showing the popup */
     public prepare(data: ErrorPopupData) {
         if (data) {
+            this.title.text = data.title ?? 'Error';
             this.messageLabel.text = data.message;
         }
     }

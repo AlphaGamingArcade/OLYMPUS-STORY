@@ -13,6 +13,7 @@ import {
     SlotOnJackpotTriggerData,
     SlotOnMatchData,
     SlotOnNextFreeSpinData,
+    SlotOnResumeStartData,
     SlotOnScatterMatch,
     SlotOnWinFreeSpinTriggerData,
 } from '../slot/Slot';
@@ -79,6 +80,8 @@ export class GameScreen extends Container {
     public readonly vfx?: GameEffects;
     /** Track if finish */
     public finished: boolean;
+    /** resuming */
+    public resuming: boolean;
     /** Currency */
     public currency: string;
     /** Greetings */
@@ -169,6 +172,9 @@ export class GameScreen extends Container {
 
         this.slot = new Slot();
         this.slot.spinIndex = userSettings.getIndex() + 1;
+
+        this.slot.onResumeStart = this.onResumeStart.bind(this);
+        this.slot.onResumeEnd = this.onResumeEnd.bind(this);
 
         this.slot.onMatch = this.onMatch.bind(this);
         this.slot.onWin = this.onWin.bind(this);
@@ -278,6 +284,7 @@ export class GameScreen extends Container {
         });
 
         this.finished = false;
+        this.resuming = false;
     }
 
     private updateBuyFreeSpinAmount() {
@@ -331,6 +338,7 @@ export class GameScreen extends Container {
 
         if (balance < toPayAmount) {
             return navigation.presentPopup<ErrorPopupData>(ErrorPopup, {
+                title: i18n.t('error'),
                 message: i18n.t('balanceNotEnough'),
             });
         }
@@ -481,6 +489,32 @@ export class GameScreen extends Container {
         await waitFor(0.3);
     }
 
+    private async onResumeStart(data: SlotOnResumeStartData) {
+        if (this.resuming) return;
+        this.resuming = true;
+
+        await navigation.presentPopup<ErrorPopupData>(ErrorPopup, {
+            title: 'Information',
+            message: 'Resuming game...',
+        });
+        await waitFor(2);
+
+        await navigation.dismissPopup();
+
+        if (data.bonusMeter.length >= 4) {
+            this.grandJackpotTier.setActiveDots(data.bonusMeter[0]);
+            this.angelicJackpotTier.setActiveDots(data.bonusMeter[1]);
+            this.blessedJackpotTier.setActiveDots(data.bonusMeter[2]);
+            this.divineJackpotTier.setActiveDots(data.bonusMeter[3]);
+
+            this.slot.process.resumeProcess(data.bet, data.bonusMeter);
+        }
+    }
+
+    private async onResumeEnd() {
+        this.resuming = false;
+    }
+
     /** Fires when there are match */
     private async onMatch(data: SlotOnMatchData) {
         if (data.wins.length > 0) {
@@ -607,10 +641,10 @@ export class GameScreen extends Container {
 
     /** Fires when the match3 spins tart */
     private async onSpinStart() {
-        this.divineJackpotTier.setActiveDots(0);
-        this.blessedJackpotTier.setActiveDots(0);
-        this.angelicJackpotTier.setActiveDots(0);
-        this.grandJackpotTier.setActiveDots(0);
+        const tiers = [this.grandJackpotTier, this.angelicJackpotTier, this.blessedJackpotTier, this.divineJackpotTier];
+        Object.values(this.slot.jackpot.jackpots).forEach((jackpot, index) => {
+            tiers[index]?.setActiveDots(jackpot.active);
+        });
     }
 
     public async onWinExtraFreeSpinTrigger(data: SlotOnWinExtraFreeSpinData): Promise<void> {

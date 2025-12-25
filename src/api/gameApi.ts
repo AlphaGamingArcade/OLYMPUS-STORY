@@ -3,6 +3,30 @@ import { Block, Jackpot, Paytable } from '../slot/SlotConfig';
 import axiosInstance from './config/axios';
 
 export class GameAPI {
+    static async checkResume({ gamecode }: { gamecode: string }) {
+        try {
+            // Make a GET request to the Express server
+            const response = await axiosInstance.get<{
+                reels: number[][];
+                resumeType: number;
+                freeSpins?: number;
+                bonus: number[];
+                benefitMoney: number;
+                bettingMoney: number;
+            }>(`/game/check-resume?gamecode=${gamecode}`);
+            return response.data;
+        } catch (error: any) {
+            // Handle axios errors
+            if (axios.isAxiosError(error)) {
+                const message = error.response?.data?.message || error.message || 'Resume fetch failed';
+                throw new Error(message);
+            }
+
+            const message = error?.message || 'Resume fetch failed';
+            throw new Error(message);
+        }
+    }
+
     static async getSettings({ gamecode }: { gamecode: string }) {
         try {
             // Make a GET request to the Express server
