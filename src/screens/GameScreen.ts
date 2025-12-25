@@ -319,7 +319,7 @@ export class GameScreen extends Container {
             autoplaySpins?: number;
         } = {},
     ) {
-        if (this.finished) {
+        if (this.finished || this.resuming) {
             // Interrupt spin
             this.slot.interruptSpin();
             return;
@@ -497,7 +497,14 @@ export class GameScreen extends Container {
             title: 'Information',
             message: 'Resuming game...',
         });
-        await waitFor(2);
+
+        this.controlPanel.setCredit(userSettings.getBalance());
+        this.controlPanel.disableBetting();
+        this.buyFreeSpinButton.enabled = false;
+        this.controlPanel.setTitle(this.betGreetings[Math.floor(Math.random() * this.betGreetings.length)]);
+        this.roundResult.clearResults();
+
+        await waitFor(1);
 
         await navigation.dismissPopup();
 
@@ -507,12 +514,25 @@ export class GameScreen extends Container {
             this.blessedJackpotTier.setActiveDots(data.bonusMeter[2]);
             this.divineJackpotTier.setActiveDots(data.bonusMeter[3]);
 
-            this.slot.process.resumeProcess(data.bet, data.bonusMeter);
+            if (data.resumeType == 3) {
+                // cascade
+                this.slot.startResumeSpin(data.bet, data.bonusMeter);
+            }
+
+            if (data.resumeType == 2 && data.freeSpins != null) {
+                // Free spins
+                this.slot.startResumeFreeSpin(data.bet, data.freeSpins, data.bonusMeter);
+            }
         }
     }
 
     private async onResumeEnd() {
+        if (!this.resuming) return;
         this.resuming = false;
+        this.controlPanel.setCredit(userSettings.getBalance());
+        this.controlPanel.enableBetting();
+        this.buyFreeSpinButton.enabled = false;
+        this.controlPanel.setTitle(this.betGreetings[Math.floor(Math.random() * this.betGreetings.length)]);
     }
 
     /** Fires when there are match */
@@ -555,6 +575,10 @@ export class GameScreen extends Container {
                 );
             }
             return;
+        }
+
+        if (this.slot.isResuming()) {
+            this.controlPanel.setWinTitle(i18n.t('win', { amount: formatCurrency(amount, this.currency) }));
         }
     }
 

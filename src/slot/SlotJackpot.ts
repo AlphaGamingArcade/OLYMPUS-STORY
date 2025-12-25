@@ -40,7 +40,7 @@ export class SlotJackpot {
     }
 
     /** Remove all specials handlers */
-    public resume(bet: number, bonus: number[]) {
+    public restore(bet: number, bonus: number[]) {
         this.betAmount = bet;
         for (const [index, config] of this.configJackpots.entries()) {
             this.jackpots[config.type] = {

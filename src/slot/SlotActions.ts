@@ -37,4 +37,14 @@ export class SlotActions {
         // Check balance
         this.slot.autoplayProcess.stopAutoplay();
     }
+
+    public async actionResumeSpin(bet: number, bonus: number[], feature?: number) {
+        // Check balance
+        this.slot.process.resumeProcess(bet, bonus, feature);
+    }
+
+    public async actionResumeFreeSpin(bet: number, freeSpins: number, bonus: number[]) {
+        // Check balance
+        this.slot.freeSpinsProcess.resumeProcess(bet, freeSpins, bonus);
+    }
 }

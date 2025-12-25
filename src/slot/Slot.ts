@@ -108,6 +108,7 @@ export interface SlotOnResumeStartData {
     bet: number;
     bonusMeter: number[];
     resumeType: number;
+    freeSpins: null | number;
 }
 
 /**
@@ -129,6 +130,8 @@ export class Slot extends Container {
     public autoplayPlaying = false;
     /** Autoplay Playing flag */
     public freeSpinPlaying = false;
+    /** resume Playing flag */
+    public resumePlaying = false;
     /** Slot game basic configuration */
     public config: SlotConfig;
     /** Compute score, grade, number of matches */
@@ -232,8 +235,10 @@ export class Slot extends Container {
 
         const resumeType = gameConfig.getResumeType();
         const bettingMoney = gameConfig.getResumeBettingMoney();
+        const freeSpins = gameConfig.getResumeFreeSpins();
+
         if (resumeType == 2 || resumeType == 3) {
-            const data = { bonusMeter: gameConfig.getResumeBonusMeter(), resumeType, bet: bettingMoney };
+            const data = { bonusMeter: gameConfig.getResumeBonusMeter(), resumeType, bet: bettingMoney, freeSpins };
             this.onResumeStart?.(data);
         }
     }
@@ -317,10 +322,33 @@ export class Slot extends Container {
         this.actions.actionStopAutoplaySpin();
     }
 
+    /** async start resume spin */
+    public async startResumeSpin(bet: number, bonus: number[], feature?: number) {
+        this.resumePlaying = true;
+        this.actions.actionResumeSpin(bet, bonus, feature);
+    }
+
+    /** async start resume spin */
+    public async startResumeFreeSpin(bet: number, freeSpins: number, bonus: number[]) {
+        this.resumePlaying = true;
+        this.actions.actionResumeFreeSpin(bet, freeSpins, bonus);
+    }
+
+    /** async start resume spin */
+    public async stopResumeSpin() {
+        this.resumePlaying = false;
+    }
+
     /** Is playing */
     public isPlaying() {
         return this.playing;
     }
+
+    /** Is playing */
+    public isResuming() {
+        return this.resumePlaying;
+    }
+
     /** Is playing */
     public isFreeSpinPlaying() {
         return this.freeSpinPlaying;

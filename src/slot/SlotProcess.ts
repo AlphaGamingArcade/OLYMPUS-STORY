@@ -121,8 +121,8 @@ export class SlotProcess {
         if (this.processing) return;
         this.processing = true;
 
-        // resume jackpot
-        this.slot.jackpot.resume(bet, bonus);
+        // restore jackpot
+        this.slot.jackpot.restore(bet, bonus);
 
         this.slot.onSpinStart?.();
         await this.fallGrid();
@@ -148,6 +148,11 @@ export class SlotProcess {
         this.queue.clear();
 
         this.slot.onProcessComplete?.();
+
+        if (this.slot.resumePlaying) {
+            this.slot.stopResumeSpin();
+            this.slot.onResumeEnd?.();
+        }
     }
 
     /**

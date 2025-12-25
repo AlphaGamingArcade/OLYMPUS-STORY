@@ -40,6 +40,7 @@ export async function loadGameConfig() {
     gameConfig.setResumeType(result3.resumeType);
     gameConfig.setResumeBonusMeter(result3.bonus);
     gameConfig.setResumeBettingMoney(result3.bettingMoney);
+    gameConfig.setResumeFreeSpins(result3.freeSpins);
 
     // User settings
     userSettings.setBetOptions(result.bettingLimit.MONEY_OPTION);

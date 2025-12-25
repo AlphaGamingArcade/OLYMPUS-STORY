@@ -45,7 +45,6 @@ export class SlotFreeSpinsProcess {
 
     /** Whether a free-spin round is currently running */
     private processing = false;
-
     /** Current internal resolution round index */
     private round = 0;
     /** round win Amount */
@@ -136,6 +135,34 @@ export class SlotFreeSpinsProcess {
         this.runNextFreeSpin();
     }
 
+    public async resumeProcess(bet: number, freeSpins: number, bonus: number[]) {
+        if (this.processing) return;
+        this.processing = true;
+
+        this.slot.process.stop();
+
+        this.round = 0;
+        this.currentFreeSpin = 0;
+        this.betAmount = bet;
+        this.currentSpinWinAmount = 0;
+        this.extraFreeSpins = 0;
+
+        // Get free spin count from stats
+        this.slot.freeSpinsStats.registerWinFreeSpins({ freeSpins });
+        const freeSpinCount = this.slot.freeSpinsStats.getAvailableFreeSpins();
+        this.remainingFreeSpins = freeSpinCount;
+
+        const freeSpinStartData = {
+            currentSpin: this.currentFreeSpin,
+            remainingSpins: this.remainingFreeSpins,
+        };
+
+        this.slot.jackpot.restore(bet, bonus);
+        this.slot.onFreeSpinStart?.(freeSpinStartData);
+
+        this.runNextFreeSpin();
+    }
+
     /** Stop the free-spin process and print debug info */
     public async stop() {
         if (!this.processing) return;
@@ -148,6 +175,11 @@ export class SlotFreeSpinsProcess {
             spins: this.slot.freeSpinsStats.getTotalFreeSpinsPlayed(),
         };
         await this.slot.onFreeSpinComplete?.(data);
+
+        if (this.slot.resumePlaying) {
+            this.slot.stopResumeSpin();
+            this.slot.onResumeEnd?.();
+        }
     }
 
     /** Generate the board for a free-spin round using backend reel data this is different from board.fillGrid*/

@@ -9,7 +9,7 @@ export class GameAPI {
             const response = await axiosInstance.get<{
                 reels: number[][];
                 resumeType: number;
-                freeSpins?: number;
+                freeSpins: number | null;
                 bonus: number[];
                 benefitMoney: number;
                 bettingMoney: number;
