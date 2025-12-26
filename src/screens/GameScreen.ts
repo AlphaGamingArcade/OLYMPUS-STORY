@@ -531,7 +531,7 @@ export class GameScreen extends Container {
         this.resuming = false;
         this.controlPanel.setCredit(userSettings.getBalance());
         this.controlPanel.enableBetting();
-        this.buyFreeSpinButton.enabled = false;
+        this.buyFreeSpinButton.enabled = true;
         this.controlPanel.setTitle(this.betGreetings[Math.floor(Math.random() * this.betGreetings.length)]);
     }
 
