@@ -26,7 +26,7 @@ export class Pillar extends Container {
 
         // Create panel background sprite
         this.panelBg = Sprite.from(Texture.WHITE);
-        this.panelBg.tint = 0xffffff;
+        this.panelBg.tint = '#EBECE6';
         this.panelBase.addChild(this.panelBg);
 
         // Create frame sprite from image

@@ -376,7 +376,6 @@ export class GameScreen extends Container {
     /** Update the screen */
     public update() {
         this.slot.update();
-        console.log(this.slot.isPlaying());
     }
 
     /** Pause gameplay - automatically fired when a popup is presented */
@@ -744,9 +743,22 @@ export class GameScreen extends Container {
 
     /** Fires when the match3 grid finishes auto-processing */
     private onAutoplaySpinStart(data: SlotOnAutoplaySpinStartData) {
-        this.roundResult.clearResults();
-        this.controlPanel.enableAutoplay();
-        this.controlPanel.setMessage(i18n.t('autoplaySpinsLeft', { spins: data.remainingSpins }));
+        const bet = userSettings.getBet();
+        const balance = userSettings.getBalance();
+
+        if (balance < bet) {
+            navigation.presentPopup<ErrorPopupData>(ErrorPopup, {
+                title: i18n.t('error'),
+                message: i18n.t('balanceNotEnough'),
+            });
+        } else {
+            this.controlPanel.setCredit(userSettings.getBalance());
+            userSettings.setBalance(balance - bet);
+            this.roundResult.clearResults();
+            this.controlPanel.enableAutoplay();
+            this.controlPanel.setTitle(this.betGreetings[Math.floor(Math.random() * this.betGreetings.length)]);
+            this.controlPanel.setMessage(i18n.t('autoplaySpinsLeft', { spins: data.remainingSpins }));
+        }
     }
 
     /** Fires when the match3 grid finishes auto-processing */
