@@ -66,6 +66,8 @@ export class GameScreen extends Container {
     public readonly angelicJackpotTier: JackpotTier;
     /** The Grand Multiplier */
     public readonly grandJackpotTier: JackpotTier;
+    /** List of all tiers */
+    public readonly jackpotTiers: JackpotTier[] = [];
     /** The game logo */
     public readonly gameLogo: GameLogo;
     /** The buy free spin butotn */
@@ -136,6 +138,7 @@ export class GameScreen extends Container {
         this.addChild(this.divineJackpotTier);
         this.divineJackpotTier.setTotalDots(5);
         this.divineJackpotTier.setActiveDots(0);
+        this.jackpotTiers.push(this.divineJackpotTier);
 
         this.blessedJackpotTier = new JackpotTier({
             name: 'multiplier-label-blessed',
@@ -147,6 +150,7 @@ export class GameScreen extends Container {
         this.addChild(this.blessedJackpotTier);
         this.blessedJackpotTier.setTotalDots(4);
         this.blessedJackpotTier.setActiveDots(0);
+        this.jackpotTiers.push(this.blessedJackpotTier);
 
         this.angelicJackpotTier = new JackpotTier({
             name: 'multiplier-label-angelic',
@@ -158,6 +162,7 @@ export class GameScreen extends Container {
         this.addChild(this.angelicJackpotTier);
         this.angelicJackpotTier.setTotalDots(3);
         this.angelicJackpotTier.setActiveDots(0);
+        this.jackpotTiers.push(this.angelicJackpotTier);
 
         this.grandJackpotTier = new JackpotTier({
             name: 'multiplier-label-grand',
@@ -169,6 +174,7 @@ export class GameScreen extends Container {
         this.addChild(this.grandJackpotTier);
         this.grandJackpotTier.setTotalDots(2);
         this.grandJackpotTier.setActiveDots(0);
+        this.jackpotTiers.push(this.grandJackpotTier);
 
         this.slot = new Slot();
         this.slot.spinIndex = userSettings.getIndex() + 1;
@@ -370,6 +376,7 @@ export class GameScreen extends Container {
     /** Update the screen */
     public update() {
         this.slot.update();
+        console.log(this.slot.isPlaying());
     }
 
     /** Pause gameplay - automatically fired when a popup is presented */
@@ -509,10 +516,9 @@ export class GameScreen extends Container {
         await navigation.dismissPopup();
 
         if (data.bonusMeter.length >= 4) {
-            this.grandJackpotTier.setActiveDots(data.bonusMeter[0]);
-            this.angelicJackpotTier.setActiveDots(data.bonusMeter[1]);
-            this.blessedJackpotTier.setActiveDots(data.bonusMeter[2]);
-            this.divineJackpotTier.setActiveDots(data.bonusMeter[3]);
+            Object.values(this.slot.jackpot.jackpots).forEach((_, index) => {
+                this.jackpotTiers[index].setActiveDots(data.bonusMeter[index]);
+            });
 
             if (data.resumeType == 3) {
                 // cascade
@@ -552,10 +558,12 @@ export class GameScreen extends Container {
 
             this.controlPanel.playMatchMessages();
 
-            const result = await GameAPI.collect({ gamecode: this.slot.gamecode });
-            userSettings.setBalance(result.balance);
-            this.slot.spinIndex = result.index + 1;
-            this.controlPanel.setCredit(userSettings.getBalance());
+            if (!data.isFreeSpins) {
+                const result = await GameAPI.collect({ gamecode: this.slot.gamecode });
+                userSettings.setBalance(result.balance);
+                this.slot.spinIndex = result.index + 1;
+                this.controlPanel.setCredit(userSettings.getBalance());
+            }
         }
     }
 
@@ -665,9 +673,8 @@ export class GameScreen extends Container {
 
     /** Fires when the match3 spins tart */
     private async onSpinStart() {
-        const tiers = [this.grandJackpotTier, this.angelicJackpotTier, this.blessedJackpotTier, this.divineJackpotTier];
         Object.values(this.slot.jackpot.jackpots).forEach((jackpot, index) => {
-            tiers[index]?.setActiveDots(jackpot.active);
+            this.jackpotTiers[index].setActiveDots(jackpot.active);
         });
     }
 

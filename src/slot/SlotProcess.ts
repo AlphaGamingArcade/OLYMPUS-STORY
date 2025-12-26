@@ -334,6 +334,7 @@ export class SlotProcess {
 
         this.slot.onMatch?.({
             wins: winMatches,
+            isFreeSpins: false,
         });
 
         await Promise.all(animePlayPieces);

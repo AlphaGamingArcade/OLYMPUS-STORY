@@ -20,6 +20,7 @@ export interface WinMatch {
 export interface SlotOnMatchData {
     /** List of all matches detected in the grid */
     wins: WinMatch[];
+    isFreeSpins: boolean;
 }
 
 /** Interface for onMatch event data */

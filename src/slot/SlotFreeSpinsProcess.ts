@@ -129,7 +129,6 @@ export class SlotFreeSpinsProcess {
             remainingSpins: this.remainingFreeSpins,
         };
 
-        this.slot.jackpot.reset();
         this.slot.onFreeSpinStart?.(freeSpinStartData);
 
         this.runNextFreeSpin();
@@ -470,6 +469,7 @@ export class SlotFreeSpinsProcess {
 
         this.slot.onMatch?.({
             wins: winMatches,
+            isFreeSpins: true,
         });
 
         await Promise.all(animePlayPieces);
